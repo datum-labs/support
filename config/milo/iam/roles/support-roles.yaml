@@ -1,0 +1,41 @@
+apiVersion: iam.miloapis.com/v1alpha1
+kind: Role
+metadata:
+  name: support.miloapis.com-support-agent
+spec:
+  description: "Full access to support tickets and messages for staff agents"
+  rules:
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supporttickets"]
+      verbs: ["create", "get", "list", "update", "patch", "delete"]
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supportmessages"]
+      verbs: ["create", "get", "list", "update", "patch", "delete"]
+---
+apiVersion: iam.miloapis.com/v1alpha1
+kind: Role
+metadata:
+  name: support.miloapis.com-support-viewer
+spec:
+  description: "Read-only access to support tickets and non-internal messages"
+  rules:
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supporttickets"]
+      verbs: ["get", "list"]
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supportmessages"]
+      verbs: ["get", "list"]
+---
+apiVersion: iam.miloapis.com/v1alpha1
+kind: Role
+metadata:
+  name: support.miloapis.com-customer
+spec:
+  description: "Customer access: create tickets, reply with non-internal messages, view own tickets"
+  rules:
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supporttickets"]
+      verbs: ["create", "get", "list"]
+    - apiGroups: ["support.miloapis.com"]
+      resources: ["supportmessages"]
+      verbs: ["create", "get", "list"]

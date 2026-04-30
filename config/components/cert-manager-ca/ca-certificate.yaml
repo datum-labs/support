@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: support-selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: support-ca
+  namespace: support-system
+spec:
+  isCA: true
+  commonName: support-ca
+  secretName: support-ca-secret
+  duration: 87600h
+  renewBefore: 8760h
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: support-selfsigned-issuer
+    kind: ClusterIssuer

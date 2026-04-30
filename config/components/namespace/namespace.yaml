@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: support-system
+  labels:
+    app.kubernetes.io/name: support
+    app.kubernetes.io/component: namespace

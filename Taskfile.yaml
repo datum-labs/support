@@ -1,0 +1,362 @@
+version: '3'
+
+includes:
+  test-infra:
+    taskfile: https://raw.githubusercontent.com/datum-cloud/test-infra/main/Taskfile.yml
+    optional: true
+
+vars:
+  TOOL_DIR: "{{.USER_WORKING_DIR}}/bin"
+  IMAGE_NAME: "ghcr.io/datum-cloud/support"
+  IMAGE_TAG: "dev"
+  CLUSTER_NAME: "support-test"
+  KUBECONFIG_FILE: ".test-infra/kubeconfig"
+  MILO_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/milo"
+  STAFF_PORTAL_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/staff-portal"
+  CLOUD_PORTAL_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/cloud-portal"
+
+env:
+  KUBECONFIG: "{{.KUBECONFIG_FILE}}"
+
+tasks:
+  default:
+    desc: List all available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # ── Build ──────────────────────────────────────────────────────────────────
+
+  build:
+    desc: Build the support binary
+    cmds:
+      - |
+        set -e
+        echo "Building support..."
+        mkdir -p {{.TOOL_DIR}}
+
+        GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        VERSION="v0.0.0-dev+${GIT_COMMIT:0:7}"
+        GIT_TREE_STATE="clean"
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+          GIT_TREE_STATE="dirty"
+        fi
+        BUILD_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "unknown")
+
+        go build \
+          -buildvcs=false \
+          -ldflags="-X 'go.miloapis.com/support/internal/version.Version=${VERSION}' \
+                    -X 'go.miloapis.com/support/internal/version.GitCommit=${GIT_COMMIT}' \
+                    -X 'go.miloapis.com/support/internal/version.GitTreeState=${GIT_TREE_STATE}' \
+                    -X 'go.miloapis.com/support/internal/version.BuildDate=${BUILD_DATE}'" \
+          -o {{.TOOL_DIR}}/support ./cmd/support
+        echo "✅ Binary built: {{.TOOL_DIR}}/support"
+    silent: true
+
+  # ── Development ────────────────────────────────────────────────────────────
+
+  dev:build:
+    desc: Build the support container image
+    silent: true
+    cmds:
+      - |
+        set -e
+        GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        VERSION="v0.0.0-dev+${GIT_COMMIT:0:7}"
+        GIT_TREE_STATE="clean"
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+          GIT_TREE_STATE="dirty"
+        fi
+        BUILD_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "unknown")
+
+        docker build \
+          --build-arg VERSION="${VERSION}" \
+          --build-arg GIT_COMMIT="${GIT_COMMIT}" \
+          --build-arg GIT_TREE_STATE="${GIT_TREE_STATE}" \
+          --build-arg BUILD_DATE="${BUILD_DATE}" \
+          -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} \
+          .
+        echo "✅ Image built: {{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
+
+  dev:load-image:
+    desc: Load the support image into the KIND cluster
+    silent: true
+    cmds:
+      - |
+        set -e
+        echo "Loading {{.IMAGE_NAME}}:{{.IMAGE_TAG}} into KIND cluster '{{.CLUSTER_NAME}}'..."
+        kind load docker-image {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --name {{.CLUSTER_NAME}}
+        echo "✅ Image loaded"
+
+  dev:deploy:
+    desc: Deploy support to the test cluster
+    silent: true
+    cmds:
+      - |
+        set -e
+        echo "Deploying support to cluster..."
+        kubectl apply -k config/overlays/dev/
+        kubectl rollout restart deployment/support-apiserver -n support-system 2>/dev/null || true
+        kubectl rollout status deployment/support-apiserver -n support-system --timeout=120s
+        echo "✅ Deployed"
+
+  dev:undeploy:
+    desc: Remove support from the test cluster
+    cmds:
+      - kubectl delete -k config/overlays/dev/ --ignore-not-found=true
+
+  dev:logs:
+    desc: Stream logs from the support API server
+    cmds:
+      - kubectl logs -f deployment/support-apiserver -n support-system
+
+  dev:status:
+    desc: Check status of the support API server
+    cmds:
+      - kubectl get apiservice v1alpha1.support.miloapis.com
+      - kubectl get pods -n support-system
+      - kubectl get supporttickets 2>/dev/null || echo "(no tickets yet)"
+      - kubectl get supportmessages 2>/dev/null || echo "(no messages yet)"
+
+  # ── Code Quality ───────────────────────────────────────────────────────────
+
+  fmt:
+    desc: Format Go code
+    cmds:
+      - gofmt -w ./...
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet -buildvcs=false ./...
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test -buildvcs=false -v ./...
+
+  generate:
+    desc: Run code generation (deepcopy, openapi)
+    cmds:
+      - |
+        echo "Running deepcopy-gen..."
+        go tool k8s.io/code-generator/cmd/deepcopy-gen \
+          --output-file zz_generated.deepcopy.go \
+          --go-header-file hack/boilerplate.go.txt \
+          go.miloapis.com/support/pkg/apis/support/v1alpha1
+        echo "✅ Code generation complete"
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf {{.TOOL_DIR}}
+
+  # ── Demo ───────────────────────────────────────────────────────────────────
+
+  demo:up:
+    desc: "Start the full support demo (kind cluster + all components)"
+    cmds:
+      - task: test-infra:cluster-up
+        vars: { CLUSTER_NAME: "{{.CLUSTER_NAME}}" }
+      - task: demo:deploy-milo
+      - task: dev:build
+      - task: dev:load-image
+      - task: dev:deploy
+      - task: demo:deploy-staff-portal
+      - task: demo:deploy-cloud-portal
+      - task: demo:seed
+      - task: demo:print-urls
+
+  demo:down:
+    desc: "Tear down the demo kind cluster"
+    cmds:
+      - kind delete cluster --name {{.CLUSTER_NAME}}
+
+  demo:deploy-milo:
+    desc: "Deploy Milo control plane to the demo cluster"
+    silent: true
+    dir: "{{.MILO_DIR}}"
+    cmds:
+      - |
+        set -e
+        echo "Deploying Milo to demo cluster..."
+        KUBECONFIG="{{.USER_WORKING_DIR}}/{{.KUBECONFIG_FILE}}" task dev:setup || true
+        echo "✅ Milo deployed"
+
+  demo:deploy-staff-portal:
+    desc: "Deploy staff portal to the demo cluster"
+    silent: true
+    cmds:
+      - |
+        set -e
+        PORTAL_DIR="{{.STAFF_PORTAL_DIR}}"
+        if [ ! -f "${PORTAL_DIR}/config/dev/.env" ] && [ -f "${PORTAL_DIR}/.env.sample" ]; then
+          cp "${PORTAL_DIR}/.env.sample" "${PORTAL_DIR}/config/dev/.env"
+          echo "⚠  Copied .env.sample → config/dev/.env in staff-portal. Please edit with real values."
+        fi
+        kubectl apply -k "${PORTAL_DIR}/config/dev/"
+        echo "✅ Staff portal deployed"
+
+  demo:deploy-cloud-portal:
+    desc: "Deploy cloud portal to the demo cluster"
+    silent: true
+    cmds:
+      - |
+        set -e
+        PORTAL_DIR="{{.CLOUD_PORTAL_DIR}}"
+        if [ ! -f "${PORTAL_DIR}/config/dev/.env" ] && [ -f "${PORTAL_DIR}/.env.sample" ]; then
+          cp "${PORTAL_DIR}/.env.sample" "${PORTAL_DIR}/config/dev/.env"
+          echo "⚠  Copied .env.sample → config/dev/.env in cloud-portal. Please edit with real values."
+        fi
+        kubectl apply -k "${PORTAL_DIR}/config/dev/"
+        echo "✅ Cloud portal deployed"
+
+  demo:seed:
+    desc: "Create demo support tickets and messages"
+    silent: true
+    cmds:
+      - |
+        set -e
+        echo "Seeding demo data..."
+
+        kubectl apply --server-side -f - <<'EOF'
+        apiVersion: support.miloapis.com/v1alpha1
+        kind: SupportTicket
+        metadata:
+          name: demo-ticket-001
+        spec:
+          title: "Cannot access project dashboard"
+          description: |
+            Getting 403 Forbidden errors when navigating to the project dashboard.
+            This started happening after I updated my organization settings yesterday.
+            Steps to reproduce:
+            1. Log into cloud portal
+            2. Navigate to any project
+            3. Observe 403 error
+          status: open
+          priority: high
+          visibility: all-staff
+          organizationRef:
+            kind: Organization
+            name: acme-corp
+          reporterRef:
+            name: jane-doe
+            displayName: "Jane Doe"
+            email: jane@acme-corp.example
+          tags:
+            - access
+            - dashboard
+        EOF
+
+        kubectl apply --server-side -f - <<'EOF'
+        apiVersion: support.miloapis.com/v1alpha1
+        kind: SupportTicket
+        metadata:
+          name: demo-ticket-002
+        spec:
+          title: "Billing invoice shows incorrect amount"
+          description: |
+            Our last invoice (March 2026) shows charges for resources we decommissioned in February.
+            The extra charges amount to approximately $240 USD.
+          status: in-progress
+          priority: medium
+          visibility: all-staff
+          organizationRef:
+            kind: Organization
+            name: acme-corp
+          reporterRef:
+            name: bob-smith
+            displayName: "Bob Smith"
+            email: bob@acme-corp.example
+          ownerRef:
+            name: alice-support
+            displayName: "Alice (Support)"
+            email: alice@datum.net
+          tags:
+            - billing
+            - invoicing
+        EOF
+
+        kubectl apply --server-side -f - <<'EOF'
+        apiVersion: support.miloapis.com/v1alpha1
+        kind: SupportMessage
+        metadata:
+          name: demo-msg-001
+        spec:
+          ticketRef: demo-ticket-001
+          body: |
+            Hi Jane,
+
+            Thanks for reaching out! I've reproduced the 403 error on our end. This appears to be related to
+            a permissions migration we ran last night. I'm working on a fix now and will update you shortly.
+
+            Best,
+            Alice (Support Team)
+          authorRef:
+            name: alice-support
+            displayName: "Alice (Support)"
+            email: alice@datum.net
+          authorType: staff
+          internal: false
+        EOF
+
+        kubectl apply --server-side -f - <<'EOF'
+        apiVersion: support.miloapis.com/v1alpha1
+        kind: SupportMessage
+        metadata:
+          name: demo-msg-002
+        spec:
+          ticketRef: demo-ticket-001
+          body: |
+            Internal note: This is caused by the org-settings migration script not backfilling
+            project-level permissions. Tracked in INFRA-4521. ETA: 2 hours.
+          authorRef:
+            name: alice-support
+            displayName: "Alice (Support)"
+            email: alice@datum.net
+          authorType: staff
+          internal: true
+        EOF
+
+        echo "✅ Demo data seeded"
+        kubectl get supporttickets
+        kubectl get supportmessages
+
+  demo:verify:
+    desc: "Verify the demo is working end-to-end"
+    cmds:
+      - |
+        echo "=== APIService status ==="
+        kubectl get apiservice v1alpha1.support.miloapis.com \
+          -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' && echo ""
+
+        echo "=== Support Tickets ==="
+        kubectl get supporttickets
+
+        echo "=== Support Messages ==="
+        kubectl get supportmessages
+
+        echo "=== Support API Server pods ==="
+        kubectl get pods -n support-system
+
+  demo:print-urls:
+    desc: "Print URLs for the demo"
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "═══════════════════════════════════════════════════"
+        echo "  Support Demo — Access URLs"
+        echo "═══════════════════════════════════════════════════"
+        echo ""
+        echo "  Staff Portal:   https://staff.localhost:30443"
+        echo "  Cloud Portal:   https://cloud.localhost:30443"
+        echo "  Support API:    https://localhost:30443/apis/support.miloapis.com/v1alpha1/"
+        echo ""
+        echo "  Add to /etc/hosts:"
+        echo "    127.0.0.1  staff.localhost cloud.localhost"
+        echo ""
+        echo "  Test the API directly:"
+        echo "    curl -sk https://localhost:30443/apis/support.miloapis.com/v1alpha1/supporttickets"
+        echo ""
+        echo "═══════════════════════════════════════════════════"

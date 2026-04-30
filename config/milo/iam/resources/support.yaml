@@ -1,0 +1,41 @@
+apiVersion: iam.miloapis.com/v1alpha1
+kind: ProtectedResource
+metadata:
+  name: support.miloapis.com-supporttickets
+spec:
+  serviceRef:
+    name: "support.miloapis.com"
+  kind: SupportTicket
+  plural: supporttickets
+  singular: supportticket
+  permissions:
+    - create
+    - get
+    - list
+    - update
+    - delete
+  parentResources:
+    - apiGroup: resourcemanager.miloapis.com
+      kind: Organization
+    - apiGroup: iam.miloapis.com
+      kind: User
+---
+apiVersion: iam.miloapis.com/v1alpha1
+kind: ProtectedResource
+metadata:
+  name: support.miloapis.com-supportmessages
+spec:
+  serviceRef:
+    name: "support.miloapis.com"
+  kind: SupportMessage
+  plural: supportmessages
+  singular: supportmessage
+  permissions:
+    - create
+    - get
+    - list
+    - update
+    - delete
+  parentResources:
+    - apiGroup: support.miloapis.com
+      kind: SupportTicket
