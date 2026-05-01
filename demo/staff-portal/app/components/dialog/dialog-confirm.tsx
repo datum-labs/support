@@ -1,0 +1,127 @@
+import { logger } from '@/utils/logger';
+import { Button } from '@datum-cloud/datum-ui/button';
+import { Dialog } from '@datum-cloud/datum-ui/dialog';
+import { Input } from '@datum-cloud/datum-ui/input';
+import { Trans } from '@lingui/react/macro';
+import { useState } from 'react';
+
+interface DialogConfirmProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'default' | 'destructive';
+  onConfirm: () => Promise<void> | void;
+  onCancel?: () => void;
+  requireConfirmation?: boolean;
+  confirmationText?: string;
+}
+
+export default function DialogConfirm({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  variant = 'default',
+  onConfirm,
+  onCancel,
+  requireConfirmation = false,
+  confirmationText = 'DELETE',
+}: DialogConfirmProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [confirmationInput, setConfirmationInput] = useState('');
+
+  const handleConfirm = async () => {
+    if (requireConfirmation && confirmationInput !== confirmationText) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await onConfirm();
+      onOpenChange(false);
+      // Reset confirmation input when dialog closes
+      setConfirmationInput('');
+    } catch (error) {
+      logger.error('Error during confirmation', {
+        error: error instanceof Error ? error.message : String(error),
+        title,
+        action: 'confirm',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (!isLoading) {
+      onCancel?.();
+      onOpenChange(false);
+      // Reset confirmation input when dialog closes
+      setConfirmationInput('');
+    }
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    // Only allow closing if not loading
+    if (!isLoading) {
+      onOpenChange(newOpen);
+      // Reset confirmation input when dialog closes
+      if (!newOpen) {
+        setConfirmationInput('');
+      }
+    }
+  };
+
+  const isConfirmDisabled = requireConfirmation && confirmationInput !== confirmationText;
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Dialog.Content className="sm:max-w-md">
+        <Dialog.Header title={title} description={description} />
+
+        <Dialog.Body className="px-5">
+          {requireConfirmation && (
+            <div className="flex flex-col gap-2">
+              <label htmlFor="confirmation-input" className="text-sm font-medium">
+                <Trans>
+                  Enter the word <strong>{confirmationText}</strong> to perform this action.
+                </Trans>
+              </label>
+              <Input
+                id="confirmation-input"
+                value={confirmationInput}
+                onChange={(e) => setConfirmationInput(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+          )}
+        </Dialog.Body>
+
+        <Dialog.Footer className="gap-2">
+          <Button
+            type="tertiary"
+            theme="borderless"
+            onClick={handleCancel}
+            disabled={isLoading}
+            className="flex-1 sm:flex-none">
+            <span>{cancelText}</span>
+          </Button>
+          <Button
+            type={variant === 'destructive' ? 'danger' : 'primary'}
+            theme="solid"
+            loading={isLoading}
+            onClick={handleConfirm}
+            disabled={isConfirmDisabled}
+            className="flex-1 sm:flex-none">
+            <span>{confirmText}</span>
+          </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog>
+  );
+}

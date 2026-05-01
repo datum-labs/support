@@ -7,8 +7,8 @@ vars:
   CLUSTER_NAME: "support-test"
   KUBECONFIG_FILE: ".test-infra/kubeconfig"
   MILO_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/milo"
-  STAFF_PORTAL_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/staff-portal"
-  CLOUD_PORTAL_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/cloud-portal"
+  STAFF_PORTAL_DIR: "{{.TASKFILE_DIR}}/demo/staff-portal"
+  CLOUD_PORTAL_DIR: "{{.TASKFILE_DIR}}/demo/cloud-portal"
 
 env:
   KUBECONFIG: "{{.TASKFILE_DIR}}/{{.KUBECONFIG_FILE}}"
@@ -91,10 +91,12 @@ tasks:
         set -e
         echo "Deploying support to cluster..."
         kubectl apply -k config/overlays/dev/
-        echo "Waiting for TLS certificate to be issued..."
-        kubectl wait --for=condition=Ready certificate/support-ca -n support-system --timeout=120s
+        echo "Waiting for cert-manager ClusterIssuer to be ready..."
+        kubectl wait --for=condition=Ready clusterissuer/support-selfsigned-issuer --timeout=120s
         echo "Waiting for cert-manager issuer to be ready..."
         kubectl wait --for=condition=Ready issuer/support-ca-issuer -n support-system --timeout=120s
+        echo "Waiting for TLS certificate to be issued..."
+        kubectl wait --for=condition=Ready certificate/support-ca -n support-system --timeout=120s
         kubectl rollout restart deployment/support-apiserver -n support-system 2>/dev/null || true
         if ! kubectl rollout status deployment/support-apiserver -n support-system --timeout=300s; then
           echo ""

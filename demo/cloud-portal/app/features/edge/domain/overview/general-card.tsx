@@ -1,0 +1,130 @@
+import { BadgeCopy } from '@/components/badge/badge-copy';
+import { DateTime } from '@/components/date-time';
+import { List, ListItem } from '@/components/list/list';
+import { NameserverChips } from '@/components/nameserver-chips';
+import { DomainExpiration } from '@/features/edge/domain/expiration';
+import { DomainStatus } from '@/features/edge/domain/status';
+import { AnalyticsAction, useAnalytics } from '@/modules/fathom';
+import type { DnsZone } from '@/resources/dns-zones';
+import type { Domain } from '@/resources/domains';
+import { paths } from '@/utils/config/paths.config';
+import { getPathWithParams } from '@/utils/helpers/path.helper';
+import { Badge } from '@datum-cloud/datum-ui/badge';
+import { LinkButton } from '@datum-cloud/datum-ui/button';
+import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
+import { useMemo } from 'react';
+import { Link } from 'react-router';
+
+export const DomainGeneralCard = ({
+  domain,
+  dnsZone,
+  projectId,
+}: {
+  domain: Domain;
+  dnsZone?: DnsZone;
+  projectId?: string;
+}) => {
+  const { trackAction } = useAnalytics();
+
+  const listItems: ListItem[] = useMemo(() => {
+    if (!domain) return [];
+
+    const registrationFetching = !!domain.status && !domain.status?.registration;
+    const nameserversFetching = !!domain.status && !domain.status?.nameservers?.length;
+
+    return [
+      {
+        label: 'Resource Name',
+        content: <BadgeCopy value={domain.name ?? ''} badgeType="muted" badgeTheme="solid" />,
+      },
+      {
+        label: 'Registrar',
+        content: registrationFetching ? (
+          <Tooltip message="Registrar information is being fetched and will appear shortly.">
+            <span className="text-muted-foreground animate-pulse text-sm">Looking up...</span>
+          </Tooltip>
+        ) : domain.status?.registration?.registrar?.name ? (
+          <Badge type="quaternary" theme="outline" className="rounded-xl text-sm font-normal">
+            {domain.status?.registration?.registrar?.name}
+          </Badge>
+        ) : domain.status?.registration ? (
+          <Tooltip message="Registrar information is not publicly available. This is common when WHOIS privacy protection is enabled.">
+            <Badge type="quaternary" theme="outline" className="rounded-xl text-sm font-normal">
+              Private
+            </Badge>
+          </Tooltip>
+        ) : (
+          '-'
+        ),
+      },
+      {
+        label: 'DNS Host',
+        content: nameserversFetching ? (
+          <Tooltip message="DNS host information is being fetched and will appear shortly.">
+            <span className="text-muted-foreground animate-pulse text-sm">Looking up...</span>
+          </Tooltip>
+        ) : (
+          <NameserverChips data={domain?.status?.nameservers} maxVisible={99} wrap />
+        ),
+      },
+      {
+        label: 'Status',
+        content: <DomainStatus domainStatus={domain.status} />,
+      },
+      {
+        label: 'Expiration Date',
+        content: <DomainExpiration expiresAt={domain?.status?.registration?.expiresAt} />,
+      },
+      {
+        label: 'Created At',
+        content: <DateTime className="text-sm" date={domain?.createdAt ?? ''} />,
+      },
+      {
+        label: 'DNS Zone',
+        content: dnsZone ? (
+          <LinkButton
+            as={Link}
+            type="primary"
+            theme="link"
+            size="link"
+            className="font-semibold"
+            href={getPathWithParams(paths.project.detail.dnsZones.detail.root, {
+              projectId: projectId ?? '',
+              dnsZoneId: dnsZone?.name,
+            })}>
+            {domain.domainName}
+          </LinkButton>
+        ) : (
+          <LinkButton
+            as={Link}
+            type="primary"
+            theme="link"
+            size="link"
+            className="font-semibold"
+            onClick={() => trackAction(AnalyticsAction.TransferDnsToDatum)}
+            href={getPathWithParams(
+              paths.project.detail.dnsZones.root,
+              {
+                projectId,
+              },
+              new URLSearchParams({
+                action: 'create',
+                domainName: domain.domainName ?? '',
+              })
+            )}>
+            Transfer to Datum
+          </LinkButton>
+        ),
+      },
+    ];
+  }, [domain, dnsZone, trackAction, projectId]);
+
+  return (
+    <Card className="w-full overflow-hidden rounded-xl px-3 py-4 shadow sm:pt-6 sm:pb-4">
+      <CardContent className="p-0 sm:px-6 sm:pb-4">
+        <List items={listItems} />
+      </CardContent>
+    </Card>
+  );
+};

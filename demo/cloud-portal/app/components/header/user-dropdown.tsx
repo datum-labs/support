@@ -1,0 +1,136 @@
+import { DarkModeIcon } from '@/components/icon/dark-mode';
+import { LightModeIcon } from '@/components/icon/light-mode';
+import { SystemModeIcon } from '@/components/icon/system-mode';
+import { useApp } from '@/providers/app.provider';
+import { ThemeValue, useUpdateUserPreferences } from '@/resources/users';
+import { paths } from '@/utils/config/paths.config';
+import { getInitials } from '@/utils/helpers/text.helper';
+import { Avatar, AvatarFallback, AvatarImage } from '@datum-cloud/datum-ui/avatar';
+import { Button } from '@datum-cloud/datum-ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@datum-cloud/datum-ui/dropdown';
+import { Icon } from '@datum-cloud/datum-ui/icons';
+import { useTheme } from '@datum-cloud/datum-ui/theme';
+import { cn } from '@datum-cloud/datum-ui/utils';
+import { CheckIcon, LogOut, UserCogIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+
+const THEME_OPTIONS = [
+  { value: 'light', label: 'Light', icon: LightModeIcon },
+  { value: 'dark', label: 'Dark', icon: DarkModeIcon },
+  { value: 'system', label: 'System', icon: SystemModeIcon },
+] as const;
+
+export const UserDropdown = ({ className }: { className?: string }) => {
+  const navigate = useNavigate();
+  const { resolvedTheme, setTheme } = useTheme();
+  const { user, userPreferences, setUser } = useApp();
+  const userId = user?.sub ?? 'me';
+
+  const [currentTheme, setCurrentTheme] = useState<ThemeValue>(resolvedTheme as ThemeValue);
+  const [open, setOpen] = useState(false);
+
+  const updatePreferencesMutation = useUpdateUserPreferences(userId, {
+    onSuccess: (data) => {
+      setUser(data);
+    },
+  });
+
+  const updateTheme = (theme: ThemeValue) => {
+    setTheme(theme);
+    setCurrentTheme(theme);
+
+    updatePreferencesMutation.mutate({ theme });
+  };
+
+  useEffect(() => {
+    if (userPreferences) {
+      setCurrentTheme(userPreferences.theme);
+    }
+  }, [userPreferences]);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="primary"
+          theme="borderless"
+          size="small"
+          data-e2e="user-menu-trigger"
+          className={cn(
+            'hover:bg-sidebar-accent cursor-pointer border-none p-0 px-1 focus-visible:ring-0 focus-visible:ring-offset-0',
+            className
+          )}>
+          <Avatar className="size-full h-7 w-7 rounded-xl">
+            {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user?.fullName || 'User'} />}
+            <AvatarFallback className="bg-primary text-primary-foreground rounded-lg font-semibold">
+              {getInitials(user?.fullName || '')}
+            </AvatarFallback>
+          </Avatar>
+
+          <p className="text-foreground hidden text-xs font-semibold lg:block">{user?.fullName}</p>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-64 rounded-lg"
+        align="end"
+        sideOffset={4}>
+        <DropdownMenuLabel className="px-3 py-2 font-normal">
+          <div className="grid flex-1 text-left text-xs">
+            <span className="text-primary truncate font-semibold">{user?.fullName}</span>
+            <span className="text-foreground truncate font-medium">{user?.email}</span>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          {THEME_OPTIONS.map((option) => (
+            <DropdownMenuItem
+              key={option.value}
+              className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 font-normal"
+              onClick={() => updateTheme(option.value)}>
+              <div className="flex items-center gap-2">
+                <Icon icon={option.icon} size={14} absoluteStrokeWidth={false} />
+                <span className="text-foreground text-xs">{option.label}</span>
+              </div>
+              {currentTheme === option.value && (
+                <Icon icon={CheckIcon} size={16} className="text-primary" strokeWidth={1.5} />
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            className="cursor-pointer rounded-lg px-3 py-2 font-normal"
+            onClick={() => navigate(paths.account.settings.general)}>
+            <div className="flex items-center gap-2">
+              <Icon icon={UserCogIcon} size={14} />
+              <span className="text-foreground text-xs">Account Settings</span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            asChild
+            variant="destructive"
+            data-e2e="user-menu-logout"
+            className="data-[variant=destructive]:*:[svg]:!text-destructive cursor-pointer rounded-lg px-3 py-2 font-normal"
+            onClick={() => {
+              navigate(paths.auth.logOut, { replace: true, preventScrollReset: true });
+            }}>
+            <div className="flex items-center gap-2">
+              <Icon icon={LogOut} size={14} />
+              <span className="text-destructive text-xs">Log Out</span>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

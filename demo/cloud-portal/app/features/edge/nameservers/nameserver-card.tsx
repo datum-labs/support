@@ -1,0 +1,44 @@
+import { NameserverTable } from './nameserver-table';
+import { IDnsNameserver, IDnsRegistration } from '@/resources/domains';
+import { Card, CardContent, CardHeader, CardTitle } from '@datum-cloud/datum-ui/card';
+import { useMemo } from 'react';
+
+export interface NameserverCardProps {
+  nameservers: IDnsNameserver[];
+  registration?: IDnsRegistration;
+  maxRows?: number;
+  title?: string;
+  actions?: React.ReactNode;
+}
+
+/**
+ * Card wrapper for nameserver table in compact mode
+ * Used in overview pages
+ */
+export const NameserverCard = ({
+  nameservers,
+  registration,
+  maxRows = 5,
+  title = 'Nameservers',
+  actions,
+}: NameserverCardProps) => {
+  // Slice data at card level for better control
+  const displayData = useMemo(
+    () => (maxRows ? nameservers.slice(0, maxRows) : nameservers),
+    [nameservers, maxRows]
+  );
+
+  return (
+    <Card className="relative gap-6 overflow-hidden rounded-xl px-3 py-4 shadow sm:pt-6 sm:pb-4">
+      <CardHeader className="px-0 sm:px-6">
+        <CardTitle className="flex items-center justify-between gap-2">
+          <span className="text-lg font-medium">{title}</span>
+          {actions}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 sm:px-6 sm:pb-4">
+        <NameserverTable data={displayData} registration={registration} />
+      </CardContent>
+    </Card>
+  );
+};

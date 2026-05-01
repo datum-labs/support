@@ -5,7 +5,7 @@ metadata:
   namespace: auth-system
 data:
   config.yaml: |
-    issuer: https://localhost:30443/dex
+    issuer: http://dex.auth-system.svc.cluster.local:5556/dex
 
     storage:
       type: memory
@@ -36,6 +36,6 @@ data:
       # email: demo@datum.net / password: password
       # (hash generated with: htpasswd -bnBC 10 "" password | tr -d ':\n')
       - email: demo@datum.net
-        hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4u"
+        hash: "$2y$10$8e42G3vHp1CFPMKSMw88Bu/WiKVQtK4e2Or6.t5n6eTbBm2c3pUAC"
         username: demo
         userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"

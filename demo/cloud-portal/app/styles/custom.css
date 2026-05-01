@@ -1,0 +1,125 @@
+/**
+ * Application-specific custom styles
+ * UI component styles are now in datum-ui/styles/animations.css
+ */
+
+/* Activity Log Styles */
+.activity-log-user {
+  font-weight: 600;
+}
+
+.activity-log-resource {
+  text-transform: capitalize;
+}
+
+.activity-log-resource-name,
+.activity-log-error-message,
+.activity-log-namespace {
+  font-weight: 600;
+}
+
+.recharts-wrapper .recharts-legend-wrapper {
+  z-index: 0;
+}
+
+.recharts-wrapper .recharts-tooltip-wrapper {
+  z-index: 1;
+}
+
+@keyframes data-table-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-data-table-fade-in {
+  animation: data-table-fade-in 0.2s ease-out;
+}
+
+[data-streamdown='code-block'] {
+  margin-top: 0.5rem;
+}
+
+/* Show "text" when no language was specified */
+[data-streamdown='code-block-header'] span:empty::before {
+  content: 'text';
+}
+
+/* Tiptap Placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tiptap p.is-editor-empty:first-child {
+  position: relative;
+}
+
+/* ── DataTable cloud-portal overrides ── */
+.datum-ui-data-table [data-slot='dt-header-row'] {
+  @apply hover:bg-transparent;
+}
+.datum-ui-data-table [data-slot='dt-header-cell'] {
+  @apply bg-background text-foreground h-[42px] border-r px-4 py-3 text-xs font-medium transition-all dark:bg-white/2 dark:hover:bg-white/5;
+}
+.datum-ui-data-table [data-slot='dt-row'] {
+  @apply bg-table-cell hover:bg-table-cell-hover relative transition-colors;
+}
+.datum-ui-data-table [data-slot='dt-cell'] {
+  @apply px-4 py-3 text-xs;
+}
+.datum-ui-data-table [data-slot='dt-cell']:has([data-slot='dt-row-actions']) {
+  @apply bg-table-cell sticky right-0 z-20 w-[1%] whitespace-nowrap;
+  box-shadow: inset 1px 0 0 0 var(--border);
+}
+.datum-ui-data-table [data-slot='dt-header-cell']:last-child:empty {
+  @apply bg-background sticky right-0;
+  box-shadow: none;
+}
+
+/* Filtered-empty cell: drop base TableCell padding + whitespace-nowrap so
+   the EmptyContent card fills the row and the message wraps, matching the
+   standalone (no-filter) empty state. */
+.datum-ui-data-table [data-slot='dt-empty'] {
+  @apply p-0 whitespace-normal;
+}
+
+/* Skeleton rows: match the real row's white cell background + padding so the
+   loading state reads as a real table. pageSize defaults to 20 for actual
+   pagination, but we cap skeleton rows at 10 to keep the loading area
+   compact and avoid an awkward overflow. */
+.datum-ui-data-table [data-slot='dt-skeleton-row'] {
+  @apply bg-table-cell;
+}
+.datum-ui-data-table [data-slot='dt-skeleton-cell'] {
+  @apply px-4 py-3;
+}
+.datum-ui-data-table [data-slot='dt-skeleton-row']:nth-of-type(n + 11) {
+  display: none;
+}
+
+/* Issue 3: Search input styling — match old SearchInput (h-9, text-xs) */
+.datum-ui-data-table [data-slot='dt-search'] {
+  @apply h-9;
+}
+.datum-ui-data-table [data-slot='dt-search'] input {
+  @apply h-full text-xs placeholder:text-xs;
+}
+
+.datum-ui-data-table__pagination {
+  @apply p-0;
+}
+
+.datum-ui-data-table__pagination [data-slot='select-trigger'] {
+  @apply min-h-8;
+}

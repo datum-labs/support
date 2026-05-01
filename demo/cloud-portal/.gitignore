@@ -1,0 +1,31 @@
+node_modules
+
+/.cache
+/build
+.env
+.DS_Store
+.react-router/
+
+# AI assistant files
+.cursor/
+.windsurf/
+.claude/
+!.claude/settings.json
+CLAUDE.MD
+.superpowers/
+docs/plans/
+docs/superpowers/
+
+# OpenAPI generation temp files
+temp-openapi-spec.json
+
+# GraphQL generation temp files
+temp-filtered-schema.graphql
+
+# Cypress files
+cypress/screenshots
+cypress/videos
+cypress/results
+
+# Playwright MCP
+.playwright-mcp/

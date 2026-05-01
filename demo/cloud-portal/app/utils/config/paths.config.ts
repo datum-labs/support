@@ -1,0 +1,136 @@
+export const paths = {
+  auth: {
+    root: '/auth',
+    logIn: '/login',
+    logOut: '/logout',
+    signUp: '/signup',
+    callback: '/auth/callback',
+  },
+  home: '/',
+  gettingStarted: '/getting-started',
+  onboarding: {
+    completeProfile: '/complete-profile',
+  },
+  fraud: {
+    verifying: '/verifying',
+    accountUnderReview: '/account-under-review',
+    accountSuspended: '/account-suspended',
+    statusApi: '/api/fraud-status',
+  },
+  invitationAccept: '/invitation/:invitationId/accept',
+  account: {
+    root: '/account',
+    organizations: {
+      root: '/account/organizations',
+    },
+    // Account Settings
+    settings: {
+      general: '/account/general',
+      security: '/account/security',
+      activeSessions: '/account/active-sessions',
+      accessTokens: '/account/access-tokens',
+      notifications: '/account/notifications',
+      activity: '/account/activity',
+    },
+  },
+  org: {
+    root: '/org',
+    detail: {
+      root: '/org/[orgId]',
+      team: {
+        root: '/org/[orgId]/team',
+        invite: '/org/[orgId]/team/invite',
+        roles: '/org/[orgId]/team/[memberId]/roles',
+        groups: '/org/[orgId]/team/groups',
+        groupDetail: '/org/[orgId]/team/groups/[groupId]',
+      },
+      projects: {
+        root: '/org/[orgId]/projects',
+      },
+      policyBindings: {
+        root: '/org/[orgId]/policy-bindings',
+        new: '/org/[orgId]/policy-bindings/new',
+        edit: '/org/[orgId]/policy-bindings/[policyBindingId]/edit',
+      },
+      settings: {
+        general: '/org/[orgId]/general',
+        notifications: '/org/[orgId]/notifications',
+        quotas: '/org/[orgId]/quotas',
+        activity: '/org/[orgId]/activity',
+      },
+    },
+  },
+  project: {
+    root: '/project',
+    detail: {
+      root: '/project/[projectId]',
+      home: '/project/[projectId]/home',
+      secrets: {
+        root: '/project/[projectId]/secrets',
+        detail: {
+          root: '/project/[projectId]/secrets/[secretId]',
+          overview: '/project/[projectId]/secrets/[secretId]/overview',
+        },
+      },
+      proxy: {
+        root: '/project/[projectId]/edge',
+        detail: {
+          root: '/project/[projectId]/edge/[proxyId]',
+        },
+      },
+      domains: {
+        root: '/project/[projectId]/domains',
+        detail: {
+          root: '/project/[projectId]/domains/[domainId]',
+          overview: '/project/[projectId]/domains/[domainId]/overview',
+          settings: '/project/[projectId]/domains/[domainId]/settings',
+        },
+      },
+      dnsZones: {
+        root: '/project/[projectId]/dns-zones',
+        detail: {
+          root: '/project/[projectId]/dns-zones/[dnsZoneId]',
+          // overview: '/project/[projectId]/dns-zones/[dnsZoneId]/overview',
+          discovery: '/project/[projectId]/dns-zones/[dnsZoneId]/discovery',
+          dnsRecords: '/project/[projectId]/dns-zones/[dnsZoneId]/dns-records',
+          nameservers: '/project/[projectId]/dns-zones/[dnsZoneId]/nameservers',
+          settings: '/project/[projectId]/dns-zones/[dnsZoneId]/settings',
+        },
+      },
+      metrics: {
+        root: '/project/[projectId]/export-policies',
+        new: '/project/[projectId]/export-policies/new',
+        detail: {
+          root: '/project/[projectId]/export-policies/[exportPolicyId]',
+          overview: '/project/[projectId]/export-policies/[exportPolicyId]/overview',
+          edit: '/project/[projectId]/export-policies/[exportPolicyId]/edit',
+        },
+      },
+      connectors: {
+        root: '/project/[projectId]/connectors',
+        detail: {
+          root: '/project/[projectId]/connectors/[connectorId]',
+        },
+      },
+      activity: '/project/[projectId]/activity',
+      quotas: '/project/[projectId]/quotas',
+      settings: {
+        general: '/project/[projectId]/general',
+        notifications: '/project/[projectId]/notifications',
+        quotas: '/project/[projectId]/quotas',
+        activity: '/project/[projectId]/activity',
+      },
+      machineAccounts: {
+        root: '/project/[projectId]/machine-accounts',
+        detail: {
+          root: '/project/[projectId]/machine-accounts/[machineAccountId]',
+          overview: '/project/[projectId]/machine-accounts/[machineAccountId]/overview',
+          keys: '/project/[projectId]/machine-accounts/[machineAccountId]/keys',
+          policyBindings:
+            '/project/[projectId]/machine-accounts/[machineAccountId]/policy-bindings',
+          activity: '/project/[projectId]/machine-accounts/[machineAccountId]/activity',
+        },
+      },
+    },
+  },
+};

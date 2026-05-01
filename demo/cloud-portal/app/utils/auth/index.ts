@@ -1,0 +1,17 @@
+/**
+ * Authentication utilities
+ *
+ * Centralized auth configuration, types, and service.
+ */
+
+export * from './auth.config';
+export * from './auth.types';
+export {
+  AuthService,
+  sessionStorage,
+  refreshTokenStorage,
+  clearUserPermissionCache,
+} from './auth.service';
+export { destroyLocalSessions } from './auth.utils';
+export { sessionManager } from './session-manager';
+export type { TokenRefreshEvent } from './session-manager';

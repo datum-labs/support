@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+
+secretGenerator:
+  - name: cloud-portal
+    envs:
+      - .env.demo
+    options:
+      disableNameSuffixHash: true
+
+patches:
+  # Remove ServiceMonitor — prometheus-operator is not installed in the demo cluster
+  - patch: |-
+      $patch: delete
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: cloud-portal
+    target:
+      kind: ServiceMonitor
+      name: cloud-portal
+
+  # Point to the test-infra gateway and restrict to the cloud.localhost hostname
+  - patch: |-
+      apiVersion: gateway.networking.k8s.io/v1beta1
+      kind: HTTPRoute
+      metadata:
+        name: cloud-portal
+      spec:
+        hostnames:
+          - "cloud.localhost"
+        parentRefs:
+          - name: default-gateway
+            namespace: envoy-gateway-system
+    target:
+      kind: HTTPRoute
+      name: cloud-portal
+
+  # Override env vars that differ from the base deployment
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: cloud-portal
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: cloud-portal
+                image: ghcr.io/datum-cloud/cloud-portal:demo
+                imagePullPolicy: IfNotPresent
+                env:
+                  - name: APP_URL
+                    value: "https://cloud.localhost:30443"
+                  - name: API_URL
+                    value: "https://localhost:30443"
+                  - name: OTEL_ENABLED
+                    value: "false"
+    target:
+      kind: Deployment
+      name: cloud-portal

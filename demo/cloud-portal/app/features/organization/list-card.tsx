@@ -1,0 +1,47 @@
+import { DateTime } from '@/components/date-time';
+import { PersonalBadge } from '@/components/personal-badge/personal-badge';
+import { ProfileIdentity } from '@/components/profile-identity';
+import type { Organization } from '@/resources/organizations';
+import { getInitials } from '@/utils/helpers/text.helper';
+import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import { Icon } from '@datum-cloud/datum-ui/icons';
+import { Building2, ChevronRight, UserRound } from 'lucide-react';
+
+export const OrganizationListCard = ({ org }: { org: Organization }) => {
+  const displayName = org?.displayName ?? org?.name ?? '';
+  const initials = getInitials(displayName);
+  const fallbackIcon = org?.type === 'Personal' ? UserRound : Building2;
+  return (
+    <Card className="hover:bg-accent/50 cursor-pointer py-4 transition-all">
+      <CardContent className="flex flex-row items-center justify-between gap-4 px-4">
+        {/* Left Side */}
+        <div className="flex flex-row items-center gap-4">
+          {/* Avatar */}
+          <ProfileIdentity
+            name={displayName}
+            fallbackText={initials}
+            fallbackIcon={!initials ? fallbackIcon : undefined}
+            size="lg"
+          />
+          {/* Organization Info */}
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-row items-center gap-2">
+              <h3 className="text-foreground text-lg leading-5 font-semibold">
+                {org?.displayName ?? org?.name ?? ''}
+              </h3>
+              {org.type === 'Personal' && <PersonalBadge />}
+            </div>
+            <p className="text-muted-foreground text-sm">{org?.name}</p>
+            {org?.createdAt && (
+              <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                <span>Created on</span> <DateTime date={org?.createdAt} format="MMM do, yyyy" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Icon icon={ChevronRight} size={24} className="text-muted-foreground" />
+      </CardContent>
+    </Card>
+  );
+};
