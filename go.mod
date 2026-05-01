@@ -108,4 +108,7 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-tool k8s.io/code-generator
+tool (
+	k8s.io/code-generator
+	k8s.io/kube-openapi/cmd/openapi-gen
+)

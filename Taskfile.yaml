@@ -1,22 +1,17 @@
 version: '3'
 
-includes:
-  test-infra:
-    taskfile: https://raw.githubusercontent.com/datum-cloud/test-infra/main/Taskfile.yml
-    optional: true
-
 vars:
-  TOOL_DIR: "{{.USER_WORKING_DIR}}/bin"
+  TOOL_DIR: "{{.TASKFILE_DIR}}/bin"
   IMAGE_NAME: "ghcr.io/datum-cloud/support"
   IMAGE_TAG: "dev"
   CLUSTER_NAME: "support-test"
   KUBECONFIG_FILE: ".test-infra/kubeconfig"
-  MILO_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/milo"
-  STAFF_PORTAL_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/staff-portal"
-  CLOUD_PORTAL_DIR: "{{.USER_WORKING_DIR}}/../datum-cloud/cloud-portal"
+  MILO_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/milo"
+  STAFF_PORTAL_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/staff-portal"
+  CLOUD_PORTAL_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/cloud-portal"
 
 env:
-  KUBECONFIG: "{{.KUBECONFIG_FILE}}"
+  KUBECONFIG: "{{.TASKFILE_DIR}}/{{.KUBECONFIG_FILE}}"
 
 tasks:
   default:
@@ -96,8 +91,25 @@ tasks:
         set -e
         echo "Deploying support to cluster..."
         kubectl apply -k config/overlays/dev/
+        echo "Waiting for TLS certificate to be issued..."
+        kubectl wait --for=condition=Ready certificate/support-ca -n support-system --timeout=120s
+        echo "Waiting for cert-manager issuer to be ready..."
+        kubectl wait --for=condition=Ready issuer/support-ca-issuer -n support-system --timeout=120s
         kubectl rollout restart deployment/support-apiserver -n support-system 2>/dev/null || true
-        kubectl rollout status deployment/support-apiserver -n support-system --timeout=120s
+        if ! kubectl rollout status deployment/support-apiserver -n support-system --timeout=300s; then
+          echo ""
+          echo "── Pod state ───────────────────────────────────────────"
+          kubectl get pods -n support-system -o wide
+          echo ""
+          echo "── Pod events ──────────────────────────────────────────"
+          kubectl describe pods -n support-system -l app=support-apiserver 2>/dev/null | grep -A 40 "^Events:"
+          echo ""
+          echo "── Crash logs ──────────────────────────────────────────"
+          kubectl logs -n support-system -l app=support-apiserver --previous --tail=50 2>/dev/null || \
+            kubectl logs -n support-system -l app=support-apiserver --tail=50 2>/dev/null || \
+            echo "(no logs available)"
+          exit 1
+        fi
         echo "✅ Deployed"
 
   dev:undeploy:
@@ -139,11 +151,24 @@ tasks:
     desc: Run code generation (deepcopy, openapi)
     cmds:
       - |
+        set -e
         echo "Running deepcopy-gen..."
         go tool k8s.io/code-generator/cmd/deepcopy-gen \
           --output-file zz_generated.deepcopy.go \
           --go-header-file hack/boilerplate.go.txt \
           go.miloapis.com/support/pkg/apis/support/v1alpha1
+
+        echo "Running openapi-gen..."
+        go tool k8s.io/kube-openapi/cmd/openapi-gen \
+          --output-dir pkg/generated/openapi \
+          --output-pkg go.miloapis.com/support/pkg/generated/openapi \
+          --go-header-file hack/boilerplate.go.txt \
+          go.miloapis.com/support/pkg/apis/support/v1alpha1 \
+          k8s.io/apimachinery/pkg/apis/meta/v1 \
+          k8s.io/apimachinery/pkg/api/resource \
+          k8s.io/apimachinery/pkg/runtime \
+          k8s.io/apimachinery/pkg/version
+
         echo "✅ Code generation complete"
 
   clean:
@@ -156,21 +181,115 @@ tasks:
   demo:up:
     desc: "Start the full support demo (kind cluster + all components)"
     cmds:
-      - task: test-infra:cluster-up
-        vars: { CLUSTER_NAME: "{{.CLUSTER_NAME}}" }
+      - task: demo:configure
+      - task: demo:cluster-up
       - task: demo:deploy-milo
+      - task: demo:deploy-auth
       - task: dev:build
       - task: dev:load-image
       - task: dev:deploy
       - task: demo:deploy-staff-portal
       - task: demo:deploy-cloud-portal
       - task: demo:seed
+      - task: demo:verify
       - task: demo:print-urls
+
+  demo:cluster-up:
+    desc: "Create the demo kind cluster and install platform components"
+    silent: true
+    cmds:
+      - |
+        set -e
+        REPO_DIR="{{.TASKFILE_DIR}}/.test-infra"
+        KUBECONFIG_PATH="{{.TASKFILE_DIR}}/{{.KUBECONFIG_FILE}}"
+        mkdir -p "$(dirname "${KUBECONFIG_PATH}")"
+
+        # Create kind cluster with our config — only maps port 30443, not 30000
+        if kind get clusters 2>/dev/null | grep -q "^{{.CLUSTER_NAME}}$"; then
+          echo "✅ KIND cluster '{{.CLUSTER_NAME}}' already exists"
+        else
+          echo "Creating kind cluster '{{.CLUSTER_NAME}}'..."
+          kind create cluster \
+            --name {{.CLUSTER_NAME}} \
+            --image kindest/node:v1.32.0 \
+            --config "{{.TASKFILE_DIR}}/hack/kind-config.yaml" \
+            --kubeconfig "${KUBECONFIG_PATH}"
+          echo "✅ KIND cluster '{{.CLUSTER_NAME}}' created"
+        fi
+
+        # Clone or update test-infra for component installation scripts
+        if [ ! -d "${REPO_DIR}" ]; then
+          echo "Cloning test-infra..."
+          git clone https://github.com/datum-cloud/test-infra.git "${REPO_DIR}"
+        else
+          git -C "${REPO_DIR}" pull origin main --quiet 2>/dev/null || true
+        fi
+
+        # Run component install tasks from within test-infra so its REPO_DIR
+        # detection resolves to "." and KUBECONFIG_FILE resolves to "./kubeconfig"
+        # (which is the same file we wrote above)
+        cd "${REPO_DIR}"
+        echo "Installing Flux..."
+        task install-flux
+        echo "Installing cert-manager..."
+        task install-cert-manager
+        echo "Installing Envoy Gateway..."
+        task install-envoy-gateway-operator
+        echo "✅ Platform components ready"
+
+  demo:deploy-auth:
+    desc: "Deploy Dex OIDC provider for demo portal authentication"
+    silent: true
+    cmds:
+      - |
+        set -e
+        echo "Deploying Dex OIDC provider..."
+        kubectl apply -k "{{.TASKFILE_DIR}}/config/demo/auth/"
+        echo "Waiting for Dex to be ready..."
+        kubectl rollout status deployment/dex -n auth-system --timeout=120s
+        echo "✅ Dex OIDC provider ready"
+        echo "   Demo user: demo@datum.net / password"
+        echo "   Issuer:    https://localhost:30443/dex"
 
   demo:down:
     desc: "Tear down the demo kind cluster"
     cmds:
       - kind delete cluster --name {{.CLUSTER_NAME}}
+
+  demo:configure:
+    desc: "Scaffold demo env files for both portals (edit OIDC secrets before deploying portals)"
+    silent: true
+    cmds:
+      - |
+        set -e
+
+        STAFF_ENV="{{.STAFF_PORTAL_DIR}}/config/demo/.env.demo"
+        CLOUD_ENV="{{.CLOUD_PORTAL_DIR}}/config/demo/.env.demo"
+
+        # Inject a random session secret if the placeholder is still present
+        inject_secret() {
+          local file="$1"
+          if grep -q "change-me-to-a-random-32-char-secret-value" "$file" 2>/dev/null; then
+            local secret
+            secret=$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32)
+            sed -i "s/change-me-to-a-random-32-char-secret-value/${secret}/" "$file"
+          fi
+        }
+
+        inject_secret "${STAFF_ENV}"
+        inject_secret "${CLOUD_ENV}"
+
+        echo ""
+        echo "╔═══════════════════════════════════════════════════════════╗"
+        echo "║  Demo configuration ready                                 ║"
+        echo "╚═══════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "  Staff portal env: ${STAFF_ENV}"
+        echo "  Cloud portal env: ${CLOUD_ENV}"
+        echo ""
+        echo "  OIDC credentials are pre-configured for Dex (deployed by demo:deploy-auth)."
+        echo "  Demo login: demo@datum.net / password"
+        echo ""
 
   demo:deploy-milo:
     desc: "Deploy Milo control plane to the demo cluster"
@@ -180,36 +299,49 @@ tasks:
       - |
         set -e
         echo "Deploying Milo to demo cluster..."
-        KUBECONFIG="{{.USER_WORKING_DIR}}/{{.KUBECONFIG_FILE}}" task dev:setup || true
+
+        # test-infra's kubectl wrapper checks for .test-infra/kubeconfig relative
+        # to its working dir (milo's dir). Copy our cluster's kubeconfig there.
+        mkdir -p .test-infra
+        cp "{{.TASKFILE_DIR}}/{{.KUBECONFIG_FILE}}" .test-infra/kubeconfig
+
+        TASK_X_REMOTE_TASKFILES=1 task dev:build --force
+        kind load docker-image ghcr.io/datum-cloud/milo:dev --name {{.CLUSTER_NAME}}
+        TASK_X_REMOTE_TASKFILES=1 task dev:deploy
         echo "✅ Milo deployed"
 
   demo:deploy-staff-portal:
-    desc: "Deploy staff portal to the demo cluster"
+    desc: "Build, load, and deploy the staff portal (demo overlay) to the demo cluster"
     silent: true
     cmds:
       - |
         set -e
-        PORTAL_DIR="{{.STAFF_PORTAL_DIR}}"
-        if [ ! -f "${PORTAL_DIR}/config/dev/.env" ] && [ -f "${PORTAL_DIR}/.env.sample" ]; then
-          cp "${PORTAL_DIR}/.env.sample" "${PORTAL_DIR}/config/dev/.env"
-          echo "⚠  Copied .env.sample → config/dev/.env in staff-portal. Please edit with real values."
-        fi
-        kubectl apply -k "${PORTAL_DIR}/config/dev/"
-        echo "✅ Staff portal deployed"
+        echo "Building staff-portal image..."
+        docker build -t ghcr.io/datum-cloud/staff-portal:demo "{{.STAFF_PORTAL_DIR}}"
+        echo "Loading staff-portal image into kind cluster..."
+        kind load docker-image ghcr.io/datum-cloud/staff-portal:demo --name {{.CLUSTER_NAME}}
+        kubectl apply -k "{{.STAFF_PORTAL_DIR}}/config/demo/"
+        kubectl rollout restart deployment/staff-portal 2>/dev/null || true
+        kubectl rollout status deployment/staff-portal --timeout=120s 2>/dev/null || true
+        echo "✅ Staff portal deployed → https://staff.localhost:30443"
 
   demo:deploy-cloud-portal:
-    desc: "Deploy cloud portal to the demo cluster"
+    desc: "Build, load, and deploy the cloud portal (demo overlay) to the demo cluster"
     silent: true
     cmds:
       - |
-        set -e
-        PORTAL_DIR="{{.CLOUD_PORTAL_DIR}}"
-        if [ ! -f "${PORTAL_DIR}/config/dev/.env" ] && [ -f "${PORTAL_DIR}/.env.sample" ]; then
-          cp "${PORTAL_DIR}/.env.sample" "${PORTAL_DIR}/config/dev/.env"
-          echo "⚠  Copied .env.sample → config/dev/.env in cloud-portal. Please edit with real values."
+        echo "Building cloud-portal image..."
+        if ! docker build -t ghcr.io/datum-cloud/cloud-portal:demo "{{.CLOUD_PORTAL_DIR}}"; then
+          echo "⚠  cloud-portal build failed — skipping portal deployment."
+          echo "   The staff portal and support API are still available."
+          exit 0
         fi
-        kubectl apply -k "${PORTAL_DIR}/config/dev/"
-        echo "✅ Cloud portal deployed"
+        echo "Loading cloud-portal image into kind cluster..."
+        kind load docker-image ghcr.io/datum-cloud/cloud-portal:demo --name {{.CLUSTER_NAME}}
+        kubectl apply -k "{{.CLOUD_PORTAL_DIR}}/config/demo/"
+        kubectl rollout restart deployment/cloud-portal 2>/dev/null || true
+        kubectl rollout status deployment/cloud-portal --timeout=120s 2>/dev/null || true
+        echo "✅ Cloud portal deployed → https://cloud.localhost:30443"
 
   demo:seed:
     desc: "Create demo support tickets and messages"
@@ -219,7 +351,7 @@ tasks:
         set -e
         echo "Seeding demo data..."
 
-        kubectl apply --server-side -f - <<'EOF'
+        kubectl apply -f - <<'EOF'
         apiVersion: support.miloapis.com/v1alpha1
         kind: SupportTicket
         metadata:
@@ -248,7 +380,7 @@ tasks:
             - dashboard
         EOF
 
-        kubectl apply --server-side -f - <<'EOF'
+        kubectl apply -f - <<'EOF'
         apiVersion: support.miloapis.com/v1alpha1
         kind: SupportTicket
         metadata:
@@ -277,7 +409,7 @@ tasks:
             - invoicing
         EOF
 
-        kubectl apply --server-side -f - <<'EOF'
+        kubectl apply -f - <<'EOF'
         apiVersion: support.miloapis.com/v1alpha1
         kind: SupportMessage
         metadata:
@@ -300,7 +432,7 @@ tasks:
           internal: false
         EOF
 
-        kubectl apply --server-side -f - <<'EOF'
+        kubectl apply -f - <<'EOF'
         apiVersion: support.miloapis.com/v1alpha1
         kind: SupportMessage
         metadata:
@@ -324,20 +456,74 @@ tasks:
 
   demo:verify:
     desc: "Verify the demo is working end-to-end"
+    silent: true
     cmds:
       - |
-        echo "=== APIService status ==="
-        kubectl get apiservice v1alpha1.support.miloapis.com \
-          -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' && echo ""
+        PASS=true
 
-        echo "=== Support Tickets ==="
-        kubectl get supporttickets
+        echo ""
+        echo "── APIService ──────────────────────────────────────────"
+        AVAIL=$(kubectl get apiservice v1alpha1.support.miloapis.com \
+          -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null || echo "Unknown")
+        if [ "${AVAIL}" = "True" ]; then
+          echo "  ✅ v1alpha1.support.miloapis.com  Available=True"
+        else
+          echo "  ❌ v1alpha1.support.miloapis.com  Available=${AVAIL}"
+          PASS=false
+        fi
 
-        echo "=== Support Messages ==="
-        kubectl get supportmessages
+        echo ""
+        echo "── Support API Server ──────────────────────────────────"
+        kubectl get pods -n support-system --no-headers 2>/dev/null | while read line; do
+          echo "  $line"
+        done
 
-        echo "=== Support API Server pods ==="
-        kubectl get pods -n support-system
+        echo ""
+        echo "── Tickets ─────────────────────────────────────────────"
+        TICKET_COUNT=$(kubectl get supporttickets --no-headers 2>/dev/null | wc -l | tr -d ' ')
+        if [ "${TICKET_COUNT}" -gt "0" ]; then
+          echo "  ✅ ${TICKET_COUNT} ticket(s) found"
+          kubectl get supporttickets 2>/dev/null
+        else
+          echo "  ⚠  No tickets yet (run 'task demo:seed')"
+        fi
+
+        echo ""
+        echo "── Messages ────────────────────────────────────────────"
+        MSG_COUNT=$(kubectl get supportmessages --no-headers 2>/dev/null | wc -l | tr -d ' ')
+        if [ "${MSG_COUNT}" -gt "0" ]; then
+          echo "  ✅ ${MSG_COUNT} message(s) found"
+        else
+          echo "  ⚠  No messages yet"
+        fi
+
+        echo ""
+        echo "── HTTPRoutes ──────────────────────────────────────────"
+        kubectl get httproutes --all-namespaces 2>/dev/null | grep -E "staff-portal|cloud-portal" | while read line; do
+          echo "  $line"
+        done
+
+        echo ""
+        if [ "$PASS" = "true" ]; then
+          echo "  ✅ Demo verification passed"
+        else
+          echo "  ❌ Demo verification failed — check 'task dev:logs' for details"
+        fi
+        echo ""
+
+  demo:logs:
+    desc: "Stream logs from all support demo components"
+    cmds:
+      - |
+        echo "Streaming logs (Ctrl-C to stop)..."
+        kubectl logs -f deployment/support-apiserver -n support-system &
+        PID1=$!
+        kubectl logs -f deployment/staff-portal 2>/dev/null &
+        PID2=$!
+        kubectl logs -f deployment/cloud-portal 2>/dev/null &
+        PID3=$!
+        trap "kill $PID1 $PID2 $PID3 2>/dev/null" EXIT
+        wait
 
   demo:print-urls:
     desc: "Print URLs for the demo"
@@ -345,18 +531,26 @@ tasks:
     cmds:
       - |
         echo ""
-        echo "═══════════════════════════════════════════════════"
-        echo "  Support Demo — Access URLs"
-        echo "═══════════════════════════════════════════════════"
+        echo "╔═══════════════════════════════════════════════════════════╗"
+        echo "║  Support Demo — Access URLs                               ║"
+        echo "╠═══════════════════════════════════════════════════════════╣"
+        echo "║                                                           ║"
+        echo "║  Staff Portal  →  https://staff.localhost:30443           ║"
+        echo "║  Cloud Portal  →  https://cloud.localhost:30443           ║"
+        echo "║  Support API   →  https://localhost:30443/apis/           ║"
+        echo "║                     support.miloapis.com/v1alpha1/        ║"
+        echo "║                                                           ║"
+        echo "╠═══════════════════════════════════════════════════════════╣"
+        echo "║  Add to /etc/hosts:                                       ║"
+        echo "║    127.0.0.1  staff.localhost cloud.localhost             ║"
+        echo "╠═══════════════════════════════════════════════════════════╣"
+        echo "║  Demo login (portal authentication):                      ║"
+        echo "║    Email:    demo@datum.net                               ║"
+        echo "║    Password: password                                     ║"
+        echo "╠═══════════════════════════════════════════════════════════╣"
+        echo "║  Quick checks:                                            ║"
+        echo "║    kubectl get supporttickets                             ║"
+        echo "║    kubectl get supportmessages                            ║"
+        echo "║    task demo:verify                                       ║"
+        echo "╚═══════════════════════════════════════════════════════════╝"
         echo ""
-        echo "  Staff Portal:   https://staff.localhost:30443"
-        echo "  Cloud Portal:   https://cloud.localhost:30443"
-        echo "  Support API:    https://localhost:30443/apis/support.miloapis.com/v1alpha1/"
-        echo ""
-        echo "  Add to /etc/hosts:"
-        echo "    127.0.0.1  staff.localhost cloud.localhost"
-        echo ""
-        echo "  Test the API directly:"
-        echo "    curl -sk https://localhost:30443/apis/support.miloapis.com/v1alpha1/supporttickets"
-        echo ""
-        echo "═══════════════════════════════════════════════════"
