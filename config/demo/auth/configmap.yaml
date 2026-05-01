@@ -5,7 +5,7 @@ metadata:
   namespace: auth-system
 data:
   config.yaml: |
-    issuer: http://dex.auth-system.svc.cluster.local:5556/dex
+    issuer: http://dex.auth-system.svc.cluster.local:5556/oidc/v1
 
     storage:
       type: memory

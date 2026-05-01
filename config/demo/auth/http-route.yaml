@@ -1,5 +1,9 @@
 ---
-# Route /dex/* to the Dex OIDC provider
+# Route /oidc/v1/* to the Dex OIDC provider.
+# Dex is configured with issuer http://dex.auth-system.svc.cluster.local:5556/oidc/v1
+# so it natively serves auth, token, userinfo etc. under /oidc/v1/.
+# This route lets the browser reach the authorization endpoint through the
+# external gateway while server-side calls go to Dex directly in-cluster.
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
@@ -13,36 +17,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /dex
-      backendRefs:
-        - name: dex
-          namespace: auth-system
-          port: 5556
----
-# Route /oidc/v1/userinfo → Dex userinfo endpoint.
-# The portals call AUTH_OIDC_ISSUER + "/oidc/v1/userinfo"; because that URL
-# starts with "/" Axios replaces the path on the origin, always landing at
-# https://localhost:30443/oidc/v1/userinfo regardless of the issuer path prefix.
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
-metadata:
-  name: dex-userinfo-compat
-  namespace: auth-system
-spec:
-  parentRefs:
-    - name: default-gateway
-      namespace: envoy-gateway-system
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /oidc/v1/userinfo
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /dex/userinfo
+            value: /oidc/v1
       backendRefs:
         - name: dex
           namespace: auth-system
