@@ -57,7 +57,7 @@ patches:
                   - name: APP_URL
                     value: "https://staff.localhost:30443"
                   - name: API_URL
-                    value: "https://localhost:30443"
+                    value: "http://envoy-merged-gateway-cf125385.envoy-gateway-system.svc.cluster.local:8080"
                   - name: OTEL_ENABLED
                     value: "false"
     target:
