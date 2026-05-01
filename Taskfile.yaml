@@ -227,17 +227,15 @@ tasks:
           git -C "${REPO_DIR}" pull origin main --quiet 2>/dev/null || true
         fi
 
-        # Run component install tasks from within test-infra so its REPO_DIR
-        # detection resolves to "." and KUBECONFIG_FILE resolves to "./kubeconfig"
-        # (which is the same file we wrote above).
-        # Use --dir so go-task finds test-infra's Taskfile rather than inheriting
-        # TASKFILE_DIR from the parent task process.
+        # Run component install tasks from within test-infra. We unset TASKFILE
+        # and TASKFILE_DIR in a subshell so go-task discovers test-infra's own
+        # Taskfile.yml rather than inheriting the parent process's env vars.
         echo "Installing Flux..."
-        task --dir "${REPO_DIR}" install-flux
+        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-flux)
         echo "Installing cert-manager..."
-        task --dir "${REPO_DIR}" install-cert-manager
+        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-cert-manager)
         echo "Installing Envoy Gateway..."
-        task --dir "${REPO_DIR}" install-envoy-gateway-operator
+        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-envoy-gateway-operator)
         echo "✅ Platform components ready"
 
   demo:deploy-auth:
