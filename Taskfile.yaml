@@ -227,15 +227,26 @@ tasks:
           git -C "${REPO_DIR}" pull origin main --quiet 2>/dev/null || true
         fi
 
-        # Run component install tasks from within test-infra. We unset TASKFILE
-        # and TASKFILE_DIR in a subshell so go-task discovers test-infra's own
-        # Taskfile.yml rather than inheriting the parent process's env vars.
+        # Install platform components directly via kustomize/kubectl rather than
+        # delegating to test-infra's task runner (go-task propagates TASKFILE env
+        # vars to child processes, causing the wrong Taskfile to be loaded).
+        WAIT="300s"
+
         echo "Installing Flux..."
-        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-flux)
+        kustomize build "${REPO_DIR}/components/flux" | kubectl apply -f -
+        kubectl -n flux-system wait deployment/{source-controller,helm-controller,kustomize-controller,notification-controller} --for=condition=Available --timeout="${WAIT}"
+        sleep 10
+
         echo "Installing cert-manager..."
-        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-cert-manager)
+        kustomize build "${REPO_DIR}/components/cert-manager" | kubectl apply -f -
+        kubectl -n cert-manager wait helmrelease/{cert-manager,cert-manager-csi-driver} --for=condition=Ready --timeout="${WAIT}"
+
         echo "Installing Envoy Gateway..."
-        (cd "${REPO_DIR}" && unset TASKFILE TASKFILE_DIR && task install-envoy-gateway-operator)
+        kustomize build "${REPO_DIR}/components/envoy-gateway-operator" | kubectl apply -f -
+        kubectl -n flux-system wait helmrelease/envoy-gateway --for=condition=Ready --timeout="${WAIT}"
+        kustomize build "${REPO_DIR}/components/envoy-gateway-operator/gateway-resources" | kubectl apply -f -
+        kubectl wait --for=condition=Programmed gateway/default-gateway -n envoy-gateway-system --timeout="${WAIT}" || true
+
         echo "✅ Platform components ready"
 
   demo:deploy-auth:
