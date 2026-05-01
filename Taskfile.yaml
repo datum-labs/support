@@ -219,12 +219,19 @@ tasks:
           echo "✅ KIND cluster '{{.CLUSTER_NAME}}' created"
         fi
 
-        # Clone or update test-infra for component installation scripts
-        if [ ! -d "${REPO_DIR}" ]; then
+        # Clone or update test-infra for component installation scripts.
+        # Check for .git/ not just the directory — a failed clone can leave an
+        # empty directory behind, causing the pull path to silently do nothing.
+        if [ ! -d "${REPO_DIR}/.git" ]; then
+          rm -rf "${REPO_DIR}"
           echo "Cloning test-infra..."
           git clone https://github.com/datum-cloud/test-infra.git "${REPO_DIR}"
         else
           git -C "${REPO_DIR}" pull origin main --quiet 2>/dev/null || true
+        fi
+        if [ ! -d "${REPO_DIR}/components" ]; then
+          echo "ERROR: test-infra clone is missing components/ — delete .test-infra/ and retry"
+          exit 1
         fi
 
         # Install platform components directly via kustomize/kubectl rather than
