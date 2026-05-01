@@ -2,7 +2,7 @@
 # BASE STAGE - Common dependencies and setup
 # ==========================================
 
-# syntax = docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
 # Use the latest Bun version
 FROM oven/bun:1.3.13 AS base
@@ -36,13 +36,15 @@ ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 # Install dependencies
 COPY --link package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
 
 # Copy application code
 COPY --link . .
 
 # Build application
-RUN bun run build && \
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun run build && \
     bun install --production --frozen-lockfile && \
     touch .env
 

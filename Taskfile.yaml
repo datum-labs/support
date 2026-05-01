@@ -348,7 +348,10 @@ tasks:
       - |
         set -e
         echo "Building staff-portal image..."
-        docker build -t ghcr.io/datum-cloud/staff-portal:demo "{{.STAFF_PORTAL_DIR}}"
+        docker build \
+          --cache-from ghcr.io/datum-cloud/staff-portal:demo \
+          -t ghcr.io/datum-cloud/staff-portal:demo \
+          "{{.STAFF_PORTAL_DIR}}"
         echo "Loading staff-portal image into kind cluster..."
         kind load docker-image ghcr.io/datum-cloud/staff-portal:demo --name {{.CLUSTER_NAME}}
         kubectl apply -k "{{.STAFF_PORTAL_DIR}}/config/demo/"
@@ -362,7 +365,10 @@ tasks:
     cmds:
       - |
         echo "Building cloud-portal image..."
-        if ! docker build -t ghcr.io/datum-cloud/cloud-portal:demo "{{.CLOUD_PORTAL_DIR}}"; then
+        if ! docker build \
+          --cache-from ghcr.io/datum-cloud/cloud-portal:demo \
+          -t ghcr.io/datum-cloud/cloud-portal:demo \
+          "{{.CLOUD_PORTAL_DIR}}"; then
           echo "⚠  cloud-portal build failed — skipping portal deployment."
           echo "   The staff portal and support API are still available."
           exit 0
