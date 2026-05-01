@@ -209,6 +209,7 @@ tasks:
         # Create kind cluster with our config — only maps port 30443, not 30000
         if kind get clusters 2>/dev/null | grep -q "^{{.CLUSTER_NAME}}$"; then
           echo "✅ KIND cluster '{{.CLUSTER_NAME}}' already exists"
+          kind export kubeconfig --name {{.CLUSTER_NAME}} --kubeconfig "${KUBECONFIG_PATH}"
         else
           echo "Creating kind cluster '{{.CLUSTER_NAME}}'..."
           kind create cluster \
