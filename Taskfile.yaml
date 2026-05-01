@@ -6,7 +6,7 @@ vars:
   IMAGE_TAG: "dev"
   CLUSTER_NAME: "support-test"
   KUBECONFIG_FILE: ".test-infra/kubeconfig"
-  MILO_DIR: "{{.TASKFILE_DIR}}/../../datum-cloud/milo"
+  MILO_DIR: "{{.TASKFILE_DIR}}/.milo"
   STAFF_PORTAL_DIR: "{{.TASKFILE_DIR}}/demo/staff-portal"
   CLOUD_PORTAL_DIR: "{{.TASKFILE_DIR}}/demo/cloud-portal"
 
@@ -317,11 +317,19 @@ tasks:
   demo:deploy-milo:
     desc: "Deploy Milo control plane to the demo cluster"
     silent: true
-    dir: "{{.MILO_DIR}}"
     cmds:
       - |
         set -e
         echo "Deploying Milo to demo cluster..."
+
+        # Clone Milo if not already cached
+        if [ ! -d "{{.MILO_DIR}}/.git" ]; then
+          rm -rf "{{.MILO_DIR}}"
+          echo "Cloning Milo..."
+          git clone https://github.com/datum-cloud/milo.git "{{.MILO_DIR}}"
+        fi
+
+        cd "{{.MILO_DIR}}"
 
         # test-infra's kubectl wrapper checks for .test-infra/kubeconfig relative
         # to its working dir (milo's dir). Copy our cluster's kubeconfig there.

@@ -60,5 +60,8 @@ observability/jsonnetfile.lock.json
 # Directory used for the test-infra repo to manage the test-infra environment.
 .test-infra
 
+# Cached Milo clone for the demo
+.milo
+
 # Directory used by the taskfile for remote taskfile storage
 .task
