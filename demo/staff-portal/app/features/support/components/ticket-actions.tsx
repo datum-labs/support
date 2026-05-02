@@ -5,19 +5,19 @@ import { toast } from '@datum-cloud/datum-ui/toast';
 import { t } from '@lingui/core/macro';
 import type { ComMiloApisSupportV1Alpha1SupportTicketSpec } from '@openapi/support.miloapis.com/v1alpha1';
 
-const STATUSES: Array<{ value: string; label: string }> = [
-  { value: 'open', label: t`Open` },
-  { value: 'in-progress', label: t`In Progress` },
-  { value: 'waiting-on-customer', label: t`Waiting on Customer` },
-  { value: 'resolved', label: t`Resolved` },
-  { value: 'closed', label: t`Closed` },
+const STATUSES: Array<{ value: string; label: () => string }> = [
+  { value: 'open', label: () => t`Open` },
+  { value: 'in-progress', label: () => t`In Progress` },
+  { value: 'waiting-on-customer', label: () => t`Waiting on Customer` },
+  { value: 'resolved', label: () => t`Resolved` },
+  { value: 'closed', label: () => t`Closed` },
 ];
 
-const PRIORITIES: Array<{ value: string; label: string }> = [
-  { value: 'low', label: t`Low` },
-  { value: 'medium', label: t`Medium` },
-  { value: 'high', label: t`High` },
-  { value: 'urgent', label: t`Urgent` },
+const PRIORITIES: Array<{ value: string; label: () => string }> = [
+  { value: 'low', label: () => t`Low` },
+  { value: 'medium', label: () => t`Medium` },
+  { value: 'high', label: () => t`High` },
+  { value: 'urgent', label: () => t`Urgent` },
 ];
 
 export function TicketActions({ ticketName }: { ticketName: string }) {
@@ -50,7 +50,7 @@ export function TicketActions({ ticketName }: { ticketName: string }) {
             <SelectContent>
               {STATUSES.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
-                  {s.label}
+                  {s.label()}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -68,7 +68,7 @@ export function TicketActions({ ticketName }: { ticketName: string }) {
             <SelectContent>
               {PRIORITIES.map((p) => (
                 <SelectItem key={p.value} value={p.value}>
-                  {p.label}
+                  {p.label()}
                 </SelectItem>
               ))}
             </SelectContent>

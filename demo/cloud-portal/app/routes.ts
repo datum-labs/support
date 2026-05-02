@@ -74,6 +74,16 @@ export default [
           route('activity', 'routes/org/detail/settings/activity.tsx'),
           // route('policy-bindings', 'routes/org/detail/settings/policy-bindings.tsx'),
         ]),
+
+        // Support tickets
+        route('support', 'routes/org/detail/support/layout.tsx', [
+          index('routes/org/detail/support/index.tsx'),
+          route('new', 'routes/org/detail/support/new.tsx'),
+          route(':ticketName', 'routes/org/detail/support/$ticketName/layout.tsx', [
+            index('routes/org/detail/support/$ticketName/index.tsx'),
+            route('messages', 'routes/org/detail/support/$ticketName/messages.tsx'),
+          ]),
+        ]),
       ]),
     ]),
 

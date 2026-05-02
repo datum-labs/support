@@ -116,6 +116,13 @@ export const activityRoutes = {
   },
 } as const;
 
+// Support feature routes
+export const supportRoutes = {
+  list: () => '/support',
+  detail: (ticketName: string) => `/support/${ticketName}`,
+  messages: (ticketName: string) => `/support/${ticketName}/messages`,
+} as const;
+
 // Profile feature routes
 export const profileRoutes = {
   settings: () => '/profile/settings',
@@ -144,4 +151,5 @@ export const routes = {
   contactGroups: contactGroupRoutes,
   fraud: fraudRoutes,
   activity: activityRoutes,
+  support: supportRoutes,
 } as const;

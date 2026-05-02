@@ -21,7 +21,12 @@ const isProdEnv = process.env.NODE_ENV === 'production';
 // Zod v4: z.url() is now a top-level schema instead of z.string().url()
 const urlSchema = (testDefault: string) => (isTestEnv ? z.url().default(testDefault) : z.url());
 
-const urlSchemaOptional = () => z.url().optional();
+const urlSchemaOptional = () =>
+  z
+    .string()
+    .optional()
+    .transform((v) => (v === '' ? undefined : v))
+    .pipe(z.url().optional());
 
 // ═══════════════════════════════════════════════════════════
 // SCHEMAS (Zod v4)
@@ -52,6 +57,7 @@ const publicSchema = z.object({
   // Required: Authentication
   // ─────────────────────────────────────────────────────────
   AUTH_OIDC_ISSUER: urlSchema('http://localhost:8080'),
+  AUTH_OIDC_AUTHORIZATION_ENDPOINT: urlSchemaOptional(),
   AUTH_ZITADEL_PROJECT_ID: z.string().optional(),
 
   // ─────────────────────────────────────────────────────────
@@ -69,7 +75,7 @@ const publicSchema = z.object({
   // Optional: Analytics & Support (graceful degradation)
   // ─────────────────────────────────────────────────────────
   FATHOM_ID: z.string().optional(),
-  HELPSCOUT_BEACON_ID: isProdEnv ? z.string().min(1) : z.string().optional(),
+  HELPSCOUT_BEACON_ID: z.string().optional(),
 
   // ─────────────────────────────────────────────────────────
   // Optional: Feature Flags
@@ -107,12 +113,10 @@ const serverSchema = z.object({
   // ─────────────────────────────────────────────────────────
   // Required: Feature Services
   // ─────────────────────────────────────────────────────────
-  PROMETHEUS_URL: urlSchema('http://localhost:9090'),
-  CLOUDVALID_API_URL: urlSchema('http://localhost:8081'),
-  CLOUDVALID_API_KEY: isTestEnv ? z.string().default('test-cloudvalid-api-key') : z.string().min(1),
-  CLOUDVALID_TEMPLATE_ID: isTestEnv
-    ? z.string().default('test-cloudvalid-template-id')
-    : z.string().min(1),
+  PROMETHEUS_URL: urlSchemaOptional(),
+  CLOUDVALID_API_URL: urlSchemaOptional(),
+  CLOUDVALID_API_KEY: z.string().optional(),
+  CLOUDVALID_TEMPLATE_ID: z.string().optional(),
 
   // ─────────────────────────────────────────────────────────
   // Optional: Observability (graceful degradation)
@@ -124,7 +128,7 @@ const serverSchema = z.object({
   // Optional: External Integrations (graceful degradation)
   // ─────────────────────────────────────────────────────────
   GRAFANA_URL: urlSchemaOptional(),
-  HELPSCOUT_SECRET_KEY: isProdEnv ? z.string().min(1) : z.string().optional(),
+  HELPSCOUT_SECRET_KEY: z.string().optional(),
 
   // ─────────────────────────────────────────────────────────
   // Optional: AI Assistant
@@ -173,6 +177,7 @@ export const env: Env = {
     apiUrl: data.API_URL,
     graphqlUrl: data.GRAPHQL_URL,
     authOidcIssuer: data.AUTH_OIDC_ISSUER,
+    authOidcAuthorizationEndpoint: data.AUTH_OIDC_AUTHORIZATION_ENDPOINT,
     authZitadelProjectId: data.AUTH_ZITADEL_PROJECT_ID,
     sentryDsn: data.SENTRY_DSN,
     sentryEnv: data.SENTRY_ENV,

@@ -59,7 +59,7 @@ export class CustomAuthenticator extends Authenticator<ISession> {
     return {
       sub: session.data?.sub ?? '',
       idToken: idToken.data?.idToken ?? '',
-      accessToken: session.data?.accessToken ?? '',
+      accessToken: process.env.DEMO_TOKEN || session.data?.accessToken || '',
       refreshToken: session.data?.refreshToken ?? null,
       expiredAt: session.data?.expiredAt ?? new Date(),
       headers: combineHeaders(session.headers, idToken.headers),

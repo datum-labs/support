@@ -32,12 +32,15 @@ graphqlRoutes.all('/:scopeType/:scopeId', async (c) => {
       controller.abort();
     });
 
+    // In demo mode, use the static DEMO_TOKEN so client-side proxy calls
+    // reach the Milo API with a token it accepts.
+    const bearerToken = process.env.DEMO_TOKEN || session.accessToken;
     const browserUA = c.req.header('User-Agent');
     const response = await fetch(targetUrl, {
       method: c.req.method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${bearerToken}`,
         'X-Request-ID': c.get('requestId') ?? '',
         // Propagate Sentry trace headers so portal and gateway spans stitch
         // into the same trace in Sentry.
@@ -83,12 +86,15 @@ graphqlRoutes.all('/', async (c) => {
       controller.abort();
     });
 
+    // In demo mode, use the static DEMO_TOKEN so client-side proxy calls
+    // reach the Milo API with a token it accepts.
+    const globalBearerToken = process.env.DEMO_TOKEN || session.accessToken;
     const browserUA = c.req.header('User-Agent');
     const response = await fetch(targetUrl, {
       method: c.req.method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${globalBearerToken}`,
         'X-Request-ID': c.get('requestId') ?? '',
         ...(c.req.header('sentry-trace') ? { 'sentry-trace': c.req.header('sentry-trace')! } : {}),
         ...(c.req.header('baggage') ? { baggage: c.req.header('baggage')! } : {}),

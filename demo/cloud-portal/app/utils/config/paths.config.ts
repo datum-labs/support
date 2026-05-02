@@ -58,6 +58,12 @@ export const paths = {
         quotas: '/org/[orgId]/quotas',
         activity: '/org/[orgId]/activity',
       },
+      support: {
+        root: '/org/[orgId]/support',
+        new: '/org/[orgId]/support/new',
+        detail: '/org/[orgId]/support/[ticketName]',
+        messages: '/org/[orgId]/support/[ticketName]/messages',
+      },
     },
   },
   project: {

@@ -57,11 +57,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Decode Access token to get sub
     const decoded = jwtDecode<{ sub: string; email: string }>(rest.accessToken);
 
+    // Dex encodes the subject as base64url(protobuf({connector_id, user_id})).
+    // Milo user names use the raw UUID from the Dex static-password config.
+    // Decode the protobuf sub to extract the original UUID so all downstream
+    // Milo API calls can resolve the user by name.
+    function resolveMiloUserId(sub: string): string {
+      if (/^[0-9a-f-]{36}$/i.test(sub)) return sub;
+      try {
+        const bytes = Buffer.from(sub, 'base64url');
+        if (bytes[0] === 0x0a) {
+          const len = bytes[1];
+          const userId = bytes.slice(2, 2 + len).toString('utf8');
+          if (userId) return userId;
+        }
+      } catch {
+        // fall through
+      }
+      return sub;
+    }
+    const miloUserId = resolveMiloUserId(decoded.sub);
+
     // Handle access token session (short-lived cookie)
     const sessionHeaders = await AuthService.setSession(cookieHeader, {
       accessToken: rest.accessToken,
       expiredAt: rest.expiredAt,
-      sub: decoded.sub,
+      sub: miloUserId,  // Store the resolved Milo user ID (raw UUID), not the Dex sub
     });
 
     // Handle refresh token (long-lived cookie) - SEPARATE from session

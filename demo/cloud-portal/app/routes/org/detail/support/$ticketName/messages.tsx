@@ -1,11 +1,10 @@
-import { useMessages, useCreateMessage, createMessageSchema, type CreateMessageInput } from '@/resources/support';
+import { useMessages, useCreateMessage } from '@/resources/support';
 import { useApp } from '@/providers/app.provider';
 import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
-import { Button } from '@datum-cloud/datum-ui/button';
-import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { cn } from '@datum-cloud/datum-ui/utils';
 import { MetaFunction, useParams } from 'react-router';
+import { useState } from 'react';
 
 export const handle = {
   breadcrumb: () => <span>Messages</span>,
@@ -20,6 +19,9 @@ export default function TicketMessagesPage() {
   const { data: messages = [], isLoading } = useMessages(ticketName ?? '');
   const createMessage = useCreateMessage(ticketName ?? '');
 
+  const [body, setBody] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
   const authorRef = {
     name: user?.sub ?? user?.email ?? 'customer',
     displayName:
@@ -27,12 +29,21 @@ export default function TicketMessagesPage() {
       ([user?.givenName, user?.familyName].filter(Boolean).join(' ') || undefined),
   };
 
-  const handleSubmit = async (values: CreateMessageInput) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!body.trim()) {
+      toast.error('Message cannot be empty');
+      return;
+    }
+    setSubmitting(true);
     try {
-      await createMessage.mutateAsync({ body: values.body, authorRef });
+      await createMessage.mutateAsync({ body: body.trim(), authorRef });
       toast.success('Reply sent');
+      setBody('');
     } catch {
       toast.error('Failed to send reply');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -80,40 +91,21 @@ export default function TicketMessagesPage() {
       )}
 
       <div className="border-t pt-4">
-        <Form
-          schema={createMessageSchema}
-          defaultValues={{ body: '' }}
-          onSubmit={handleSubmit}
-          className="space-y-3">
-          {({ form }) => (
-            <>
-              <Form.Field
-                control={form.control}
-                name="body"
-                render={({ field }) => (
-                  <Form.Item>
-                    <Form.Control>
-                      <textarea
-                        {...field}
-                        rows={4}
-                        placeholder="Write a reply..."
-                        className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
-                      />
-                    </Form.Control>
-                    <Form.Message />
-                  </Form.Item>
-                )}
-              />
-              <Button
-                type="primary"
-                theme="solid"
-                htmlType="submit"
-                loading={createMessage.isPending}>
-                Send reply
-              </Button>
-            </>
-          )}
-        </Form>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
+            placeholder="Write a reply..."
+            className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+          />
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50">
+            {submitting ? 'Sending...' : 'Send reply'}
+          </button>
+        </form>
       </div>
     </div>
   );

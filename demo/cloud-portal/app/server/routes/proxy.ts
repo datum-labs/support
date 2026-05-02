@@ -35,8 +35,12 @@ proxyRoutes.all('/*', async (c) => {
     // Resolve the real client IP from X-Forwarded-For set by Envoy Gateway.
     const clientIP = c.req.header('X-Forwarded-For')?.split(',')[0]?.trim();
 
+    // In demo mode, use the static DEMO_TOKEN so client-side proxy calls
+    // reach the Milo API with a token it accepts (Milo uses static token auth,
+    // not OIDC, in this environment).
+    const bearerToken = process.env.DEMO_TOKEN || session.accessToken;
     const upstreamHeaders: Record<string, string> = {
-      Authorization: `Bearer ${session.accessToken}`,
+      Authorization: `Bearer ${bearerToken}`,
       'Content-Type': c.req.header('Content-Type') ?? 'application/json',
       'X-Request-ID': c.get('requestId'),
     };

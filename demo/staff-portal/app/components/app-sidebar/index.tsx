@@ -11,6 +11,7 @@ import {
   orgRoutes,
   projectRoutes,
   routes,
+  supportRoutes,
   userRoutes,
 } from '@/utils/config/routes.config';
 import {
@@ -41,6 +42,7 @@ import {
   Contact,
   Home,
   LucideIcon,
+  LifeBuoy,
   MailSearch,
   ShieldAlert,
   ShieldUser,
@@ -153,6 +155,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t`Fraud & Abuse`,
       href: fraudRoutes.root(),
       icon: ShieldAlert,
+      hasSubmenu: false,
+    },
+    {
+      title: t`Support`,
+      href: supportRoutes.list(),
+      icon: LifeBuoy,
       hasSubmenu: false,
     },
   ];

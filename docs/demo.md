@@ -122,7 +122,7 @@ kubectl get supportmessages
 
 ## Seed data
 
-`task demo:seed` creates two demo tickets and two messages:
+`task demo:seed` creates two demo tickets, two messages, a Milo `User` resource for the demo account, a `GroupMembership` linking that user to the support staff group, and an `OrganizationMembership` for `demo-org`:
 
 | Name | Title | Status | Priority |
 |------|-------|--------|----------|
@@ -130,6 +130,8 @@ kubectl get supportmessages
 | `demo-ticket-002` | Billing invoice shows incorrect amount | in-progress | medium |
 
 `demo-ticket-001` has one public reply and one internal staff note (the internal note is visible in the Staff Portal, hidden in the Cloud Portal).
+
+The `OrganizationMembership` is required so the Cloud Portal's organization list shows `demo-org` after login.
 
 ---
 
@@ -154,12 +156,36 @@ task demo:down
 
 ---
 
+## Architecture notes
+
+### Authentication
+
+The portals use Dex as the OIDC provider. The Dex issuer runs at the in-cluster URL `http://dex.auth-system.svc.cluster.local:5556/oidc/v1` (used for server-side token validation), but the browser is redirected to the Envoy Gateway URL for the authorization endpoint (`https://{staff,cloud}.localhost:30443/oidc/v1/auth`). This is configured via `AUTH_OIDC_AUTHORIZATION_ENDPOINT` in each portal's `.env.demo`.
+
+### DEMO_TOKEN
+
+Both portals inject `DEMO_TOKEN=test-admin-token` as the Bearer token for all Milo and Support API calls. The demo cluster's Milo API server runs in static-token mode and accepts only two tokens:
+
+| Token | Identity |
+|-------|----------|
+| `test-admin-token` | `system:masters` |
+| `test-user-token` | `system:authenticated` |
+
+Dex access tokens are not accepted by the Milo API server in demo mode; the DEMO_TOKEN is the workaround.
+
+### Support API RBAC
+
+The support API server does not issue tokens in demo mode — all requests arrive as `system:unauthenticated`. The seed step grants `system:unauthenticated` the `support-admin` ClusterRole so both portals can read and write `SupportTicket` and `SupportMessage` resources without authentication errors.
+
+---
+
 ## Troubleshooting
 
 **Portal login fails / OIDC error**
 - Verify Dex is running: `kubectl get pods -n auth-system`
 - Check Dex logs: `kubectl logs deployment/dex -n auth-system`
-- Confirm the OIDC issuer in `.env.demo` matches: `AUTH_OIDC_ISSUER=https://localhost:30443/dex`
+- Confirm the OIDC issuer in `.env.demo` is the internal cluster URL: `AUTH_OIDC_ISSUER=http://dex.auth-system.svc.cluster.local:5556/oidc/v1`
+- Confirm the authorization endpoint override is set to the Envoy Gateway URL: `AUTH_OIDC_AUTHORIZATION_ENDPOINT=https://{staff,cloud}.localhost:30443/oidc/v1/auth`
 - Redeploy the portal after changing env files: `task demo:deploy-staff-portal`
 - Verify Milo is running: `kubectl get pods -n milo-system`
 

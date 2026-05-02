@@ -17,6 +17,7 @@ export interface PublicEnv {
 
   // Required: Authentication
   authOidcIssuer: string;
+  authOidcAuthorizationEndpoint?: string;
   authZitadelProjectId?: string;
 
   // Optional: Observability
@@ -49,11 +50,11 @@ export interface ServerEnv {
   sessionSecret: string;
   authOidcClientId: string;
 
-  // Required: Feature Services
-  prometheusUrl: string;
-  cloudvalidApiUrl: string;
-  cloudvalidApiKey: string;
-  cloudvalidTemplateId: string;
+  // Optional: Feature Services
+  prometheusUrl?: string;
+  cloudvalidApiUrl?: string;
+  cloudvalidApiKey?: string;
+  cloudvalidTemplateId?: string;
 
   // Optional: Observability
   otelExporterEndpoint?: string;

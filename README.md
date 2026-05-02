@@ -15,6 +15,32 @@ kubectl get supportmessages
 kubectl get supportticket demo-ticket-001 -o yaml
 ```
 
+## Demo
+
+Run the full local demo with a single command (requires Docker, kind, task):
+
+```sh
+task demo:up
+```
+
+This starts a kind cluster, deploys Milo, Dex (OIDC), the support API server, both portals, and seeds demo data. See [docs/demo.md](docs/demo.md) for the complete setup guide.
+
+**Demo credentials:** `demo@datum.net` / `password`
+
+### Staff Portal — ticket list (`https://staff.localhost:30443/support`)
+
+![Ticket list](docs/screenshots/readme-01-ticket-list.png)
+
+### Staff Portal — ticket detail
+
+![Ticket detail](docs/screenshots/readme-02-ticket-detail.png)
+
+### Cloud Portal — ticket messages (`https://cloud.localhost:30443`)
+
+![Ticket messages](docs/screenshots/readme-03-ticket-messages.png)
+
+---
+
 ## Development
 
 ### Prerequisites

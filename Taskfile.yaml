@@ -190,6 +190,7 @@ tasks:
       - task: dev:build
       - task: dev:load-image
       - task: dev:deploy
+      - task: demo:register-support-api
       - task: demo:deploy-staff-portal
       - task: demo:deploy-cloud-portal
       - task: demo:seed
@@ -341,6 +342,35 @@ tasks:
         TASK_X_REMOTE_TASKFILES=1 task dev:deploy
         echo "✅ Milo deployed"
 
+  demo:register-support-api:
+    desc: "Register the support API server as an aggregated APIService in the Milo cluster"
+    silent: true
+    cmds:
+      - |
+        set -e
+        MILO_KUBECONFIG="{{.MILO_DIR}}/.milo/kubeconfig"
+        echo "Registering support APIService in Milo cluster..."
+        kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
+        apiVersion: apiregistration.k8s.io/v1
+        kind: APIService
+        metadata:
+          name: v1alpha1.support.miloapis.com
+        spec:
+          service:
+            name: support-apiserver
+            namespace: support-system
+            port: 443
+          group: support.miloapis.com
+          version: v1alpha1
+          insecureSkipTLSVerify: true
+          groupPriorityMinimum: 1000
+          versionPriority: 15
+        EOF
+        kubectl --kubeconfig "${MILO_KUBECONFIG}" wait \
+          --for=jsonpath='{.status.conditions[?(@.type=="Available")].status}=True' \
+          apiservice/v1alpha1.support.miloapis.com --timeout=60s 2>/dev/null || true
+        echo "✅ Support APIService registered in Milo cluster"
+
   demo:deploy-staff-portal:
     desc: "Build, load, and deploy the staff portal (demo overlay) to the demo cluster"
     silent: true
@@ -487,10 +517,23 @@ tasks:
           internal: true
         EOF
 
-        # Grant demo user staff access via Milo IAM
-        kubectl create namespace milo-system --dry-run=client -o yaml | kubectl apply -f -
+        # Grant demo user staff access via Milo IAM (uses Milo cluster kubeconfig)
+        MILO_KUBECONFIG="{{.MILO_DIR}}/.milo/kubeconfig"
 
-        kubectl apply -f - <<'EOF'
+        # Create demo user in Milo using the Dex userID as the name
+        # demo@datum.net has Dex userID: 08a8684b-db88-4b73-90a9-3cd1661f5466
+        kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
+        apiVersion: iam.miloapis.com/v1alpha1
+        kind: User
+        metadata:
+          name: 08a8684b-db88-4b73-90a9-3cd1661f5466
+        spec:
+          email: demo@datum.net
+          givenName: Demo
+          familyName: User
+        EOF
+
+        kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
         apiVersion: iam.miloapis.com/v1alpha1
         kind: Group
         metadata:
@@ -498,7 +541,7 @@ tasks:
           namespace: milo-system
         EOF
 
-        kubectl apply -f - <<'EOF'
+        kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
         apiVersion: iam.miloapis.com/v1alpha1
         kind: GroupMembership
         metadata:
@@ -509,8 +552,8 @@ tasks:
             name: staff-users
             namespace: milo-system
           userRef:
-            # demo@datum.net (Dex userID 08a8684b-... + Milo "local" cluster tag)
-            name: CiQwOGE4Njg0Yi1kYjg4LTRiNzMtOTBhOS0zY2QxNjYxZjU0NjYSBWxvY2Fs
+            # demo@datum.net (Dex userID used as Milo user name)
+            name: 08a8684b-db88-4b73-90a9-3cd1661f5466
         EOF
 
         echo "✅ Demo data seeded"

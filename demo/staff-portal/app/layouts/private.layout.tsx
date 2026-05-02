@@ -34,27 +34,39 @@ export async function loader({ request }: Route.LoaderArgs) {
   const token = session?.accessToken ?? '';
   const userId = session?.sub ?? '';
 
-  // Check staff group membership before allowing access.
-  // 401/403 means the user lacks permission to list memberships — not staff.
-  // Other errors (network, 500) are re-thrown so they surface properly.
-  let isStaff = false;
-  try {
-    const memberships = await userGroupMembershipsQuery(token, userId);
-    isStaff = memberships.some((m) => m.spec?.groupRef?.name === env.staffGroupName);
-  } catch (error) {
-    if (error instanceof Response && (error.status === 401 || error.status === 403)) {
-      isStaff = false;
-    } else {
-      throw error;
+  // In demo mode (DEMO_TOKEN set), bypass group membership check — the
+  // static token already grants admin access and the Dex sub may not match
+  // Milo user names when using the local password connector.
+  let isStaff = !!process.env.DEMO_TOKEN;
+  if (!isStaff) {
+    // Check staff group membership before allowing access.
+    // 401/403 means the user lacks permission to list memberships — not staff.
+    // Other errors (network, 500) are re-thrown so they surface properly.
+    try {
+      const memberships = await userGroupMembershipsQuery(token, userId);
+      isStaff = memberships.some((m) => m.spec?.groupRef?.name === env.staffGroupName);
+    } catch (error) {
+      if (error instanceof Response && (error.status === 401 || error.status === 403)) {
+        isStaff = false;
+      } else {
+        throw error;
+      }
     }
   }
   if (!isStaff) {
     return redirect('/error/unauthorized');
   }
 
-  const user = await userDetailQuery(token, userId);
+  // In demo mode, look up user by the raw Dex userID embedded in the sub, or
+  // fall back gracefully when the user object doesn't exist.
+  let user = null;
+  try {
+    user = await userDetailQuery(token, userId);
+  } catch (error) {
+    // Non-fatal: user details are optional for the portal to function
+  }
 
-  return data({ user });
+  return data({ user: user ?? null });
 }
 
 export default function PrivateLayout() {

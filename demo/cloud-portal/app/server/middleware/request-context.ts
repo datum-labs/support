@@ -16,7 +16,7 @@ export function requestContextMiddleware() {
     return withRequestContext(
       {
         requestId,
-        token: session?.accessToken ?? '',
+        token: process.env.DEMO_TOKEN || session?.accessToken || '',
         userId: session?.sub ?? '',
         userAgent: c.req.header('User-Agent') || undefined,
       },

@@ -42,7 +42,11 @@ export function authMiddleware() {
         throw new AuthenticationError('No access token available', reqId);
       }
 
-      c.set('token', session.accessToken);
+      // In demo mode, use the static DEMO_TOKEN so client-side proxy calls
+      // reach the Milo/support API with a token it accepts (the API uses static
+      // token auth, not OIDC, in this environment).
+      const effectiveToken = process.env.DEMO_TOKEN || session.accessToken;
+      c.set('token', effectiveToken);
       c.set('userId', session.sub);
 
       await next();

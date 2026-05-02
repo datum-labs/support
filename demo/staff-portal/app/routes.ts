@@ -149,6 +149,15 @@ export default [
       route('sessions', 'routes/profile/session.tsx'),
     ]),
 
+    // Support
+    route('support', 'routes/support/layout.tsx', [
+      index('routes/support/index.tsx'),
+      route(':ticketName', 'routes/support/$ticketName/layout.tsx', [
+        index('routes/support/$ticketName/index.tsx'),
+        route('messages', 'routes/support/$ticketName/messages.tsx'),
+      ]),
+    ]),
+
     route('demo', 'routes/demo.tsx'),
     route('test-sentry', 'routes/test-sentry.tsx'),
   ]),
