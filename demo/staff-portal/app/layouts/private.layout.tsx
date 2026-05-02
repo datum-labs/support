@@ -57,13 +57,15 @@ export async function loader({ request }: Route.LoaderArgs) {
     return redirect('/error/unauthorized');
   }
 
-  // In demo mode, look up user by the raw Dex userID embedded in the sub, or
-  // fall back gracefully when the user object doesn't exist.
+  // Skip the IAM user lookup in demo mode — the Dex sub doesn't correspond
+  // to a Milo IAM user record, so the call always 404s and pollutes the logs.
   let user = null;
-  try {
-    user = await userDetailQuery(token, userId);
-  } catch (error) {
-    // Non-fatal: user details are optional for the portal to function
+  if (!process.env.DEMO_TOKEN) {
+    try {
+      user = await userDetailQuery(token, userId);
+    } catch {
+      // Non-fatal: user details are optional for the portal to function
+    }
   }
 
   return data({ user: user ?? null });

@@ -15,6 +15,7 @@ export interface PublicEnv {
   CHATBOT_ENABLED?: boolean;
   MCP_ENABLED?: boolean;
   FRAUD_ENABLED?: boolean;
+  ACTIVITY_ENABLED?: boolean;
 }
 
 export function useEnv(): PublicEnv | undefined {

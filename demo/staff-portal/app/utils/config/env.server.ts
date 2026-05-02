@@ -41,6 +41,7 @@ const envSchema = z.object({
 
   // Feature flags
   FRAUD_ENABLED: z.string().default('true'),
+  ACTIVITY_ENABLED: z.string().default('true'),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -90,4 +91,5 @@ export const env = {
   mcpApiKey: parsedEnv.MCP_API_KEY,
   staffGroupName: parsedEnv.STAFF_GROUP_NAME,
   fraudEnabled: toBoolean(parsedEnv.FRAUD_ENABLED) !== false,
+  activityEnabled: toBoolean(parsedEnv.ACTIVITY_ENABLED) !== false,
 };

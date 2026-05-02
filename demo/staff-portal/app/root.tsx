@@ -55,6 +55,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         CHATBOT_ENABLED: env.chatbotEnabled,
         MCP_ENABLED: !!(env.mcpUrl && env.mcpApiKey),
         FRAUD_ENABLED: env.fraudEnabled,
+        ACTIVITY_ENABLED: env.activityEnabled,
       } satisfies PublicEnv,
     },
     { headers: { 'Set-Cookie': cookie } }

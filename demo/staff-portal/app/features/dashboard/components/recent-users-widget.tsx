@@ -1,6 +1,7 @@
 import { DateTime } from '@/components/date';
 import { DisplayName } from '@/components/display';
 import { activityListQuery } from '@/resources/request/client';
+import { useEnv } from '@/hooks/use-env';
 import { userRoutes } from '@/utils/config/routes.config';
 import { Avatar, AvatarFallback } from '@datum-cloud/datum-ui/avatar';
 import { Button } from '@datum-cloud/datum-ui/button';
@@ -63,10 +64,13 @@ function EmptyState() {
 }
 
 export function RecentUsersWidget() {
+  const env = useEnv();
+  const activityEnabled = env?.ACTIVITY_ENABLED !== false;
   const navigate = useNavigate();
 
   const { data: userListData, isLoading } = useQuery({
     queryKey: ['users', 'recent'],
+    enabled: activityEnabled,
     queryFn: () =>
       activityListQuery('users', undefined, {
         filters: {

@@ -62,6 +62,8 @@ patches:
                     value: "false"
                   - name: FRAUD_ENABLED
                     value: "false"
+                  - name: ACTIVITY_ENABLED
+                    value: "false"
     target:
       kind: Deployment
       name: staff-portal
