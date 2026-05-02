@@ -46,9 +46,12 @@ export default function Page() {
     queryFn: () => projectListQuery({ limit: 1 }),
   });
 
+  const fraudEnabled = env?.FRAUD_ENABLED !== false;
+
   const fraudCount = useResourceCount({
     queryKey: ['dashboard', 'kpi', 'fraud-evaluations'],
     queryFn: () => listFraudEvaluations({ limit: 1 }),
+    enabled: fraudEnabled,
   });
 
   return (
@@ -79,14 +82,16 @@ export default function Page() {
           isError={projectCount.isError}
           href={projectRoutes.list()}
         />
-        <KpiCounterCard
-          label={<Trans>Fraud Evaluations</Trans>}
-          icon={<ShieldAlert size={16} />}
-          count={fraudCount.count}
-          isLoading={fraudCount.isLoading}
-          isError={fraudCount.isError}
-          href={fraudRoutes.evaluations.list()}
-        />
+        {fraudEnabled && (
+          <KpiCounterCard
+            label={<Trans>Fraud Evaluations</Trans>}
+            icon={<ShieldAlert size={16} />}
+            count={fraudCount.count}
+            isLoading={fraudCount.isLoading}
+            isError={fraudCount.isError}
+            href={fraudRoutes.evaluations.list()}
+          />
+        )}
       </div>
 
       {/* Row 2: Cluster health (requires MCP) */}
@@ -94,7 +99,7 @@ export default function Page() {
 
       {/* Row 3: Alert widgets */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <FraudAlertsWidget />
+        {fraudEnabled && <FraudAlertsWidget />}
         <PendingApprovalsWidget />
       </div>
 

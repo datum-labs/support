@@ -38,6 +38,9 @@ const envSchema = z.object({
 
   // Staff access control
   STAFF_GROUP_NAME: z.string().default('staff-users'),
+
+  // Feature flags
+  FRAUD_ENABLED: z.string().default('true'),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -86,4 +89,5 @@ export const env = {
   mcpUrl: parsedEnv.MCP_URL,
   mcpApiKey: parsedEnv.MCP_API_KEY,
   staffGroupName: parsedEnv.STAFF_GROUP_NAME,
+  fraudEnabled: toBoolean(parsedEnv.FRAUD_ENABLED) !== false,
 };

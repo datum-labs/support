@@ -60,6 +60,8 @@ patches:
                     value: "http://envoy-merged-gateway-cf125385.envoy-gateway-system.svc.cluster.local:8080"
                   - name: OTEL_ENABLED
                     value: "false"
+                  - name: FRAUD_ENABLED
+                    value: "false"
     target:
       kind: Deployment
       name: staff-portal

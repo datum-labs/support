@@ -1,4 +1,5 @@
 import { listFraudEvaluations, userGetQuery } from '@/resources/request/client';
+import { useEnv } from '@/hooks/use-env';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
@@ -20,10 +21,14 @@ interface UseFraudAlertsWidgetResult {
 }
 
 export function useFraudAlertsWidget(): UseFraudAlertsWidgetResult {
+  const env = useEnv();
+  const enabled = env?.FRAUD_ENABLED !== false;
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['dashboard', 'fraud-alerts'],
+    enabled,
     queryFn: () => listFraudEvaluations({ limit: 100 }),
-    refetchInterval: 60_000,
+    refetchInterval: enabled ? 60_000 : false,
     staleTime: 30 * 1000,
   });
 

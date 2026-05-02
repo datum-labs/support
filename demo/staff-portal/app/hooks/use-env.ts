@@ -14,6 +14,7 @@ export interface PublicEnv {
   CLOUD_PORTAL_URL?: string;
   CHATBOT_ENABLED?: boolean;
   MCP_ENABLED?: boolean;
+  FRAUD_ENABLED?: boolean;
 }
 
 export function useEnv(): PublicEnv | undefined {

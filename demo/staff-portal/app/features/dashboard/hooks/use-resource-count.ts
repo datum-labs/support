@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 interface UseResourceCountOptions {
   queryKey: readonly unknown[];
+  enabled?: boolean;
   /** Async function that calls a list API with limit=1 and returns the list response object */
   queryFn: () => Promise<
     | {
@@ -22,6 +23,7 @@ interface UseResourceCountResult {
 export function useResourceCount(options: UseResourceCountOptions): UseResourceCountResult {
   const { data, isLoading, isError } = useQuery({
     queryKey: options.queryKey,
+    enabled: options.enabled !== false,
     queryFn: async () => {
       const result = await options.queryFn();
       const items = result?.items ?? [];
