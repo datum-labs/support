@@ -6,6 +6,7 @@ import { graphqlRoutes } from './graphql';
 import { permissionsRoutes } from './permissions';
 import { prometheusRoutes } from './prometheus';
 import { proxyRoutes } from './proxy';
+import { uploadRoutes } from './upload';
 import { userRoutes } from './user';
 import { watchRoutes } from './watch';
 import { authGuardMiddleware } from '@/server/middleware/auth';
@@ -44,6 +45,7 @@ export function createApiApp() {
   api.route('/permissions', permissionsRoutes);
   api.route('/user', userRoutes);
   api.route('/watch', watchRoutes);
+  api.route('/uploads', uploadRoutes);
   api.use('/assistant/*', rateLimiter(RateLimitPresets.assistant));
   api.route('/assistant', assistantRoutes);
 

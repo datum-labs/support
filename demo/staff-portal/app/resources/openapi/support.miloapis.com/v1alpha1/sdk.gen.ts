@@ -105,3 +105,15 @@ export const createSupportMiloapisComV1Alpha1SupportMessage = async (
   );
   return unwrap<ComMiloApisSupportV1Alpha1SupportMessage>(response);
 };
+
+export const patchSupportMiloapisComV1Alpha1SupportMessage = async (
+  name: string,
+  patch: Partial<{ spec: Partial<ComMiloApisSupportV1Alpha1SupportMessage['spec']> }>
+) => {
+  const response = await httpClient.patch<ProxyResponse<ComMiloApisSupportV1Alpha1SupportMessage>>(
+    `${BASE}/supportmessages/${name}`,
+    patch,
+    { params: { fieldManager: 'datum-staff-portal' }, headers: { 'Content-Type': 'application/merge-patch+json' } }
+  );
+  return unwrap<ComMiloApisSupportV1Alpha1SupportMessage>(response);
+};

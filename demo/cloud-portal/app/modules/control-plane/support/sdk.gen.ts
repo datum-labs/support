@@ -21,6 +21,9 @@ import type {
   CreateSupportMiloapisComV1Alpha1SupportMessageData,
   CreateSupportMiloapisComV1Alpha1SupportMessageErrors,
   CreateSupportMiloapisComV1Alpha1SupportMessageResponses,
+  PatchSupportMiloapisComV1Alpha1SupportMessageData,
+  PatchSupportMiloapisComV1Alpha1SupportMessageErrors,
+  PatchSupportMiloapisComV1Alpha1SupportMessageResponses,
 } from './types.gen';
 
 type Options<T extends TDataShape, ThrowOnError extends boolean> = Options2<T, ThrowOnError> & {
@@ -127,6 +130,25 @@ export const createSupportMiloapisComV1Alpha1SupportMessage = <ThrowOnError exte
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+/**
+ * partially update the specified SupportMessage (merge-patch)
+ */
+export const patchSupportMiloapisComV1Alpha1SupportMessage = <ThrowOnError extends boolean = false>(
+  options: Options<PatchSupportMiloapisComV1Alpha1SupportMessageData, ThrowOnError>
+) =>
+  (options?.client ?? client).patch<
+    PatchSupportMiloapisComV1Alpha1SupportMessageResponses,
+    PatchSupportMiloapisComV1Alpha1SupportMessageErrors,
+    ThrowOnError
+  >({
+    url: '/apis/support.miloapis.com/v1alpha1/supportmessages/{name}',
+    ...options,
+    headers: {
+      'Content-Type': 'application/merge-patch+json',
       ...options?.headers,
     },
   });

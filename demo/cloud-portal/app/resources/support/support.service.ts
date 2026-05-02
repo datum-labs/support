@@ -4,6 +4,7 @@ import {
   createSupportMiloapisComV1Alpha1SupportTicket,
   listSupportMiloapisComV1Alpha1SupportMessage,
   createSupportMiloapisComV1Alpha1SupportMessage,
+  patchSupportMiloapisComV1Alpha1SupportMessage,
 } from '@/modules/control-plane/support';
 import { logger } from '@/modules/logger';
 import { mapApiError } from '@/utils/errors/error-mapper';
@@ -114,6 +115,25 @@ export function createSupportService() {
         return result;
       } catch (error) {
         logger.error(`${SERVICE_NAME}.listMessages failed`, error as Error);
+        throw mapApiError(error);
+      }
+    },
+
+    async updateMessage(name: string, body: string): Promise<SupportMessage> {
+      const startTime = Date.now();
+      try {
+        const response = await patchSupportMiloapisComV1Alpha1SupportMessage({
+          path: { name },
+          body: { spec: { body } },
+        });
+        const message = toSupportMessage(response.data);
+        logger.service(SERVICE_NAME, 'updateMessage', {
+          input: { name },
+          duration: Date.now() - startTime,
+        });
+        return message;
+      } catch (error) {
+        logger.error(`${SERVICE_NAME}.updateMessage failed`, error as Error);
         throw mapApiError(error);
       }
     },

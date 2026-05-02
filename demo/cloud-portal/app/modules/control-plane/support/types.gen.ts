@@ -310,3 +310,31 @@ export type CreateSupportMiloapisComV1Alpha1SupportMessageResponses = {
 
 export type CreateSupportMiloapisComV1Alpha1SupportMessageResponse =
   CreateSupportMiloapisComV1Alpha1SupportMessageResponses[keyof CreateSupportMiloapisComV1Alpha1SupportMessageResponses];
+
+// PatchSupportMessage operation types
+
+export type PatchSupportMiloapisComV1Alpha1SupportMessageData = {
+  body: Record<string, unknown>;
+  path: {
+    /**
+     * name of the SupportMessage
+     */
+    name: string;
+  };
+  query?: {
+    dryRun?: string;
+    fieldManager?: string;
+  };
+  url: '/apis/support.miloapis.com/v1alpha1/supportmessages/{name}';
+};
+
+export type PatchSupportMiloapisComV1Alpha1SupportMessageErrors = {
+  [status: number]: unknown;
+};
+
+export type PatchSupportMiloapisComV1Alpha1SupportMessageResponses = {
+  200: ComMiloApisSupportV1Alpha1SupportMessage;
+};
+
+export type PatchSupportMiloapisComV1Alpha1SupportMessageResponse =
+  PatchSupportMiloapisComV1Alpha1SupportMessageResponses[keyof PatchSupportMiloapisComV1Alpha1SupportMessageResponses];

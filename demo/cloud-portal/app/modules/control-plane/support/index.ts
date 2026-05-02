@@ -8,6 +8,7 @@ export {
   patchSupportMiloapisComV1Alpha1SupportTicket,
   listSupportMiloapisComV1Alpha1SupportMessage,
   createSupportMiloapisComV1Alpha1SupportMessage,
+  patchSupportMiloapisComV1Alpha1SupportMessage,
   type Options,
 } from './sdk.gen';
 
@@ -48,4 +49,8 @@ export type {
   CreateSupportMiloapisComV1Alpha1SupportMessageErrors,
   CreateSupportMiloapisComV1Alpha1SupportMessageResponse,
   CreateSupportMiloapisComV1Alpha1SupportMessageResponses,
+  PatchSupportMiloapisComV1Alpha1SupportMessageData,
+  PatchSupportMiloapisComV1Alpha1SupportMessageErrors,
+  PatchSupportMiloapisComV1Alpha1SupportMessageResponse,
+  PatchSupportMiloapisComV1Alpha1SupportMessageResponses,
 } from './types.gen';

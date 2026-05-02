@@ -97,3 +97,19 @@ export function useCreateMessage(
     },
   });
 }
+
+export function useUpdateMessage(
+  ticketName: string,
+  options?: UseMutationOptions<SupportMessage, Error, { name: string; body: string }>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ name, body }: { name: string; body: string }) =>
+      createSupportService().updateMessage(name, body),
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: supportKeys.messages.list(ticketName) });
+      options?.onSuccess?.(...args);
+    },
+  });
+}

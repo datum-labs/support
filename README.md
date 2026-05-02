@@ -39,6 +39,12 @@ This starts a kind cluster, deploys Milo, Dex (OIDC), the support API server, bo
 
 ![Ticket messages](docs/screenshots/readme-03-ticket-messages.png)
 
+### Editing a message
+
+Messages support inline editing with a full markdown editor — hover any message to reveal the edit button.
+
+<video src="docs/edit-message-demo.mp4" controls width="960"></video>
+
 ---
 
 ## Development

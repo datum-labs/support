@@ -22,4 +22,4 @@ export {
 export { createSupportService, supportKeys, type SupportService } from './support.service';
 
 // Query hook exports
-export { useTickets, useTicket, useMessages, useCreateTicket, useCreateMessage } from './support.queries';
+export { useTickets, useTicket, useMessages, useCreateTicket, useCreateMessage, useUpdateMessage } from './support.queries';

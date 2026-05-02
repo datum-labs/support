@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ComMiloApisSupportV1Alpha1SupportTicket } from '@openapi/support.miloapis.com/v1alpha1';
 import {
   messageCreateMutation,
+  messagePatchMutation,
   messageListQuery,
   ticketDetailQuery,
   ticketListQuery,
@@ -71,6 +72,17 @@ export function useCreateMessageMutation(ticketName: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supportQueryKeys.messages.list(ticketName) });
       qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.detail(ticketName) });
+    },
+  });
+}
+
+export function useUpdateMessageMutation(ticketName: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ name, body }: { name: string; body: string }) =>
+      messagePatchMutation(name, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: supportQueryKeys.messages.list(ticketName) });
     },
   });
 }

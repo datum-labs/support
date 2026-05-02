@@ -11,6 +11,7 @@ import {
   deleteSupportMiloapisComV1Alpha1SupportTicket,
   listSupportMiloapisComV1Alpha1SupportMessage,
   createSupportMiloapisComV1Alpha1SupportMessage,
+  patchSupportMiloapisComV1Alpha1SupportMessage,
 } from '@openapi/support.miloapis.com/v1alpha1';
 
 export interface TicketListParams {
@@ -89,6 +90,13 @@ export const messageCreateMutation = async (
       authorType: 'staff',
       internal,
     },
+  });
+  return response.data;
+};
+
+export const messagePatchMutation = async (name: string, body: string) => {
+  const response = await patchSupportMiloapisComV1Alpha1SupportMessage(name, {
+    spec: { body },
   });
   return response.data;
 };
