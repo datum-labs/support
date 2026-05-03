@@ -17,10 +17,19 @@ msgstr ""
 msgid "(current)"
 msgstr "(current)"
 
+#. placeholder {0}: members.length
+#: app/routes/support/oncall.tsx:117
+msgid "{0, plural, one {# member} other {# members}}"
+msgstr "{0, plural, one {# member} other {# members}}"
+
 #. placeholder {0}: policy.spec.historyRetention?.maxEntries ?? 50
 #: app/features/fraud/policy/policy-detail.tsx:149
 msgid "{0} entries"
 msgstr "{0} entries"
+
+#: app/routes/support/oncall.tsx:117
+#~ msgid "{0} member{1}"
+#~ msgstr "{0} member{1}"
 
 #: app/components/app-search/search-result-group.tsx:44
 msgid "{heading}"
@@ -119,7 +128,7 @@ msgid "Active Sessions"
 msgstr "Active Sessions"
 
 #: app/components/app-search/use-app-search.ts:48
-#: app/components/app-sidebar/index.tsx:149
+#: app/components/app-sidebar/index.tsx:138
 #: app/routes/organization/detail/activity/index.tsx:14
 #: app/routes/organization/detail/layout.tsx:64
 #: app/routes/project/detail/activity/index.tsx:14
@@ -141,6 +150,7 @@ msgstr "Activity Feed"
 #: app/routes/contact/index.tsx:27
 #: app/routes/group/member.tsx:147
 #: app/routes/group/member.tsx:170
+#: app/routes/support/oncall.tsx:203
 msgid "Add"
 msgstr "Add"
 
@@ -157,7 +167,7 @@ msgstr "Add Group"
 msgid "Add Member"
 msgstr "Add Member"
 
-#: app/features/support/components/reply-form.tsx:77
+#: app/features/support/components/reply-form.tsx:78
 msgid "Add note"
 msgstr "Add note"
 
@@ -172,6 +182,10 @@ msgstr "Add Provider"
 #: app/features/fraud/policy/policy-form.tsx:249
 msgid "Add Stage"
 msgstr "Add Stage"
+
+#: app/routes/support/oncall.tsx:172
+msgid "Add to On-Call"
+msgstr "Add to On-Call"
 
 #: app/features/fraud/policy/policy-form.tsx:182
 msgid "Add Trigger"
@@ -351,6 +365,7 @@ msgstr "Back to evaluations"
 #: app/features/fraud/policy/policy-form.tsx:318
 #: app/features/quota/components/quota-bucket-list.tsx:128
 #: app/features/quota/components/quota-grant-list.tsx:138
+#: app/features/support/components/message-thread.tsx:47
 #: app/features/user/components/user-reject-dialog.tsx:30
 #: app/routes/contact-group/detail/member.tsx:346
 #: app/routes/contact-group/detail/member.tsx:363
@@ -469,8 +484,8 @@ msgid "Contact updated successfully"
 msgstr "Contact updated successfully"
 
 #: app/components/app-search/search-results.tsx:291
+#: app/components/app-sidebar/index.tsx:116
 #: app/components/app-sidebar/index.tsx:121
-#: app/components/app-sidebar/index.tsx:127
 #: app/routes/contact/index.tsx:14
 #: app/routes/contact/layout.tsx:5
 #: app/routes/user/detail/contacts.tsx:9
@@ -569,7 +584,11 @@ msgstr "Created"
 msgid "Credentials Reference"
 msgstr "Credentials Reference"
 
-#: app/components/app-sidebar/index.tsx:101
+#: app/routes/support/oncall.tsx:113
+msgid "Current On-Call"
+msgstr "Current On-Call"
+
+#: app/components/app-sidebar/index.tsx:105
 #: app/routes/customers/layout.tsx:7
 #: app/routes/project/detail/layout.tsx:50
 msgid "Customers"
@@ -584,7 +603,7 @@ msgid "Dark"
 msgstr "Dark"
 
 #: app/components/app-search/use-app-search.ts:33
-#: app/components/app-sidebar/index.tsx:95
+#: app/components/app-sidebar/index.tsx:99
 #: app/routes/dashboard/index.tsx:28
 msgid "Dashboard"
 msgstr "Dashboard"
@@ -859,7 +878,7 @@ msgstr "Edit Quota"
 msgid "Email"
 msgstr "Email"
 
-#: app/components/app-sidebar/index.tsx:143
+#: app/components/app-sidebar/index.tsx:132
 #: app/routes/email-activity/index.tsx:12
 #: app/routes/email-activity/layout.tsx:5
 #: app/routes/user/detail/email-activity.tsx:9
@@ -1006,7 +1025,11 @@ msgstr "Failed to load DNS record status"
 msgid "Failed to load status"
 msgstr "Failed to load status"
 
-#: app/features/support/components/reply-form.tsx:33
+#: app/features/support/components/message-thread.tsx:29
+msgid "Failed to save edit"
+msgstr "Failed to save edit"
+
+#: app/features/support/components/reply-form.tsx:40
 msgid "Failed to send reply"
 msgstr "Failed to send reply"
 
@@ -1098,7 +1121,7 @@ msgstr "First Name"
 msgid "First name is required"
 msgstr "First name is required"
 
-#: app/components/app-sidebar/index.tsx:155
+#: app/components/app-sidebar/index.tsx:144
 #: app/routes/fraud/layout.tsx:21
 msgid "Fraud & Abuse"
 msgstr "Fraud & Abuse"
@@ -1119,7 +1142,7 @@ msgstr "Fraud Evaluation Detail"
 msgid "Fraud evaluation started"
 msgstr "Fraud evaluation started"
 
-#: app/routes/dashboard/index.tsx:83
+#: app/routes/dashboard/index.tsx:87
 #: app/routes/fraud/index.tsx:35
 msgid "Fraud Evaluations"
 msgstr "Fraud Evaluations"
@@ -1181,8 +1204,8 @@ msgstr "Group deleted successfully"
 msgid "Group is required"
 msgstr "Group is required"
 
-#: app/components/app-sidebar/index.tsx:131
-#: app/components/app-sidebar/index.tsx:137
+#: app/components/app-sidebar/index.tsx:122
+#: app/components/app-sidebar/index.tsx:126
 #: app/routes/contact/detail/group.tsx:29
 #: app/routes/contact/detail/layout.tsx:53
 #: app/routes/group/index.tsx:14
@@ -1231,7 +1254,7 @@ msgstr "In Progress"
 msgid "Inactive"
 msgstr "Inactive"
 
-#: app/features/support/components/reply-form.tsx:31
+#: app/features/support/components/reply-form.tsx:37
 msgid "Internal note added"
 msgstr "Internal note added"
 
@@ -1277,7 +1300,7 @@ msgstr "Irreversible and destructive actions"
 msgid "Joined"
 msgstr "Joined"
 
-#: app/features/dashboard/components/recent-users-widget.tsx:107
+#: app/features/dashboard/components/recent-users-widget.tsx:111
 msgid "Last 10 new users who joined Datum"
 msgstr "Last 10 new users who joined Datum"
 
@@ -1335,7 +1358,7 @@ msgstr "Loading evaluation..."
 msgid "Loading mail lists..."
 msgstr "Loading mail lists..."
 
-#: app/features/support/components/message-thread.tsx:10
+#: app/features/support/components/message-thread.tsx:74
 msgid "Loading messages..."
 msgstr "Loading messages..."
 
@@ -1449,7 +1472,7 @@ msgstr "Members"
 #: app/features/support/components/ticket-detail.tsx:22
 #: app/features/support/components/ticket-list.tsx:70
 #: app/routes/support/$ticketName/layout.tsx:34
-#: app/routes/support/$ticketName/messages.tsx:7
+#: app/routes/support/$ticketName/messages.tsx:10
 msgid "Messages"
 msgstr "Messages"
 
@@ -1616,13 +1639,17 @@ msgstr "No members found."
 msgid "No members in this group."
 msgstr "No members in this group."
 
-#: app/features/support/components/message-thread.tsx:11
+#: app/features/support/components/message-thread.tsx:75
 msgid "No messages yet."
 msgstr "No messages yet."
 
 #: app/features/domain/components/notes-list.tsx:30
 msgid "No notes yet. Add the first note below."
 msgstr "No notes yet. Add the first note below."
+
+#: app/routes/support/oncall.tsx:135
+msgid "No one is on call. Add staff members below."
+msgstr "No one is on call. Add staff members below."
 
 #: app/routes/organization/index.tsx:112
 #: app/routes/user/detail/organization.tsx:91
@@ -1662,7 +1689,7 @@ msgstr "No support tickets found."
 msgid "No users found."
 msgstr "No users found."
 
-#: app/features/dashboard/components/recent-users-widget.tsx:56
+#: app/features/dashboard/components/recent-users-widget.tsx:57
 msgid "No users yet"
 msgstr "No users yet"
 
@@ -1700,6 +1727,19 @@ msgstr "Notifications"
 msgid "Observed"
 msgstr "Observed"
 
+#: app/components/app-sidebar/index.tsx:157
+#: app/routes/support/oncall.tsx:19
+msgid "On-Call"
+msgstr "On-Call"
+
+#: app/routes/support/oncall.tsx:100
+msgid "On-Call Roster"
+msgstr "On-Call Roster"
+
+#: app/routes/support/oncall.tsx:103
+msgid "On-call staff receive badge notifications for new support tickets. Group: <0>{groupName}</0>"
+msgstr "On-call staff receive badge notifications for new support tickets. Group: <0>{groupName}</0>"
+
 #: app/features/contact/components/contact-form.tsx:205
 msgid "Once a contact is associated with a user, this association cannot be removed or changed later."
 msgstr "Once a contact is associated with a user, this association cannot be removed or changed later."
@@ -1734,7 +1774,7 @@ msgstr "Organization Type"
 #: app/components/app-search/search-results.tsx:152
 #: app/components/app-search/use-app-search.ts:36
 #: app/components/app-sidebar/index.tsx:111
-#: app/routes/dashboard/index.tsx:67
+#: app/routes/dashboard/index.tsx:70
 #: app/routes/organization/index.tsx:15
 #: app/routes/organization/layout.tsx:5
 #: app/routes/project/detail/layout.tsx:51
@@ -1890,8 +1930,8 @@ msgstr "Project deleted successfully"
 
 #: app/components/app-search/search-results.tsx:168
 #: app/components/app-search/use-app-search.ts:42
-#: app/components/app-sidebar/index.tsx:115
-#: app/routes/dashboard/index.tsx:75
+#: app/components/app-sidebar/index.tsx:112
+#: app/routes/dashboard/index.tsx:78
 #: app/routes/organization/detail/layout.tsx:59
 #: app/routes/organization/detail/project.tsx:17
 #: app/routes/project/detail/layout.tsx:57
@@ -2026,11 +2066,15 @@ msgstr "Reject User"
 msgid "Rejected"
 msgstr "Rejected"
 
-#: app/features/support/components/reply-form.tsx:21
+#: app/routes/support/oncall.tsx:159
+msgid "Remove"
+msgstr "Remove"
+
+#: app/features/support/components/reply-form.tsx:26
 msgid "Reply cannot be empty"
 msgstr "Reply cannot be empty"
 
-#: app/features/support/components/reply-form.tsx:31
+#: app/features/support/components/reply-form.tsx:37
 msgid "Reply sent"
 msgstr "Reply sent"
 
@@ -2112,8 +2156,13 @@ msgid "Running"
 msgstr "Running"
 
 #: app/features/profile/components/profile-form.tsx:58
+#: app/features/support/components/message-thread.tsx:42
 msgid "Save"
 msgstr "Save"
+
+#: app/features/support/components/message-thread.tsx:42
+msgid "Saving…"
+msgstr "Saving…"
 
 #: app/routes/user/index.tsx:218
 msgid "Schedule At"
@@ -2282,6 +2331,10 @@ msgstr "See all domains"
 msgid "Select a user to run a fraud evaluation against the current policy."
 msgstr "Select a user to run a fraud evaluation against the current policy."
 
+#: app/routes/support/oncall.tsx:181
+msgid "Select a user…"
+msgstr "Select a user…"
+
 #: app/routes/contact/detail/group.tsx:181
 msgid "Select group..."
 msgstr "Select group..."
@@ -2298,9 +2351,13 @@ msgstr "Select visibility..."
 msgid "Selected filters"
 msgstr "Selected filters"
 
-#: app/features/support/components/reply-form.tsx:77
+#: app/features/support/components/reply-form.tsx:79
 msgid "Send reply"
 msgstr "Send reply"
+
+#: app/features/support/components/reply-form.tsx:76
+msgid "Sending..."
+msgstr "Sending..."
 
 #: app/features/email/components/email-detail.tsx:81
 #: app/features/email/components/email-list.tsx:94
@@ -2349,15 +2406,15 @@ msgstr "Source"
 msgid "Sources"
 msgstr "Sources"
 
-#: app/features/support/components/message-thread.tsx:42
+#: app/features/support/components/message-thread.tsx:107
 msgid "Staff"
 msgstr "Staff"
 
-#: app/features/support/components/message-thread.tsx:37
+#: app/features/support/components/message-thread.tsx:102
 msgid "Staff note"
 msgstr "Staff note"
 
-#: app/features/support/components/reply-form.tsx:70
+#: app/features/support/components/reply-form.tsx:68
 msgid "Staff-only note (not visible to customer)"
 msgstr "Staff-only note (not visible to customer)"
 
@@ -2429,7 +2486,7 @@ msgstr "Subject is required when user association is enabled"
 msgid "Summary"
 msgstr "Summary"
 
-#: app/components/app-sidebar/index.tsx:161
+#: app/components/app-sidebar/index.tsx:150
 #: app/routes/support/layout.tsx:5
 msgid "Support"
 msgstr "Support"
@@ -2485,6 +2542,10 @@ msgstr "Ticket not found."
 #: app/features/support/components/ticket-actions.tsx:30
 msgid "Ticket updated"
 msgstr "Ticket updated"
+
+#: app/components/app-sidebar/index.tsx:156
+msgid "Tickets"
+msgstr "Tickets"
 
 #: app/features/preferences/components/preferences-form.tsx:64
 msgid "Timezone updated successfully"
@@ -2618,14 +2679,14 @@ msgstr "User rejected successfully"
 
 #: app/components/app-search/search-results.tsx:184
 #: app/components/app-search/use-app-search.ts:34
-#: app/components/app-sidebar/index.tsx:107
-#: app/routes/dashboard/index.tsx:59
+#: app/components/app-sidebar/index.tsx:110
+#: app/routes/dashboard/index.tsx:62
 #: app/routes/user/index.tsx:31
 #: app/routes/user/layout.tsx:5
 msgid "Users"
 msgstr "Users"
 
-#: app/features/dashboard/components/recent-users-widget.tsx:59
+#: app/features/dashboard/components/recent-users-widget.tsx:60
 msgid "Users will appear here once they join Datum"
 msgstr "Users will appear here once they join Datum"
 
@@ -2659,7 +2720,7 @@ msgstr "View activity logs"
 
 #: app/features/dashboard/components/fraud-alerts-widget.tsx:122
 #: app/features/dashboard/components/pending-approvals-widget.tsx:108
-#: app/features/dashboard/components/recent-users-widget.tsx:102
+#: app/features/dashboard/components/recent-users-widget.tsx:106
 msgid "View All"
 msgstr "View All"
 
@@ -2707,11 +2768,11 @@ msgstr "Warning"
 msgid "Watch"
 msgstr "Watch"
 
-#: app/features/support/components/reply-form.tsx:55
+#: app/features/support/components/reply-form.tsx:59
 msgid "Write a reply..."
 msgstr "Write a reply..."
 
-#: app/features/support/components/reply-form.tsx:55
+#: app/features/support/components/reply-form.tsx:59
 msgid "Write an internal note..."
 msgstr "Write an internal note..."
 

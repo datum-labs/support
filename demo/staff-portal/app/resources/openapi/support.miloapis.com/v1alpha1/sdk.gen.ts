@@ -9,6 +9,7 @@ import { httpClient } from '@/modules/axios/axios.client';
 import type {
   ComMiloApisSupportV1Alpha1SupportTicket,
   ComMiloApisSupportV1Alpha1SupportTicketList,
+  ComMiloApisSupportV1Alpha1SupportTicketStatus,
   ComMiloApisSupportV1Alpha1SupportMessage,
   ComMiloApisSupportV1Alpha1SupportMessageList,
 } from './types.gen';
@@ -60,7 +61,10 @@ export const createSupportMiloapisComV1Alpha1SupportTicket = async (
 
 export const patchSupportMiloapisComV1Alpha1SupportTicket = async (
   name: string,
-  patch: Partial<{ spec: Partial<ComMiloApisSupportV1Alpha1SupportTicket['spec']> }>
+  patch: Partial<{
+    spec: Partial<ComMiloApisSupportV1Alpha1SupportTicket['spec']>;
+    status: Partial<ComMiloApisSupportV1Alpha1SupportTicketStatus>;
+  }>
 ) => {
   const response = await httpClient.patch<ProxyResponse<ComMiloApisSupportV1Alpha1SupportTicket>>(
     `${BASE}/supporttickets/${name}`,

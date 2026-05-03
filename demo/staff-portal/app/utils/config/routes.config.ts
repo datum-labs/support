@@ -121,6 +121,7 @@ export const supportRoutes = {
   list: () => '/support',
   detail: (ticketName: string) => `/support/${ticketName}`,
   messages: (ticketName: string) => `/support/${ticketName}/messages`,
+  oncall: () => '/support/oncall',
 } as const;
 
 // Profile feature routes

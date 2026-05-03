@@ -3,6 +3,7 @@
 import { NavUser } from './nav-user';
 import { LogoIcon } from '@/components/logo/logo-icon';
 import { LogoText } from '@/components/logo/logo-text';
+import { useUnreadSupportCount } from '@/features/support/hooks/use-unread-support-count';
 import {
   contactGroupRoutes,
   contactRoutes,
@@ -62,29 +63,32 @@ interface MenuItem {
   icon: LucideIcon;
   href?: string;
   hasSubmenu: boolean;
+  badge?: number;
   submenuItems?: SubMenuItem[];
+}
+
+function NavBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="bg-primary text-primary-foreground ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open, state, isMobile, closeForNavigation } = useSidebar();
   const { t } = useLingui();
   const location = useLocation();
+  const unreadSupportCount = useUnreadSupportCount();
 
-  // Helper function to check if a menu item is active
   const isMenuItemActive = (href: string | undefined) => {
     if (!href) return false;
-
-    // Special case for dashboard (root path)
     if (href === '/') {
       return location.pathname === '/' || location.pathname === '/dashboard';
     }
-
-    // For other routes, use exact path matching for better precision
-    // This prevents /users from being active when on /users/123
     const normalizedHref = href.replace(/\/+$/, '');
     const normalizedPathname = location.pathname.replace(/\/+$/, '');
-
-    // Check if we're exactly on the route or on a sub-route
     return (
       normalizedPathname === normalizedHref || normalizedPathname.startsWith(normalizedHref + '/')
     );
@@ -103,18 +107,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Users,
       hasSubmenu: true,
       submenuItems: [
-        {
-          title: t`Users`,
-          href: userRoutes.list(),
-        },
-        {
-          title: t`Organizations`,
-          href: orgRoutes.list(),
-        },
-        {
-          title: t`Projects`,
-          href: projectRoutes.list(),
-        },
+        { title: t`Users`, href: userRoutes.list() },
+        { title: t`Organizations`, href: orgRoutes.list() },
+        { title: t`Projects`, href: projectRoutes.list() },
       ],
     },
     {
@@ -123,14 +118,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Contact,
       hasSubmenu: true,
       submenuItems: [
-        {
-          title: t`Contacts`,
-          href: contactRoutes.list(),
-        },
-        {
-          title: t`Groups`,
-          href: contactGroupRoutes.list(),
-        },
+        { title: t`Contacts`, href: contactRoutes.list() },
+        { title: t`Groups`, href: contactGroupRoutes.list() },
       ],
     },
     {
@@ -161,7 +150,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t`Support`,
       href: supportRoutes.list(),
       icon: LifeBuoy,
-      hasSubmenu: false,
+      hasSubmenu: true,
+      badge: unreadSupportCount,
+      submenuItems: [
+        { title: t`Tickets`, href: supportRoutes.list() },
+        { title: t`On-Call`, href: supportRoutes.oncall() },
+      ],
     },
   ];
 
@@ -195,7 +189,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuButton tooltip={item.title}>
                           <item.icon />
                           <span>{item.title}</span>
-                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          {item.badge ? <NavBadge count={item.badge} /> : null}
+                          <ChevronRight className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -265,6 +260,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }}>
                       <item.icon />
                       <span>{item.title}</span>
+                      {item.badge ? <NavBadge count={item.badge} /> : null}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

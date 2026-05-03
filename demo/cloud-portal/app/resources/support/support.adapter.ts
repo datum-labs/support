@@ -29,6 +29,7 @@ export function toSupportTicket(raw: ComMiloApisSupportV1Alpha1SupportTicket): S
       : undefined,
     messageCount: raw.status?.messageCount,
     lastActivity: raw.status?.lastActivity,
+    readState: raw.status?.readState,
     createdAt: raw.metadata?.creationTimestamp
       ? new Date(raw.metadata.creationTimestamp)
       : undefined,

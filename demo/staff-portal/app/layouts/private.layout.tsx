@@ -38,16 +38,19 @@ export async function loader({ request }: Route.LoaderArgs) {
   // static token already grants admin access and the Dex sub may not match
   // Milo user names when using the local password connector.
   let isStaff = !!process.env.DEMO_TOKEN;
-  if (!isStaff) {
+  let isOnCall = !!process.env.DEMO_TOKEN;
+  if (!process.env.DEMO_TOKEN) {
     // Check staff group membership before allowing access.
     // 401/403 means the user lacks permission to list memberships — not staff.
     // Other errors (network, 500) are re-thrown so they surface properly.
     try {
       const memberships = await userGroupMembershipsQuery(token, userId);
       isStaff = memberships.some((m) => m.spec?.groupRef?.name === env.staffGroupName);
+      isOnCall = memberships.some((m) => m.spec?.groupRef?.name === env.onCallGroupName);
     } catch (error) {
       if (error instanceof Response && (error.status === 401 || error.status === 403)) {
         isStaff = false;
+        isOnCall = false;
       } else {
         throw error;
       }
@@ -68,7 +71,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
-  return data({ user: user ?? null });
+  // principalId is used client-side for read-state tracking.
+  // In non-demo mode it is the IAM user's metadata.name; in demo mode
+  // the IAM user record is skipped so we fall back to the OIDC sub.
+  const principalId = user?.metadata?.name ?? userId;
+  return data({ user: user ?? null, isOnCall, principalId });
 }
 
 export default function PrivateLayout() {
@@ -76,7 +83,7 @@ export default function PrivateLayout() {
   const env = useEnv();
 
   const content = (
-    <AppProvider user={data.user ?? undefined}>
+    <AppProvider user={data.user ?? undefined} isOnCall={data.isOnCall} principalId={data.principalId}>
       <TaskQueueProvider config={{ storageType: 'memory' }}>
         <SidebarProvider defaultOpen={false}>
           <AppSidebar />

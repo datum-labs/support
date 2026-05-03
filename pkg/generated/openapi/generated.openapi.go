@@ -41,6 +41,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"go.miloapis.com/support/pkg/apis/support/v1alpha1.SupportTicketList":    schema_pkg_apis_support_v1alpha1_SupportTicketList(ref),
 		"go.miloapis.com/support/pkg/apis/support/v1alpha1.SupportTicketSpec":    schema_pkg_apis_support_v1alpha1_SupportTicketSpec(ref),
 		"go.miloapis.com/support/pkg/apis/support/v1alpha1.SupportTicketStatus":  schema_pkg_apis_support_v1alpha1_SupportTicketStatus(ref),
+		"go.miloapis.com/support/pkg/apis/support/v1alpha1.TicketParticipant":    schema_pkg_apis_support_v1alpha1_TicketParticipant(ref),
 		"go.miloapis.com/support/pkg/apis/support/v1alpha1.UserReference":        schema_pkg_apis_support_v1alpha1_UserReference(ref),
 		resource.Quantity{}.OpenAPIModelName():                                   schema_apimachinery_pkg_api_resource_Quantity(ref),
 		v1.APIGroup{}.OpenAPIModelName():                                         schema_pkg_apis_meta_v1_APIGroup(ref),
@@ -461,6 +462,20 @@ func schema_pkg_apis_support_v1alpha1_SupportTicketSpec(ref common.ReferenceCall
 							},
 						},
 					},
+					"participants": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Participants lists users added to this ticket thread beyond the original reporter.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("go.miloapis.com/support/pkg/apis/support/v1alpha1.TicketParticipant"),
+									},
+								},
+							},
+						},
+					},
 					"tags": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Tags are labels attached to the ticket for categorization.",
@@ -501,7 +516,7 @@ func schema_pkg_apis_support_v1alpha1_SupportTicketSpec(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"go.miloapis.com/support/pkg/apis/support/v1alpha1.ObjectReference", "go.miloapis.com/support/pkg/apis/support/v1alpha1.UserReference"},
+			"go.miloapis.com/support/pkg/apis/support/v1alpha1.ObjectReference", "go.miloapis.com/support/pkg/apis/support/v1alpha1.TicketParticipant", "go.miloapis.com/support/pkg/apis/support/v1alpha1.UserReference"},
 	}
 }
 
@@ -532,6 +547,20 @@ func schema_pkg_apis_support_v1alpha1_SupportTicketStatus(ref common.ReferenceCa
 							Ref:         ref(v1.Time{}.OpenAPIModelName()),
 						},
 					},
+					"readState": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReadState maps principal names to the time they last read the ticket. Used to compute unread indicators and notification badges.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref(v1.Time{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
 					"conditions": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Conditions represents the latest available observations of the ticket.",
@@ -551,6 +580,35 @@ func schema_pkg_apis_support_v1alpha1_SupportTicketStatus(ref common.ReferenceCa
 		},
 		Dependencies: []string{
 			v1.Condition{}.OpenAPIModelName(), v1.Time{}.OpenAPIModelName()},
+	}
+}
+
+func schema_pkg_apis_support_v1alpha1_TicketParticipant(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TicketParticipant represents a user added to a ticket thread beyond the original reporter.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"userRef": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserRef identifies the participant.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("go.miloapis.com/support/pkg/apis/support/v1alpha1.UserReference"),
+						},
+					},
+					"addedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AddedAt is when the participant was added to the thread.",
+							Ref:         ref(v1.Time{}.OpenAPIModelName()),
+						},
+					},
+				},
+				Required: []string{"userRef"},
+			},
+		},
+		Dependencies: []string{
+			"go.miloapis.com/support/pkg/apis/support/v1alpha1.UserReference", v1.Time{}.OpenAPIModelName()},
 	}
 }
 

@@ -56,6 +56,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         MCP_ENABLED: !!(env.mcpUrl && env.mcpApiKey),
         FRAUD_ENABLED: env.fraudEnabled,
         ACTIVITY_ENABLED: env.activityEnabled,
+        ONCALL_GROUP_NAME: env.onCallGroupName,
       } satisfies PublicEnv,
     },
     { headers: { 'Set-Cookie': cookie } }

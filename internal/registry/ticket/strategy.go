@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -53,6 +54,20 @@ func (s strategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
 	newTicket.Status.MessageCount = oldTicket.Status.MessageCount
 	if newTicket.Status.LastActivity == nil {
 		newTicket.Status.LastActivity = oldTicket.Status.LastActivity
+	}
+
+	// Merge ReadState: a PATCH from one user should not wipe other users' read cursors.
+	if len(newTicket.Status.ReadState) > 0 {
+		merged := make(map[string]metav1.Time, len(oldTicket.Status.ReadState)+len(newTicket.Status.ReadState))
+		for k, v := range oldTicket.Status.ReadState {
+			merged[k] = v
+		}
+		for k, v := range newTicket.Status.ReadState {
+			merged[k] = v
+		}
+		newTicket.Status.ReadState = merged
+	} else {
+		newTicket.Status.ReadState = oldTicket.Status.ReadState
 	}
 }
 

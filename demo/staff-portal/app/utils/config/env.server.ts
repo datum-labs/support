@@ -38,6 +38,7 @@ const envSchema = z.object({
 
   // Staff access control
   STAFF_GROUP_NAME: z.string().default('staff-users'),
+  ONCALL_GROUP_NAME: z.string().default('support-oncall'),
 
   // Feature flags
   FRAUD_ENABLED: z.string().default('true'),
@@ -90,6 +91,7 @@ export const env = {
   mcpUrl: parsedEnv.MCP_URL,
   mcpApiKey: parsedEnv.MCP_API_KEY,
   staffGroupName: parsedEnv.STAFF_GROUP_NAME,
+  onCallGroupName: parsedEnv.ONCALL_GROUP_NAME,
   fraudEnabled: toBoolean(parsedEnv.FRAUD_ENABLED) !== false,
   activityEnabled: toBoolean(parsedEnv.ACTIVITY_ENABLED) !== false,
 };

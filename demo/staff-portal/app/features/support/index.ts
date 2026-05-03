@@ -1,4 +1,5 @@
 export * from './components/ticket-list';
+export * from './hooks/use-unread-support-count';
 export * from './components/ticket-detail';
 export * from './components/ticket-actions';
 export * from './components/message-thread';

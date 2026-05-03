@@ -16,6 +16,7 @@ export interface PublicEnv {
   MCP_ENABLED?: boolean;
   FRAUD_ENABLED?: boolean;
   ACTIVITY_ENABLED?: boolean;
+  ONCALL_GROUP_NAME?: string;
 }
 
 export function useEnv(): PublicEnv | undefined {

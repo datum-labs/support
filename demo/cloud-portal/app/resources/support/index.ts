@@ -22,4 +22,5 @@ export {
 export { createSupportService, supportKeys, type SupportService } from './support.service';
 
 // Query hook exports
-export { useTickets, useTicket, useMessages, useCreateTicket, useCreateMessage, useUpdateMessage } from './support.queries';
+export { useTickets, useTicket, useMessages, useCreateTicket, useCreateMessage, useUpdateMessage, useMarkTicketRead, useUpdateTicketLastActivity } from './support.queries';
+export { useUnreadSupportCount } from './use-unread-support-count';

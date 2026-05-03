@@ -23,6 +23,7 @@ export const supportTicketSchema = z.object({
     .optional(),
   messageCount: z.number().optional(),
   lastActivity: z.string().optional(),
+  readState: z.record(z.string(), z.string()).optional(),
   createdAt: z.coerce.date().optional(),
 });
 

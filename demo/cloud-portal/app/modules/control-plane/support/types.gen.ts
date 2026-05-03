@@ -53,6 +53,11 @@ export type ComMiloApisSupportV1Alpha1ObjectReference = {
   name: string;
 };
 
+export type ComMiloApisSupportV1Alpha1TicketParticipant = {
+  userRef: ComMiloApisSupportV1Alpha1UserReference;
+  addedAt?: string;
+};
+
 export type ComMiloApisSupportV1Alpha1SupportTicketSpec = {
   title: string;
   description?: string;
@@ -60,6 +65,7 @@ export type ComMiloApisSupportV1Alpha1SupportTicketSpec = {
   priority?: 'low' | 'medium' | 'high' | 'urgent';
   ownerRef?: ComMiloApisSupportV1Alpha1UserReference;
   contributors?: ComMiloApisSupportV1Alpha1UserReference[];
+  participants?: ComMiloApisSupportV1Alpha1TicketParticipant[];
   tags?: string[];
   visibility?: string;
   organizationRef?: ComMiloApisSupportV1Alpha1ObjectReference;
@@ -70,6 +76,8 @@ export type ComMiloApisSupportV1Alpha1SupportTicketStatus = {
   phase?: string;
   messageCount?: number;
   lastActivity?: string;
+  /** Maps principal name → ISO timestamp of last read. */
+  readState?: Record<string, string>;
   conditions?: Array<{ type: string; status: string; message?: string }>;
 };
 

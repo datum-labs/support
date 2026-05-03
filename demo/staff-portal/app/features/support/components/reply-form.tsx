@@ -1,4 +1,7 @@
-import { useCreateMessageMutation } from '@/resources/request/client/queries/support.queries';
+import {
+  useCreateMessageMutation,
+  useUpdateTicketLastActivityMutation,
+} from '@/resources/request/client/queries/support.queries';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Checkbox } from '@datum-cloud/datum-ui/checkbox';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -16,6 +19,7 @@ export function ReplyForm({ ticketName, authorRef }: ReplyFormProps) {
   const [body, setBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const createMessage = useCreateMessageMutation(ticketName);
+  const updateLastActivity = useUpdateTicketLastActivityMutation();
 
   const doSubmit = async () => {
     if (!body.trim()) {
@@ -29,6 +33,7 @@ export function ReplyForm({ ticketName, authorRef }: ReplyFormProps) {
         authorRef,
         internal: isInternal,
       });
+      if (!isInternal) updateLastActivity.mutate(ticketName);
       toast.success(isInternal ? t`Internal note added` : t`Reply sent`);
       setBody('');
     } catch {

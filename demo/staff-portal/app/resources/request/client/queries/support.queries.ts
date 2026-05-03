@@ -6,7 +6,9 @@ import {
   messageListQuery,
   ticketDetailQuery,
   ticketListQuery,
+  ticketMarkReadMutation,
   ticketPatchMutation,
+  ticketUpdateLastActivityMutation,
   type TicketListParams,
 } from '../apis/support.api';
 import type { ComMiloApisSupportV1Alpha1UserReference } from '@openapi/support.miloapis.com/v1alpha1';
@@ -22,10 +24,11 @@ export const supportQueryKeys = {
   },
 };
 
-export function useTicketListQuery(params?: TicketListParams) {
+export function useTicketListQuery(params?: TicketListParams, refetchInterval?: number) {
   return useQuery({
     queryKey: supportQueryKeys.tickets.list(params),
     queryFn: () => ticketListQuery(params),
+    refetchInterval,
   });
 }
 
@@ -53,6 +56,29 @@ export function usePatchTicketMutation(ticketName: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.detail(ticketName) });
       qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.list() });
+    },
+  });
+}
+
+export function useMarkTicketReadMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketName, principalId }: { ticketName: string; principalId: string }) =>
+      ticketMarkReadMutation(ticketName, principalId),
+    onSuccess: (_, { ticketName }) => {
+      qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.list() });
+      qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.detail(ticketName) });
+    },
+  });
+}
+
+export function useUpdateTicketLastActivityMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ticketName: string) => ticketUpdateLastActivityMutation(ticketName),
+    onSuccess: (_, ticketName) => {
+      qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.list() });
+      qc.invalidateQueries({ queryKey: supportQueryKeys.tickets.detail(ticketName) });
     },
   });
 }

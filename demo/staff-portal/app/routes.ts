@@ -152,6 +152,7 @@ export default [
     // Support
     route('support', 'routes/support/layout.tsx', [
       index('routes/support/index.tsx'),
+      route('oncall', 'routes/support/oncall.tsx'),
       route(':ticketName', 'routes/support/$ticketName/layout.tsx', [
         index('routes/support/$ticketName/index.tsx'),
         route('messages', 'routes/support/$ticketName/messages.tsx'),

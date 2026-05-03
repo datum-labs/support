@@ -15,6 +15,15 @@ type SupportTicket struct {
 	Status SupportTicketStatus `json:"status,omitempty"`
 }
 
+// TicketParticipant represents a user added to a ticket thread beyond the original reporter.
+type TicketParticipant struct {
+	// UserRef identifies the participant.
+	UserRef UserReference `json:"userRef"`
+	// AddedAt is when the participant was added to the thread.
+	// +optional
+	AddedAt *metav1.Time `json:"addedAt,omitempty"`
+}
+
 // SupportTicketSpec defines the desired state of a SupportTicket.
 type SupportTicketSpec struct {
 	// Title is the subject line of the support ticket.
@@ -42,6 +51,10 @@ type SupportTicketSpec struct {
 	// Contributors lists additional staff members working on the ticket.
 	// +optional
 	Contributors []UserReference `json:"contributors,omitempty"`
+
+	// Participants lists users added to this ticket thread beyond the original reporter.
+	// +optional
+	Participants []TicketParticipant `json:"participants,omitempty"`
 
 	// Tags are labels attached to the ticket for categorization.
 	// +optional
@@ -74,6 +87,11 @@ type SupportTicketStatus struct {
 	// LastActivity is the timestamp of the most recent message or update.
 	// +optional
 	LastActivity *metav1.Time `json:"lastActivity,omitempty"`
+
+	// ReadState maps principal names to the time they last read the ticket.
+	// Used to compute unread indicators and notification badges.
+	// +optional
+	ReadState map[string]metav1.Time `json:"readState,omitempty"`
 
 	// Conditions represents the latest available observations of the ticket.
 	// +optional

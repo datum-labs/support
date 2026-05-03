@@ -15,6 +15,8 @@ import React, {
 interface IContextProps {
   user: ComMiloapisIamV1Alpha1User | null;
   setUser: (user: ComMiloapisIamV1Alpha1User) => void;
+  isOnCall: boolean;
+  principalId: string | undefined;
   actions: ReactNode[];
   addActions: (children: ReactNode) => void;
   removeActions: (children: ReactNode) => void;
@@ -29,6 +31,8 @@ interface IContextProps {
 const AppContext = createContext<IContextProps>({
   user: null,
   setUser: () => {},
+  isOnCall: false,
+  principalId: undefined,
   actions: [],
   addActions: () => {},
   removeActions: () => {},
@@ -43,9 +47,11 @@ const AppContext = createContext<IContextProps>({
 interface IProviderProps {
   children: ReactNode;
   user?: ComMiloapisIamV1Alpha1User;
+  isOnCall?: boolean;
+  principalId?: string;
 }
 
-export const AppProvider: React.FC<IProviderProps> = ({ children, user }) => {
+export const AppProvider: React.FC<IProviderProps> = ({ children, user, isOnCall = false, principalId: principalIdProp }) => {
   const [userState, setUserState] = useState<ComMiloapisIamV1Alpha1User | null>(user ?? null);
   const [actions, setActions] = useState<ReactNode[]>([]);
   const [navigation, setNavigation] = useState<ReactNode | null>(null);
@@ -63,6 +69,8 @@ export const AppProvider: React.FC<IProviderProps> = ({ children, user }) => {
     () => ({
       user: userState,
       setUser: setUserState,
+      isOnCall,
+      principalId: userState?.metadata?.name ?? principalIdProp,
       actions,
       addActions,
       removeActions,
@@ -74,7 +82,7 @@ export const AppProvider: React.FC<IProviderProps> = ({ children, user }) => {
           userState?.metadata?.annotations?.['preferences/timezone'] ?? getBrowserTimezone(),
       },
     }),
-    [actions, navigation, userState]
+    [actions, isOnCall, navigation, principalIdProp, userState]
   );
 
   // Update theme when settings change

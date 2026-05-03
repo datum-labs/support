@@ -3,6 +3,7 @@ import { RbacProvider } from '@/modules/rbac';
 import { setSentryOrgContext } from '@/modules/sentry';
 import { useApp } from '@/providers/app.provider';
 import { createOrganizationService } from '@/resources/organizations';
+import { useUnreadSupportCount } from '@/resources/support';
 import { paths } from '@/utils/config/paths.config';
 import { clearProjectSession, redirectWithToast, setOrgSession } from '@/utils/cookies';
 import { NotFoundError } from '@/utils/errors';
@@ -72,6 +73,7 @@ export default function OrgLayout() {
 
   // Use app state (updated by mutations), fallback to SSR data
   const org = organization?.name === initialOrg?.name ? organization : initialOrg;
+  const unreadSupportCount = useUnreadSupportCount(org?.name ?? '');
 
   const navItems: NavItem[] = useMemo(() => {
     const orgId = org?.name;
@@ -104,6 +106,7 @@ export default function OrgLayout() {
         href: getPathWithParams(paths.org.detail.support.root, { orgId }),
         type: 'link',
         icon: LifeBuoy,
+        count: unreadSupportCount || undefined,
       },
       {
         title: 'Organization Settings',
@@ -120,7 +123,7 @@ export default function OrgLayout() {
         ],
       },
     ];
-  }, [org]);
+  }, [org, unreadSupportCount]);
 
   // Sync SSR org to app state on initial load or org change
   useEffect(() => {

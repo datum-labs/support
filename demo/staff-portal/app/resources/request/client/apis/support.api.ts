@@ -100,3 +100,17 @@ export const messagePatchMutation = async (name: string, body: string) => {
   });
   return response.data;
 };
+
+export const ticketMarkReadMutation = async (ticketName: string, principalId: string) => {
+  const response = await patchSupportMiloapisComV1Alpha1SupportTicket(ticketName, {
+    status: { readState: { [principalId]: new Date().toISOString() } },
+  });
+  return response.data;
+};
+
+export const ticketUpdateLastActivityMutation = async (ticketName: string) => {
+  const response = await patchSupportMiloapisComV1Alpha1SupportTicket(ticketName, {
+    status: { lastActivity: new Date().toISOString() },
+  });
+  return response.data;
+};

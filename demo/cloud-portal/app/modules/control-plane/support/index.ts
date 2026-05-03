@@ -17,6 +17,7 @@ export type {
   IoK8sApimachineryPkgApisMetaV1ObjectMeta,
   ComMiloApisSupportV1Alpha1UserReference,
   ComMiloApisSupportV1Alpha1ObjectReference,
+  ComMiloApisSupportV1Alpha1TicketParticipant,
   ComMiloApisSupportV1Alpha1SupportTicketSpec,
   ComMiloApisSupportV1Alpha1SupportTicketStatus,
   ComMiloApisSupportV1Alpha1SupportTicket,

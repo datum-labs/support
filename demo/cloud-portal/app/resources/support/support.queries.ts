@@ -113,3 +113,27 @@ export function useUpdateMessage(
     },
   });
 }
+
+export function useMarkTicketRead(orgId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketName, principalId }: { ticketName: string; principalId: string }) =>
+      createSupportService().markRead(ticketName, principalId),
+    onSuccess: (_, { ticketName }) => {
+      queryClient.invalidateQueries({ queryKey: supportKeys.tickets.list(orgId) });
+      queryClient.invalidateQueries({ queryKey: supportKeys.tickets.detail(ticketName) });
+    },
+  });
+}
+
+export function useUpdateTicketLastActivity(orgId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ticketName: string) =>
+      createSupportService().updateLastActivity(ticketName),
+    onSuccess: (_, ticketName) => {
+      queryClient.invalidateQueries({ queryKey: supportKeys.tickets.list(orgId) });
+      queryClient.invalidateQueries({ queryKey: supportKeys.tickets.detail(ticketName) });
+    },
+  });
+}

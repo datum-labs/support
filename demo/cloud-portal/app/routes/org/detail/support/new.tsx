@@ -1,4 +1,5 @@
-import { useCreateTicket } from '@/resources/support';
+import { useCreateTicket, useMarkTicketRead } from '@/resources/support';
+import { MarkdownEditor } from '@/components/markdown-editor';
 import { useApp } from '@/providers/app.provider';
 import { paths } from '@/utils/config/paths.config';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
@@ -19,6 +20,7 @@ export default function NewTicketPage() {
   const { user } = useApp();
 
   const createTicket = useCreateTicket(orgId ?? '');
+  const markRead = useMarkTicketRead(orgId ?? '');
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -47,6 +49,8 @@ export default function NewTicketPage() {
         input: { title: title.trim(), description: description.trim(), priority },
         reporterRef,
       });
+      const principalId = user?.sub ?? user?.email;
+      if (principalId) markRead.mutate({ ticketName: ticket.name, principalId });
       toast.success('Ticket created', { description: ticket.title });
       navigate(
         getPathWithParams(paths.org.detail.support.detail, {
@@ -80,17 +84,14 @@ export default function NewTicketPage() {
           />
         </div>
         <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1">
             Description <span className="text-red-500">*</span>
           </label>
-          <textarea
-            id="description"
+          <MarkdownEditor
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={6}
+            onChange={setDescription}
             placeholder="Describe the problem in detail..."
-            required
-            className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+            rows={6}
           />
         </div>
         <div>

@@ -2,6 +2,7 @@ import {
   listSupportMiloapisComV1Alpha1SupportTicket,
   readSupportMiloapisComV1Alpha1SupportTicket,
   createSupportMiloapisComV1Alpha1SupportTicket,
+  patchSupportMiloapisComV1Alpha1SupportTicket,
   listSupportMiloapisComV1Alpha1SupportMessage,
   createSupportMiloapisComV1Alpha1SupportMessage,
   patchSupportMiloapisComV1Alpha1SupportMessage,
@@ -135,6 +136,28 @@ export function createSupportService() {
       } catch (error) {
         logger.error(`${SERVICE_NAME}.updateMessage failed`, error as Error);
         throw mapApiError(error);
+      }
+    },
+
+    async markRead(ticketName: string, principalId: string): Promise<void> {
+      try {
+        await patchSupportMiloapisComV1Alpha1SupportTicket({
+          path: { name: ticketName },
+          body: { status: { readState: { [principalId]: new Date().toISOString() } } },
+        });
+      } catch (error) {
+        logger.error(`${SERVICE_NAME}.markRead failed`, error as Error);
+      }
+    },
+
+    async updateLastActivity(ticketName: string): Promise<void> {
+      try {
+        await patchSupportMiloapisComV1Alpha1SupportTicket({
+          path: { name: ticketName },
+          body: { status: { lastActivity: new Date().toISOString() } },
+        });
+      } catch (error) {
+        logger.error(`${SERVICE_NAME}.updateLastActivity failed`, error as Error);
       }
     },
 

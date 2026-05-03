@@ -1,4 +1,4 @@
-import { useMessages, useCreateMessage, useUpdateMessage } from '@/resources/support';
+import { useMessages, useCreateMessage, useUpdateMessage, useMarkTicketRead, useUpdateTicketLastActivity } from '@/resources/support';
 import { useApp } from '@/providers/app.provider';
 import { MarkdownBody } from '@/components/markdown-body';
 import { MarkdownEditor } from '@/components/markdown-editor';
@@ -6,7 +6,7 @@ import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { cn } from '@datum-cloud/datum-ui/utils';
 import { MetaFunction, useParams } from 'react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const handle = {
   breadcrumb: () => <span>Messages</span>,
@@ -75,17 +75,29 @@ function EditableMessage({
 }
 
 export default function TicketMessagesPage() {
-  const { ticketName } = useParams<{ ticketName: string }>();
+  const { orgId, ticketName } = useParams<{ orgId: string; ticketName: string }>();
   const { user } = useApp();
 
   const { data: messages = [], isLoading } = useMessages(ticketName ?? '');
   const createMessage = useCreateMessage(ticketName ?? '');
+  const markRead = useMarkTicketRead(orgId ?? '');
+  const updateLastActivity = useUpdateTicketLastActivity(orgId ?? '');
+
+  const principalId = user?.sub ?? user?.email;
+
+  useEffect(() => {
+    if (ticketName && principalId) {
+      markRead.mutate({ ticketName, principalId });
+    }
+  // Only run on mount or when the ticket changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticketName]);
 
   const [body, setBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const authorRef = {
-    name: user?.sub ?? user?.email ?? 'customer',
+    name: principalId ?? 'customer',
     displayName:
       user?.fullName ??
       ([user?.givenName, user?.familyName].filter(Boolean).join(' ') || undefined),
@@ -99,6 +111,7 @@ export default function TicketMessagesPage() {
     setSubmitting(true);
     try {
       await createMessage.mutateAsync({ body: body.trim(), authorRef });
+      if (ticketName) updateLastActivity.mutate(ticketName);
       toast.success('Reply sent');
       setBody('');
     } catch {
