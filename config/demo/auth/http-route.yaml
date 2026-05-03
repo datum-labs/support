@@ -13,6 +13,10 @@ spec:
   parentRefs:
     - name: default-gateway
       namespace: envoy-gateway-system
+  hostnames:
+    - "cloud.localhost"
+    - "staff.localhost"
+    - "localhost"
   rules:
     - matches:
         - path:

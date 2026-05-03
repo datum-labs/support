@@ -374,25 +374,26 @@ tasks:
         # Wire up auth delegation: support-apiserver validates tokens via Milo's TokenReview API.
         # Create a kubeconfig pointing to the in-cluster Milo address with the demo static token.
         echo "Wiring up auth delegation to Milo..."
-        cat > /tmp/support-milo-kubeconfig.yaml <<'KUBECONFIG'
-apiVersion: v1
-kind: Config
-clusters:
-- name: milo
-  cluster:
-    server: https://milo-apiserver.milo-system.svc.cluster.local:6443
-    insecure-skip-tls-verify: true
-users:
-- name: support-apiserver
-  user:
-    token: test-admin-token
-contexts:
-- name: default
-  context:
-    cluster: milo
-    user: support-apiserver
-current-context: default
-KUBECONFIG
+        # Write kubeconfig using printf to avoid heredoc indentation issues in YAML.
+        printf '%s\n' \
+          'apiVersion: v1' \
+          'kind: Config' \
+          'clusters:' \
+          '- name: milo' \
+          '  cluster:' \
+          '    server: https://milo-apiserver.milo-system.svc.cluster.local:6443' \
+          '    insecure-skip-tls-verify: true' \
+          'users:' \
+          '- name: support-apiserver' \
+          '  user:' \
+          '    token: test-admin-token' \
+          'contexts:' \
+          '- name: default' \
+          '  context:' \
+          '    cluster: milo' \
+          '    user: support-apiserver' \
+          'current-context: default' \
+          > /tmp/support-milo-kubeconfig.yaml
         kubectl create secret generic support-milo-kubeconfig \
           -n support-system \
           --from-file=kubeconfig=/tmp/support-milo-kubeconfig.yaml \
@@ -408,27 +409,9 @@ KUBECONFIG
           --dry-run=client -o yaml | kubectl apply -f -
 
         # Patch the support-apiserver deployment to use Milo for auth/authz.
-        # Uses strategic merge patch so it's idempotent (env vars merge by name, volumes by name).
-        kubectl patch deployment support-apiserver -n support-system --type=strategic -p='
-spec:
-  template:
-    spec:
-      containers:
-      - name: apiserver
-        env:
-        - name: AUTHENTICATION_KUBECONFIG
-          value: /etc/support/milo/kubeconfig
-        - name: AUTHORIZATION_KUBECONFIG
-          value: /etc/support/milo/kubeconfig
-        volumeMounts:
-        - name: milo-kubeconfig
-          mountPath: /etc/support/milo
-          readOnly: true
-      volumes:
-      - name: milo-kubeconfig
-        secret:
-          secretName: support-milo-kubeconfig
-'
+        # Uses strategic merge patch (JSON) so it's idempotent (env vars merge by name, volumes by name).
+        kubectl patch deployment support-apiserver -n support-system --type=strategic \
+          -p='{"spec":{"template":{"spec":{"containers":[{"name":"apiserver","env":[{"name":"AUTHENTICATION_KUBECONFIG","value":"/etc/support/milo/kubeconfig"},{"name":"AUTHORIZATION_KUBECONFIG","value":"/etc/support/milo/kubeconfig"}],"volumeMounts":[{"name":"milo-kubeconfig","mountPath":"/etc/support/milo","readOnly":true}]}],"volumes":[{"name":"milo-kubeconfig","secret":{"secretName":"support-milo-kubeconfig"}}]}}}}'
         kubectl rollout status deployment/support-apiserver -n support-system --timeout=60s 2>/dev/null || true
 
         # Create a direct HTTPRoute for support API calls that bypasses Milo (which strips bearer tokens).
@@ -647,12 +630,19 @@ spec:
           familyName: User
         EOF
 
-        # Approve the demo user so the cloud portal skips the /verifying screen
-        curl -sk -X PATCH \
+        # Create the acme-corp Organization so the cloud portal can navigate to /org/acme-corp/support
+        curl -sk -X POST \
           -H "Authorization: Bearer test-admin-token" \
-          -H "Content-Type: application/merge-patch+json" \
-          https://localhost:30443/apis/iam.miloapis.com/v1alpha1/users/08a8684b-db88-4b73-90a9-3cd1661f5466/status \
-          -d '{"status":{"registrationApproval":"Approved"}}' > /dev/null
+          -H "Content-Type: application/json" \
+          https://localhost:30443/apis/resourcemanager.miloapis.com/v1alpha1/organizations \
+          -d '{"apiVersion":"resourcemanager.miloapis.com/v1alpha1","kind":"Organization","metadata":{"name":"acme-corp"},"spec":{"displayName":"Acme Corp","type":"Standard"}}' > /dev/null
+
+        # Add demo user as a member of acme-corp
+        curl -sk -X POST \
+          -H "Authorization: Bearer test-admin-token" \
+          -H "Content-Type: application/json" \
+          https://localhost:30443/apis/resourcemanager.miloapis.com/v1alpha1/namespaces/default/organizationmemberships \
+          -d '{"apiVersion":"resourcemanager.miloapis.com/v1alpha1","kind":"OrganizationMembership","metadata":{"name":"acme-corp-demo-user","namespace":"default"},"spec":{"organizationRef":{"name":"acme-corp"},"userRef":{"name":"08a8684b-db88-4b73-90a9-3cd1661f5466"}}}' > /dev/null
 
         kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
         apiVersion: iam.miloapis.com/v1alpha1

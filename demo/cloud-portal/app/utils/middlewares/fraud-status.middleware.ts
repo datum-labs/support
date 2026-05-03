@@ -5,6 +5,7 @@ import { RegistrationApproval } from '@/resources/users/user.schema';
 import { paths } from '@/utils/config/paths.config';
 import { getSession } from '@/utils/cookies';
 import { AuthorizationError, NotFoundError } from '@/utils/errors';
+import { env } from '@/utils/env/env.server';
 import { redirect } from 'react-router';
 
 /**
@@ -29,6 +30,11 @@ export async function fraudStatusMiddleware(
 
   // Short-circuit for the logout route so users can always sign out.
   if (new URL(request.url).pathname === paths.auth.logOut) {
+    return next();
+  }
+
+  // Skip fraud checks entirely when FRAUD_ENABLED=false (e.g. demo environments).
+  if (!env.public.fraudEnabled) {
     return next();
   }
 

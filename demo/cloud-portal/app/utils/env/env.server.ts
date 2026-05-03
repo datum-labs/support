@@ -84,6 +84,10 @@ const publicSchema = z.object({
     .string()
     .transform((val) => val === 'true')
     .optional(),
+  FRAUD_ENABLED: z
+    .string()
+    .transform((val) => val !== 'false')
+    .default('true'),
 
   // ─────────────────────────────────────────────────────────
   // Optional: Logging Configuration
@@ -191,6 +195,7 @@ export const env: Env = {
     otelEnabled: data.OTEL_ENABLED === true && !!data.OTEL_EXPORTER_OTLP_ENDPOINT,
     otelLogLevel: data.OTEL_LOG_LEVEL,
     chatbotEnabled: data.CHATBOT_ENABLED === true,
+    fraudEnabled: data.FRAUD_ENABLED !== false,
   },
   server: {
     sessionSecret: data.SESSION_SECRET,

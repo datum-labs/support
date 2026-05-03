@@ -63,6 +63,35 @@ task demo:verify # health check
 
 See `docs/demo.md` for prerequisites and the full walkthrough.
 
+### Verifying demo changes
+
+**All changes that affect demo behavior must be verified by exercising the browser UI, not just the API.** Use a headless Playwright browser (Chromium via `nix-shell -p chromium`) to:
+
+1. Log in at `https://cloud.localhost:30443` as `demo@datum.net` / `password` (cloud portal) or `https://staff.localhost:30443` as a staff user (staff portal).
+2. Navigate to the relevant feature and interact with it — click buttons, fill forms, observe the result.
+3. Take screenshots at key steps and check for console errors.
+
+**Do not** accept a passing `curl` or direct API call as evidence that the portal UI works. Routing bugs, auth flows, React rendering errors, and middleware issues are only caught by going through the browser.
+
+To launch a headless browser test in this environment:
+
+```js
+// In a .mjs test script
+import { chromium } from 'playwright';
+const CHROMIUM_PATH = '/nix/store/<hash>-chromium-<ver>/bin/chromium'; // get via: nix-shell -p chromium --run "which chromium"
+const browser = await chromium.launch({
+  headless: true,
+  executablePath: CHROMIUM_PATH,
+  args: ['--ignore-certificate-errors', '--no-sandbox', '--disable-dev-shm-usage'],
+});
+const page = await (await browser.newContext({ ignoreHTTPSErrors: true })).newPage();
+```
+
+The nix Chromium path changes with version; get the current one with:
+```sh
+nix-shell -p chromium --run "which chromium"
+```
+
 ## Sibling repos
 
 The demo pulls from sibling repositories. Expected layout:

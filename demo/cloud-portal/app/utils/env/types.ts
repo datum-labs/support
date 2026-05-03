@@ -32,6 +32,7 @@ export interface PublicEnv {
 
   // Feature Flags
   chatbotEnabled: boolean;
+  fraudEnabled: boolean;
 
   // Logging (always has defaults)
   logLevel: 'debug' | 'info' | 'warn' | 'error';
