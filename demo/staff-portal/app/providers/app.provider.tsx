@@ -17,6 +17,7 @@ interface IContextProps {
   setUser: (user: ComMiloapisIamV1Alpha1User) => void;
   isOnCall: boolean;
   principalId: string | undefined;
+  displayName: string | undefined;
   actions: ReactNode[];
   addActions: (children: ReactNode) => void;
   removeActions: (children: ReactNode) => void;
@@ -33,6 +34,7 @@ const AppContext = createContext<IContextProps>({
   setUser: () => {},
   isOnCall: false,
   principalId: undefined,
+  displayName: undefined,
   actions: [],
   addActions: () => {},
   removeActions: () => {},
@@ -49,9 +51,10 @@ interface IProviderProps {
   user?: ComMiloapisIamV1Alpha1User;
   isOnCall?: boolean;
   principalId?: string;
+  displayName?: string;
 }
 
-export const AppProvider: React.FC<IProviderProps> = ({ children, user, isOnCall = false, principalId: principalIdProp }) => {
+export const AppProvider: React.FC<IProviderProps> = ({ children, user, isOnCall = false, principalId: principalIdProp, displayName: displayNameProp }) => {
   const [userState, setUserState] = useState<ComMiloapisIamV1Alpha1User | null>(user ?? null);
   const [actions, setActions] = useState<ReactNode[]>([]);
   const [navigation, setNavigation] = useState<ReactNode | null>(null);
@@ -71,6 +74,10 @@ export const AppProvider: React.FC<IProviderProps> = ({ children, user, isOnCall
       setUser: setUserState,
       isOnCall,
       principalId: userState?.metadata?.name ?? principalIdProp,
+      displayName:
+        [userState?.spec?.givenName, userState?.spec?.familyName].filter(Boolean).join(' ') ||
+        (userState?.spec as any)?.email ||
+        displayNameProp,
       actions,
       addActions,
       removeActions,
@@ -82,7 +89,7 @@ export const AppProvider: React.FC<IProviderProps> = ({ children, user, isOnCall
           userState?.metadata?.annotations?.['preferences/timezone'] ?? getBrowserTimezone(),
       },
     }),
-    [actions, isOnCall, navigation, principalIdProp, userState]
+    [actions, displayNameProp, isOnCall, navigation, principalIdProp, userState]
   );
 
   // Update theme when settings change

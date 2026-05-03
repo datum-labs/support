@@ -33,9 +33,218 @@ data:
     enablePasswordDB: true
 
     staticPasswords:
-      # email: demo@datum.net / password: password
-      # (hash generated with: htpasswd -bnBC 10 "" password | tr -d ':\n')
+      # All passwords: password
+      # Staff portal users
       - email: demo@datum.net
         hash: "$2y$10$8e42G3vHp1CFPMKSMw88Bu/WiKVQtK4e2Or6.t5n6eTbBm2c3pUAC"
         username: demo
         userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+      - email: alice@datum.net
+        hash: "$2b$10$L50SKs6d8wjBawmSngL6qeQqnXiZm3s7bfBjhRmdRt5xP4O9dBBsC"
+        username: alice
+        userID: "alice"
+      - email: bob@datum.net
+        hash: "$2b$10$T2S4kIslxcy18JCfJLs4germVioIz472OVRB80kqJOyxSF9wSakKG"
+        username: bob
+        userID: "bob"
+      # Customer users — cloud portal (password: password)
+      - email: james.hartwell@acme-corp.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: james.hartwell
+        userID: "james-hartwell"
+      - email: emma.sutton@acme-corp.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: emma.sutton
+        userID: "emma-sutton"
+      - email: oliver.crane@acme-corp.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: oliver.crane
+        userID: "oliver-crane"
+      - email: sophia.morales@acme-corp.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: sophia.morales
+        userID: "sophia-morales"
+      - email: william.ford@acme-corp.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: william.ford
+        userID: "william-ford"
+      - email: ava.chen@brightpath.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: ava.chen
+        userID: "ava-chen"
+      - email: noah.patel@brightpath.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: noah.patel
+        userID: "noah-patel"
+      - email: isabella.ross@brightpath.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: isabella.ross
+        userID: "isabella-ross"
+      - email: liam.warner@brightpath.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: liam.warner
+        userID: "liam-warner"
+      - email: mia.kowalski@brightpath.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: mia.kowalski
+        userID: "mia-kowalski"
+      - email: b.shaw@meridian-tech.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: benjamin.shaw
+        userID: "benjamin-shaw"
+      - email: c.tran@meridian-tech.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: charlotte.tran
+        userID: "charlotte-tran"
+      - email: l.osei@meridian-tech.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: lucas.osei
+        userID: "lucas-osei"
+      - email: a.byrne@meridian-tech.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: amelia.byrne
+        userID: "amelia-byrne"
+      - email: m.lin@meridian-tech.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: mason.lin
+        userID: "mason-lin"
+      - email: harper@cascade-analytics.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: harper.nkosi
+        userID: "harper-nkosi"
+      - email: ethan@cascade-analytics.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: ethan.vasquez
+        userID: "ethan-vasquez"
+      - email: evelyn@cascade-analytics.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: evelyn.price
+        userID: "evelyn-price"
+      - email: henry@cascade-analytics.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: henry.dougherty
+        userID: "henry-dougherty"
+      - email: abigail@cascade-analytics.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: abigail.kim
+        userID: "abigail-kim"
+      - email: alex.hunt@vertex-systems.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: alexander.hunt
+        userID: "alexander-hunt"
+      - email: emily.santos@vertex-systems.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: emily.santos
+        userID: "emily-santos"
+      - email: michael.porter@vertex-systems.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: michael.porter
+        userID: "michael-porter"
+      - email: e.reed@vertex-systems.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: elizabeth.reed
+        userID: "elizabeth-reed"
+      - email: d.berg@vertex-systems.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: daniel.berg
+        userID: "daniel-berg"
+      - email: m.quinn@harbor-cloud.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: matthew.quinn
+        userID: "matthew-quinn"
+      - email: a.hoffman@harbor-cloud.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: avery.hoffman
+        userID: "avery-hoffman"
+      - email: j.mills@harbor-cloud.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: jackson.mills
+        userID: "jackson-mills"
+      - email: e.thornton@harbor-cloud.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: ella.thornton
+        userID: "ella-thornton"
+      - email: s.holt@harbor-cloud.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: sebastian.holt
+        userID: "sebastian-holt"
+      - email: s.novak@pinnacle.io.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: scarlett.novak
+        userID: "scarlett-novak"
+      - email: a.walsh@pinnacle.io.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: aiden.walsh
+        userID: "aiden-walsh"
+      - email: v.lane@pinnacle.io.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: victoria.lane
+        userID: "victoria-lane"
+      - email: jack.obrien@pinnacle.io.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: jack.obrien
+        userID: "jack-obrien"
+      - email: m.frost@pinnacle.io.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: madison.frost
+        userID: "madison-frost"
+      - email: o.callahan@ridgeline.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: owen.callahan
+        userID: "owen-callahan"
+      - email: l.espinoza@ridgeline.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: luna.espinoza
+        userID: "luna-espinoza"
+      - email: s.west@ridgeline.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: samuel.west
+        userID: "samuel-west"
+      - email: g.mackenzie@ridgeline.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: grace.mackenzie
+        userID: "grace-mackenzie"
+      - email: d.yuen@ridgeline.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: david.yuen
+        userID: "david-yuen"
+      - email: c.ingram@northstar.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: chloe.ingram
+        userID: "chloe-ingram"
+      - email: j.brennan@northstar.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: joseph.brennan
+        userID: "joseph-brennan"
+      - email: p.cross@northstar.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: penelope.cross
+        userID: "penelope-cross"
+      - email: c.wolfe@northstar.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: carter.wolfe
+        userID: "carter-wolfe"
+      - email: r.snow@northstar.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: riley.snow
+        userID: "riley-snow"
+      - email: w.ellison@foxhollow.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: wyatt.ellison
+        userID: "wyatt-ellison"
+      - email: z.garner@foxhollow.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: zoey.garner
+        userID: "zoey-garner"
+      - email: j.blackwood@foxhollow.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: john.blackwood
+        userID: "john-blackwood"
+      - email: n.sterling@foxhollow.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: nora.sterling
+        userID: "nora-sterling"
+      - email: a.cross@foxhollow.example
+        hash: "$2b$10$q74iDGxvM2Q1f53VX128luSwM3NXCSpN1jq/2xYyfC6pUoFtiZH9K"
+        username: aiden.cross
+        userID: "aiden-cross"

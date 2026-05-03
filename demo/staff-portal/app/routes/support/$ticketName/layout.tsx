@@ -1,11 +1,7 @@
 import type { Route } from './+types/layout';
-import { SubLayout } from '@/components/sub-layout';
 import { authenticator } from '@/modules/auth';
 import { supportTicketDetailQuery } from '@/resources/request/server';
-import { supportRoutes } from '@/utils/config/routes.config';
 import type { ComMiloApisSupportV1Alpha1SupportTicket } from '@openapi/support.miloapis.com/v1alpha1';
-import { useLingui } from '@lingui/react/macro';
-import { MessageSquare, FileText } from 'lucide-react';
 import { Outlet, useLoaderData } from 'react-router';
 
 export const handle = {
@@ -20,31 +16,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
 };
 
 export default function Layout() {
-  const { t } = useLingui();
-  const data = useLoaderData<typeof loader>();
-  const ticketName = data?.metadata?.name ?? '';
-
-  const menuItems = [
-    {
-      title: t`Details`,
-      href: supportRoutes.detail(ticketName),
-      icon: FileText,
-    },
-    {
-      title: t`Messages`,
-      href: supportRoutes.messages(ticketName),
-      icon: MessageSquare,
-    },
-  ];
-
-  return (
-    <SubLayout>
-      <SubLayout.SidebarLeft>
-        <SubLayout.SidebarMenu menuItems={menuItems} />
-      </SubLayout.SidebarLeft>
-      <SubLayout.Content>
-        <Outlet />
-      </SubLayout.Content>
-    </SubLayout>
-  );
+  // Loader data makes the breadcrumb work — consumed by handle.breadcrumb above.
+  useLoaderData<typeof loader>();
+  return <Outlet />;
 }

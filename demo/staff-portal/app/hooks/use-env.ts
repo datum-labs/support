@@ -17,6 +17,7 @@ export interface PublicEnv {
   FRAUD_ENABLED?: boolean;
   ACTIVITY_ENABLED?: boolean;
   ONCALL_GROUP_NAME?: string;
+  STAFF_GROUP_NAME?: string;
 }
 
 export function useEnv(): PublicEnv | undefined {

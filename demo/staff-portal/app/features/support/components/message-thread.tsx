@@ -69,17 +69,39 @@ function EditableMessage({
 
 export function MessageThread({ ticketName }: { ticketName: string }) {
   const { data, isLoading } = useMessageListQuery(ticketName);
-  const messages = data?.items ?? [];
+  const messages = [...(data?.items ?? [])].sort((a, b) => {
+    const ta = a.status?.createdAt ?? a.metadata?.creationTimestamp ?? '';
+    const tb = b.status?.createdAt ?? b.metadata?.creationTimestamp ?? '';
+    return ta < tb ? -1 : ta > tb ? 1 : 0;
+  });
 
-  if (isLoading) return <div className="p-4 text-muted-foreground">{t`Loading messages...`}</div>;
-  if (!messages.length) return <div className="p-4 text-muted-foreground">{t`No messages yet.`}</div>;
+  if (isLoading) return <div className="py-2 text-sm text-muted-foreground">{t`Loading messages...`}</div>;
+  if (!messages.length) return <div className="py-2 text-sm text-muted-foreground">{t`No messages yet.`}</div>;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-3">
       {messages.map((msg) => {
+        const isSystem = msg.spec.authorRef.name === 'system';
         const isInternal = msg.spec.internal;
         const isStaff = msg.spec.authorType === 'staff';
         const msgName = msg.metadata?.name ?? '';
+
+        // Activity timeline event — render as a horizontal divider
+        if (isSystem) {
+          return (
+            <div key={msgName} className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-border" />
+              <span className="shrink-0 text-xs text-muted-foreground">
+                <MarkdownBody content={msg.spec.body} />
+              </span>
+              <DateTime
+                date={msg.status?.createdAt ?? msg.metadata?.creationTimestamp}
+                className="shrink-0 text-xs text-muted-foreground"
+              />
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          );
+        }
 
         return (
           <div

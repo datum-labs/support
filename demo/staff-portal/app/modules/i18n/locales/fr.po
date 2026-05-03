@@ -18,7 +18,7 @@ msgid "(current)"
 msgstr ""
 
 #. placeholder {0}: members.length
-#: app/routes/support/oncall.tsx:117
+#: app/routes/support/oncall.tsx:235
 msgid "{0, plural, one {# member} other {# members}}"
 msgstr ""
 
@@ -26,10 +26,6 @@ msgstr ""
 #: app/features/fraud/policy/policy-detail.tsx:149
 msgid "{0} entries"
 msgstr ""
-
-#: app/routes/support/oncall.tsx:117
-#~ msgid "{0} member{1}"
-#~ msgstr ""
 
 #: app/components/app-search/search-result-group.tsx:44
 msgid "{heading}"
@@ -113,10 +109,15 @@ msgstr ""
 #: app/components/app-toolbar/mobile-toolbar.tsx:89
 #: app/features/activity/components/activity-list.tsx:453
 #: app/features/activity/components/activity-list.tsx:519
-#: app/features/support/components/ticket-actions.tsx:39
+#: app/features/support/components/ticket-actions.tsx:133
 msgid "Actions"
 msgstr ""
 
+#: app/routes/support/oncall.tsx:358
+msgid "Activate"
+msgstr ""
+
+#: app/routes/support/oncall.tsx:362
 #: app/routes/user/index.tsx:280
 #: app/routes/user/index.tsx:307
 msgid "Active"
@@ -150,7 +151,8 @@ msgstr ""
 #: app/routes/contact/index.tsx:27
 #: app/routes/group/member.tsx:147
 #: app/routes/group/member.tsx:170
-#: app/routes/support/oncall.tsx:203
+#: app/routes/support/oncall.tsx:318
+#: app/routes/support/oncall.tsx:426
 msgid "Add"
 msgstr ""
 
@@ -183,12 +185,16 @@ msgstr ""
 msgid "Add Stage"
 msgstr ""
 
-#: app/routes/support/oncall.tsx:172
+#: app/routes/support/oncall.tsx:288
 msgid "Add to On-Call"
 msgstr ""
 
 #: app/features/fraud/policy/policy-form.tsx:182
 msgid "Add Trigger"
+msgstr ""
+
+#: app/routes/support/oncall.tsx:414
+msgid "Add user to rotation…"
 msgstr ""
 
 #: app/routes/contact-group/detail/member.tsx:224
@@ -402,7 +408,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:13
+#: app/features/support/components/ticket-actions.tsx:24
 msgid "Closed"
 msgstr ""
 
@@ -584,7 +590,7 @@ msgstr ""
 msgid "Credentials Reference"
 msgstr ""
 
-#: app/routes/support/oncall.tsx:113
+#: app/routes/support/oncall.tsx:232
 msgid "Current On-Call"
 msgstr ""
 
@@ -650,6 +656,10 @@ msgstr ""
 #: app/routes/fraud/index.tsx:341
 #: app/routes/user/detail/index.tsx:305
 msgid "Decision"
+msgstr ""
+
+#: app/routes/support/oncall.tsx:333
+msgid "Define a recurring rotation. The scheduled person can be activated with one click."
 msgstr ""
 
 #: app/features/fraud/policy/policy-detail.tsx:168
@@ -771,13 +781,13 @@ msgstr ""
 #: app/routes/organization/detail/index.tsx:42
 #: app/routes/project/detail/dns/index.tsx:77
 #: app/routes/project/detail/index.tsx:41
+#: app/routes/support/$ticketName/index.tsx:86
 msgid "Description"
 msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:31
 #: app/routes/contact-group/detail/layout.tsx:34
 #: app/routes/contact/detail/layout.tsx:45
-#: app/routes/support/$ticketName/layout.tsx:29
 msgid "Details"
 msgstr ""
 
@@ -1037,7 +1047,7 @@ msgstr ""
 msgid "Failed to update theme"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:32
+#: app/features/support/components/ticket-actions.tsx:76
 msgid "Failed to update ticket"
 msgstr ""
 
@@ -1155,6 +1165,10 @@ msgstr ""
 msgid "Fraud Providers"
 msgstr ""
 
+#: app/routes/support/$ticketName/index.tsx:95
+msgid "From:"
+msgstr ""
+
 #: app/routes/user/detail/index.tsx:244
 msgid "Full Name"
 msgstr ""
@@ -1215,7 +1229,7 @@ msgstr ""
 
 #: app/features/email/components/email-list.tsx:137
 #: app/features/email/components/email-list.tsx:165
-#: app/features/support/components/ticket-actions.tsx:19
+#: app/features/support/components/ticket-actions.tsx:30
 msgid "High"
 msgstr ""
 
@@ -1239,13 +1253,12 @@ msgstr ""
 msgid "HTML"
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:23
 #: app/routes/user/detail/index.tsx:235
 #: app/routes/user/index.tsx:103
 msgid "ID"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:10
+#: app/features/support/components/ticket-actions.tsx:21
 msgid "In Progress"
 msgstr ""
 
@@ -1304,7 +1317,7 @@ msgstr ""
 msgid "Last 10 new users who joined Datum"
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:74
+#: app/features/support/components/ticket-list.tsx:121
 msgid "Last Activity"
 msgstr ""
 
@@ -1358,7 +1371,7 @@ msgstr ""
 msgid "Loading mail lists..."
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:74
+#: app/features/support/components/message-thread.tsx:78
 msgid "Loading messages..."
 msgstr ""
 
@@ -1379,6 +1392,7 @@ msgstr ""
 #: app/routes/auth/callback.tsx:71
 #: app/routes/auth/login.tsx:41
 #: app/routes/auth/logout.tsx:36
+#: app/routes/support/$ticketName/index.tsx:44
 #: app/routes/user/detail/index.tsx:289
 msgid "Loading..."
 msgstr ""
@@ -1405,7 +1419,7 @@ msgstr ""
 
 #: app/features/email/components/email-list.tsx:138
 #: app/features/email/components/email-list.tsx:166
-#: app/features/support/components/ticket-actions.tsx:17
+#: app/features/support/components/ticket-actions.tsx:28
 msgid "Low"
 msgstr ""
 
@@ -1442,7 +1456,7 @@ msgstr ""
 msgid "Manually sync this description with the one in Loops (used for opt-in pages)."
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:18
+#: app/features/support/components/ticket-actions.tsx:29
 msgid "Medium"
 msgstr ""
 
@@ -1470,9 +1484,8 @@ msgid "Members"
 msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:22
-#: app/features/support/components/ticket-list.tsx:70
-#: app/routes/support/$ticketName/layout.tsx:34
-#: app/routes/support/$ticketName/messages.tsx:10
+#: app/features/support/components/ticket-list.tsx:117
+#: app/routes/support/$ticketName/index.tsx:125
 msgid "Messages"
 msgstr ""
 
@@ -1546,6 +1559,14 @@ msgstr ""
 
 #: app/components/app-search/search-results.tsx:99
 msgid "Navigation"
+msgstr ""
+
+#: app/features/support/components/ticket-list.tsx:79
+msgid "New"
+msgstr ""
+
+#: app/features/support/components/ticket-list.tsx:62
+msgid "New — no staff has read this yet"
 msgstr ""
 
 #: app/routes/fraud/index.tsx:208
@@ -1639,7 +1660,7 @@ msgstr ""
 msgid "No members in this group."
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:75
+#: app/features/support/components/message-thread.tsx:79
 msgid "No messages yet."
 msgstr ""
 
@@ -1647,7 +1668,7 @@ msgstr ""
 msgid "No notes yet. Add the first note below."
 msgstr ""
 
-#: app/routes/support/oncall.tsx:135
+#: app/routes/support/oncall.tsx:253
 msgid "No one is on call. Add staff members below."
 msgstr ""
 
@@ -1677,11 +1698,15 @@ msgstr ""
 msgid "No results found."
 msgstr ""
 
+#: app/routes/support/oncall.tsx:370
+msgid "No rotation configured. Add users to the rotation below."
+msgstr ""
+
 #: app/routes/project/detail/secret.tsx:74
 msgid "No secrets found."
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:110
+#: app/features/support/components/ticket-list.tsx:157
 msgid "No support tickets found."
 msgstr ""
 
@@ -1728,15 +1753,15 @@ msgid "Observed"
 msgstr ""
 
 #: app/components/app-sidebar/index.tsx:157
-#: app/routes/support/oncall.tsx:19
+#: app/routes/support/oncall.tsx:21
 msgid "On-Call"
 msgstr ""
 
-#: app/routes/support/oncall.tsx:100
+#: app/routes/support/oncall.tsx:219
 msgid "On-Call Roster"
 msgstr ""
 
-#: app/routes/support/oncall.tsx:103
+#: app/routes/support/oncall.tsx:222
 msgid "On-call staff receive badge notifications for new support tickets. Group: <0>{groupName}</0>"
 msgstr ""
 
@@ -1744,7 +1769,7 @@ msgstr ""
 msgid "Once a contact is associated with a user, this association cannot be removed or changed later."
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:9
+#: app/features/support/components/ticket-actions.tsx:20
 msgid "Open"
 msgstr ""
 
@@ -1752,11 +1777,19 @@ msgstr ""
 msgid "Open search"
 msgstr ""
 
+#: app/routes/support/$ticketName/index.tsx:116
+msgid "Opened:"
+msgstr ""
+
+#: app/routes/support/$ticketName/index.tsx:106
+msgid "Org:"
+msgstr ""
+
 #: app/features/activity/components/activity-list.tsx:399
 #: app/features/activity/components/activity-list.tsx:498
 #: app/features/dashboard/components/quota-utilization-widget.tsx:146
 #: app/features/support/components/ticket-detail.tsx:18
-#: app/features/support/components/ticket-list.tsx:66
+#: app/features/support/components/ticket-list.tsx:113
 #: app/routes/project/detail/index.tsx:49
 #: app/routes/project/index.tsx:41
 msgid "Organization"
@@ -1790,8 +1823,9 @@ msgid "Overview"
 msgstr ""
 
 #: app/features/dashboard/components/quota-utilization-widget.tsx:151
+#: app/features/support/components/ticket-actions.tsx:137
 #: app/features/support/components/ticket-detail.tsx:19
-#: app/features/support/components/ticket-list.tsx:62
+#: app/features/support/components/ticket-list.tsx:105
 msgid "Owner"
 msgstr ""
 
@@ -1897,9 +1931,9 @@ msgstr ""
 #: app/features/email/components/email-detail.tsx:93
 #: app/features/email/components/email-list.tsx:133
 #: app/features/email/components/email-list.tsx:158
-#: app/features/support/components/ticket-actions.tsx:61
+#: app/features/support/components/ticket-actions.tsx:180
 #: app/features/support/components/ticket-detail.tsx:16
-#: app/features/support/components/ticket-list.tsx:50
+#: app/features/support/components/ticket-list.tsx:93
 msgid "Priority"
 msgstr ""
 
@@ -2066,7 +2100,7 @@ msgstr ""
 msgid "Rejected"
 msgstr ""
 
-#: app/routes/support/oncall.tsx:159
+#: app/routes/support/oncall.tsx:275
 msgid "Remove"
 msgstr ""
 
@@ -2079,7 +2113,7 @@ msgid "Reply sent"
 msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:17
-#: app/features/support/components/ticket-list.tsx:54
+#: app/features/support/components/ticket-list.tsx:97
 msgid "Reporter"
 msgstr ""
 
@@ -2092,7 +2126,7 @@ msgstr ""
 msgid "Resend"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:12
+#: app/features/support/components/ticket-actions.tsx:23
 msgid "Resolved"
 msgstr ""
 
@@ -2124,6 +2158,10 @@ msgstr ""
 msgid "Response Code"
 msgstr ""
 
+#: app/routes/support/$ticketName/index.tsx:70
+msgid "Responsible:"
+msgstr ""
+
 #: app/features/dashboard/components/cluster-health-widget.tsx:50
 #: app/features/dashboard/components/fraud-alerts-widget.tsx:92
 #: app/features/dashboard/components/pending-approvals-widget.tsx:78
@@ -2145,6 +2183,14 @@ msgstr ""
 #: app/routes/organization/detail/member.tsx:191
 #: app/routes/organization/detail/member.tsx:205
 msgid "Role"
+msgstr ""
+
+#: app/routes/support/oncall.tsx:377
+msgid "Rotation order"
+msgstr ""
+
+#: app/routes/support/oncall.tsx:329
+msgid "Rotation Schedule"
 msgstr ""
 
 #: app/routes/fraud/index.tsx:217
@@ -2279,7 +2325,7 @@ msgstr ""
 msgid "Search sessions..."
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:102
+#: app/features/support/components/ticket-list.tsx:149
 msgid "Search tickets..."
 msgstr ""
 
@@ -2331,7 +2377,7 @@ msgstr ""
 msgid "Select a user to run a fraud evaluation against the current policy."
 msgstr ""
 
-#: app/routes/support/oncall.tsx:181
+#: app/routes/support/oncall.tsx:296
 msgid "Select a user…"
 msgstr ""
 
@@ -2406,11 +2452,11 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:107
+#: app/features/support/components/message-thread.tsx:129
 msgid "Staff"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:102
+#: app/features/support/components/message-thread.tsx:124
 msgid "Staff note"
 msgstr ""
 
@@ -2451,9 +2497,9 @@ msgstr ""
 #: app/features/email/components/email-list.tsx:159
 #: app/features/fraud/policy/policy-detail.tsx:158
 #: app/features/quota/components/quota-grant-list.tsx:107
-#: app/features/support/components/ticket-actions.tsx:43
+#: app/features/support/components/ticket-actions.tsx:162
 #: app/features/support/components/ticket-detail.tsx:15
-#: app/features/support/components/ticket-list.tsx:46
+#: app/features/support/components/ticket-list.tsx:89
 #: app/routes/contact-group/detail/member.tsx:208
 #: app/routes/contact-group/index.tsx:82
 #: app/routes/contact/detail/group.tsx:102
@@ -2531,15 +2577,20 @@ msgstr ""
 msgid "Thresholds"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:7
+#: app/features/support/components/ticket-list.tsx:53
+msgid "Ticket"
+msgstr ""
+
+#: app/routes/support/$ticketName/index.tsx:22
 msgid "Ticket Details"
 msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:12
+#: app/routes/support/$ticketName/index.tsx:45
 msgid "Ticket not found."
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:30
+#: app/features/support/components/ticket-actions.tsx:74
 msgid "Ticket updated"
 msgstr ""
 
@@ -2549,10 +2600,6 @@ msgstr ""
 
 #: app/features/preferences/components/preferences-form.tsx:64
 msgid "Timezone updated successfully"
-msgstr ""
-
-#: app/features/support/components/ticket-list.tsx:36
-msgid "Title"
 msgstr ""
 
 #. placeholder {0}: idx + 1
@@ -2584,7 +2631,12 @@ msgstr ""
 msgid "Type at least 3 characters to search."
 msgstr ""
 
+#: app/features/support/components/ticket-actions.tsx:140
+#: app/features/support/components/ticket-actions.tsx:144
 #: app/features/support/components/ticket-detail.tsx:19
+#: app/features/support/components/ticket-list.tsx:109
+#: app/routes/support/$ticketName/index.tsx:49
+#: app/routes/support/$ticketName/index.tsx:78
 msgid "Unassigned"
 msgstr ""
 
@@ -2594,6 +2646,10 @@ msgstr ""
 
 #: app/features/domain/components/note-card.tsx:38
 msgid "Unknown"
+msgstr ""
+
+#: app/features/support/components/ticket-list.tsx:62
+msgid "Unread — new activity"
 msgstr ""
 
 #: app/features/activity/components/activity-list.tsx:369
@@ -2614,7 +2670,7 @@ msgstr ""
 msgid "Updating email addresses for GitHub identities"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:20
+#: app/features/support/components/ticket-actions.tsx:31
 msgid "Urgent"
 msgstr ""
 
@@ -2751,7 +2807,7 @@ msgstr ""
 msgid "Visibility"
 msgstr ""
 
-#: app/features/support/components/ticket-actions.tsx:11
+#: app/features/support/components/ticket-actions.tsx:22
 msgid "Waiting on Customer"
 msgstr ""
 

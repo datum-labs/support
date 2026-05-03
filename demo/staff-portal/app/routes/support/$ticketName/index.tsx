@@ -1,22 +1,144 @@
 import type { Route } from './+types/index';
-import { TicketActions, TicketDetail } from '@/features/support';
+import { MarkdownBody } from '@/components/markdown-body';
+import { DateTime } from '@/components/date';
+import { TicketActions } from '@/features/support';
+import { MessageThread } from '@/features/support/components/message-thread';
+import { ReplyForm } from '@/features/support/components/reply-form';
+import { TicketStatusBadge } from '@/features/support/components/ticket-status-badge';
+import { PriorityBadge } from '@/features/support/components/priority-badge';
+import { TicketNavButtons } from '@/features/support/components/ticket-nav-buttons';
+import { useApp } from '@/providers/app.provider';
+import AppActionBar from '@/components/app-actiobar';
+import {
+  useTicketDetailQuery,
+  useMarkTicketReadMutation,
+} from '@/resources/request/client/queries/support.queries';
 import { metaObject } from '@/utils/helpers';
+import { userRoutes, orgRoutes } from '@/utils/config/routes.config';
 import { t } from '@lingui/core/macro';
-import { useParams } from 'react-router';
+import { UserCircle } from 'lucide-react';
+
+import { useEffect } from 'react';
+import { Link, useParams } from 'react-router';
 
 export const meta: Route.MetaFunction = () => metaObject(t`Ticket Details`);
 
 export default function TicketDetailPage() {
   const { ticketName } = useParams<{ ticketName: string }>();
+  const name = ticketName ?? '';
+  const { principalId, displayName } = useApp();
+  const { data: ticket, isLoading } = useTicketDetailQuery(name);
+  const markRead = useMarkTicketReadMutation();
+
+  useEffect(() => {
+    if (name && principalId) {
+      markRead.mutate({ ticketName: name, principalId });
+    }
+    // Only on mount or ticket change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
+
+  const authorRef = {
+    name: principalId ?? 'staff',
+    displayName: displayName ?? 'Support Staff',
+  };
+
+  const owner = ticket?.spec.ownerRef;
+  const ownerLabel =
+    owner?.displayName || owner?.email || owner?.name || t`Unassigned`;
 
   return (
-    <div className="flex gap-4 p-4">
-      <div className="min-w-0 flex-1">
-        <TicketDetail ticketName={ticketName ?? ''} />
+    <>
+      <AppActionBar>
+        <TicketNavButtons ticketName={name} />
+      </AppActionBar>
+      {isLoading && <div className="p-6 text-muted-foreground">{t`Loading...`}</div>}
+      {!isLoading && !ticket && <div className="p-6 text-destructive">{t`Ticket not found.`}</div>}
+      {ticket && <div className="flex gap-6 p-6">
+      {/* Main column */}
+      <div className="min-w-0 flex-1 space-y-6">
+        {/* Header */}
+        <div>
+          <div className="flex items-start gap-3">
+            <h1 className="min-w-0 flex-1 text-xl font-semibold">{ticket.spec.title}</h1>
+            <div className="flex shrink-0 items-center gap-2">
+              <TicketStatusBadge status={ticket.spec.status} />
+              <PriorityBadge priority={ticket.spec.priority} />
+            </div>
+          </div>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">#{ticket.metadata?.name}</p>
+        </div>
+
+        {/* Owner callout */}
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3">
+          <UserCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">{t`Responsible:`}</span>
+          {owner ? (
+            <Link
+              to={userRoutes.detail(owner.name)}
+              className="text-sm font-semibold text-primary hover:underline">
+              {ownerLabel}
+            </Link>
+          ) : (
+            <span className="text-sm font-medium text-amber-600">{t`Unassigned`}</span>
+          )}
+        </div>
+
+        {/* Description */}
+        {ticket.spec.description && (
+          <div className="rounded-lg border p-4">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t`Description`}
+            </h2>
+            <MarkdownBody content={ticket.spec.description} />
+          </div>
+        )}
+
+        {/* Reporter + dates metadata */}
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            {t`From:`}{' '}
+            <Link
+              to={userRoutes.detail(ticket.spec.reporterRef.name)}
+              className="font-medium text-foreground hover:text-primary hover:underline">
+              {ticket.spec.reporterRef.displayName ||
+                ticket.spec.reporterRef.email ||
+                ticket.spec.reporterRef.name}
+            </Link>
+          </span>
+          {ticket.spec.organizationRef && (
+            <span>
+              {t`Org:`}{' '}
+              <Link
+                to={orgRoutes.detail(ticket.spec.organizationRef.name)}
+                className="font-medium text-foreground hover:text-primary hover:underline">
+                {ticket.spec.organizationRef.name}
+              </Link>
+            </span>
+          )}
+          {ticket.metadata?.creationTimestamp && (
+            <span>
+              {t`Opened:`}{' '}
+              <DateTime date={ticket.metadata.creationTimestamp} className="font-medium text-foreground" />
+            </span>
+          )}
+        </div>
+
+        {/* Messages + reply */}
+        <div className="space-y-1">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t`Messages`}
+          </h2>
+        </div>
+        <MessageThread ticketName={name} />
+        <ReplyForm ticketName={name} authorRef={authorRef} />
       </div>
+
+      {/* Sidebar */}
       <div className="w-64 shrink-0">
-        <TicketActions ticketName={ticketName ?? ''} />
+        <TicketActions ticketName={name} />
       </div>
-    </div>
+    </div>}
+    </>
   );
 }

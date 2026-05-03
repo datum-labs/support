@@ -75,7 +75,25 @@ export async function loader({ request }: Route.LoaderArgs) {
   // In non-demo mode it is the IAM user's metadata.name; in demo mode
   // the IAM user record is skipped so we fall back to the OIDC sub.
   const principalId = user?.metadata?.name ?? userId;
-  return data({ user: user ?? null, isOnCall, principalId });
+
+  // Decode display name from the OIDC id_token claims so the client has a
+  // human-readable name even in demo mode (where the IAM user lookup is skipped).
+  let displayName: string | undefined;
+  const idToken = session?.idToken ?? '';
+  if (idToken) {
+    try {
+      const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64url').toString());
+      displayName =
+        payload.name ||
+        [payload.given_name, payload.family_name].filter(Boolean).join(' ') ||
+        payload.email ||
+        payload.preferred_username;
+    } catch {
+      // Non-fatal
+    }
+  }
+
+  return data({ user: user ?? null, isOnCall, principalId, displayName: displayName ?? null });
 }
 
 export default function PrivateLayout() {
@@ -83,7 +101,7 @@ export default function PrivateLayout() {
   const env = useEnv();
 
   const content = (
-    <AppProvider user={data.user ?? undefined} isOnCall={data.isOnCall} principalId={data.principalId}>
+    <AppProvider user={data.user ?? undefined} isOnCall={data.isOnCall} principalId={data.principalId} displayName={data.displayName ?? undefined}>
       <TaskQueueProvider config={{ storageType: 'memory' }}>
         <SidebarProvider defaultOpen={false}>
           <AppSidebar />
