@@ -12,6 +12,8 @@ import type {
   ComMiloApisSupportV1Alpha1SupportTicketStatus,
   ComMiloApisSupportV1Alpha1SupportMessage,
   ComMiloApisSupportV1Alpha1SupportMessageList,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntry,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntryList,
 } from './types.gen';
 
 const BASE = '/apis/support.miloapis.com/v1alpha1';
@@ -120,4 +122,52 @@ export const patchSupportMiloapisComV1Alpha1SupportMessage = async (
     { params: { fieldManager: 'datum-staff-portal' }, headers: { 'Content-Type': 'application/merge-patch+json' } }
   );
   return unwrap<ComMiloApisSupportV1Alpha1SupportMessage>(response);
+};
+
+// ── KnowledgeBaseEntry ───────────────────────────────────────────────────────
+
+export const listSupportMiloapisComV1Alpha1KnowledgeBaseEntry = async (params?: {
+  fieldSelector?: string;
+  labelSelector?: string;
+  limit?: number;
+  continue?: string;
+}) => {
+  const response = await httpClient.get<ProxyResponse<ComMiloApisSupportV1Alpha1KnowledgeBaseEntryList>>(
+    `${BASE}/knowledgebaseentries`,
+    { params }
+  );
+  return unwrap<ComMiloApisSupportV1Alpha1KnowledgeBaseEntryList>(response);
+};
+
+export const readSupportMiloapisComV1Alpha1KnowledgeBaseEntry = async (name: string) => {
+  const response = await httpClient.get<ProxyResponse<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>>(
+    `${BASE}/knowledgebaseentries/${name}`
+  );
+  return unwrap<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>(response);
+};
+
+export const createSupportMiloapisComV1Alpha1KnowledgeBaseEntry = async (
+  body: ComMiloApisSupportV1Alpha1KnowledgeBaseEntry
+) => {
+  const response = await httpClient.post<ProxyResponse<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>>(
+    `${BASE}/knowledgebaseentries`,
+    body
+  );
+  return unwrap<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>(response);
+};
+
+export const patchSupportMiloapisComV1Alpha1KnowledgeBaseEntry = async (
+  name: string,
+  patch: Partial<{ spec: Partial<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry['spec']> }>
+) => {
+  const response = await httpClient.patch<ProxyResponse<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>>(
+    `${BASE}/knowledgebaseentries/${name}`,
+    patch,
+    { params: { fieldManager: 'datum-staff-portal' }, headers: { 'Content-Type': 'application/merge-patch+json' } }
+  );
+  return unwrap<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry>(response);
+};
+
+export const deleteSupportMiloapisComV1Alpha1KnowledgeBaseEntry = async (name: string) => {
+  return httpClient.delete(`${BASE}/knowledgebaseentries/${name}`);
 };

@@ -363,6 +363,10 @@ msgstr ""
 msgid "Back to evaluations"
 msgstr ""
 
+#: app/features/support/components/promote-to-kb-dialog.tsx:75
+msgid "Body"
+msgstr ""
+
 #: app/components/button/button-delete-action.tsx:43
 #: app/components/danger-zone-card/index.tsx:49
 #: app/features/contact-group/components/contact-group-form.tsx:97
@@ -371,7 +375,8 @@ msgstr ""
 #: app/features/fraud/policy/policy-form.tsx:318
 #: app/features/quota/components/quota-bucket-list.tsx:128
 #: app/features/quota/components/quota-grant-list.tsx:138
-#: app/features/support/components/message-thread.tsx:47
+#: app/features/support/components/message-thread.tsx:49
+#: app/features/support/components/promote-to-kb-dialog.tsx:111
 #: app/features/user/components/user-reject-dialog.tsx:30
 #: app/routes/contact-group/detail/member.tsx:346
 #: app/routes/contact-group/detail/member.tsx:363
@@ -426,6 +431,10 @@ msgstr ""
 
 #: app/features/dashboard/components/cluster-health-widget.tsx:207
 msgid "clusters healthy"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:98
+msgid "Comma-separated tags"
 msgstr ""
 
 #: app/routes/fraud/index.tsx:308
@@ -766,6 +775,10 @@ msgstr ""
 msgid "Delete Session"
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:21
+msgid "Delete this knowledge base entry?"
+msgstr ""
+
 #: app/routes/user/detail/index.tsx:442
 #: app/routes/user/detail/index.tsx:444
 msgid "Delete User"
@@ -781,7 +794,7 @@ msgstr ""
 #: app/routes/organization/detail/index.tsx:42
 #: app/routes/project/detail/dns/index.tsx:77
 #: app/routes/project/detail/index.tsx:41
-#: app/routes/support/$ticketName/index.tsx:86
+#: app/routes/support/$ticketName/index.tsx:91
 msgid "Description"
 msgstr ""
 
@@ -856,6 +869,10 @@ msgstr ""
 #: app/routes/project/detail/domain/layout.tsx:5
 #: app/routes/project/detail/layout.tsx:134
 msgid "Domains"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:89
+msgid "e.g. Billing, Networking"
 msgstr ""
 
 #: app/features/contact/components/contact-list.tsx:51
@@ -966,6 +983,14 @@ msgstr ""
 msgid "Entities"
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:24
+msgid "Entry deleted"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:69
+msgid "Entry title"
+msgstr ""
+
 #: app/features/fraud/detail/evaluation-sections.tsx:108
 #: app/routes/fraud/index.tsx:311
 msgid "Error"
@@ -1027,6 +1052,10 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:26
+msgid "Failed to delete entry"
+msgstr ""
+
 #: app/features/dns/components/dns-record-status-probe.tsx:33
 msgid "Failed to load DNS record status"
 msgstr ""
@@ -1035,8 +1064,12 @@ msgstr ""
 msgid "Failed to load status"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:29
+#: app/features/support/components/message-thread.tsx:31
 msgid "Failed to save edit"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:56
+msgid "Failed to save knowledge base entry"
 msgstr ""
 
 #: app/features/support/components/reply-form.tsx:40
@@ -1165,7 +1198,7 @@ msgstr ""
 msgid "Fraud Providers"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:95
+#: app/routes/support/$ticketName/index.tsx:100
 msgid "From:"
 msgstr ""
 
@@ -1313,6 +1346,16 @@ msgstr ""
 msgid "Joined"
 msgstr ""
 
+#: app/routes/support/knowledge-base.tsx:7
+#: app/routes/support/knowledge-base.tsx:15
+#: app/routes/support/layout.tsx:30
+msgid "Knowledge Base"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:50
+msgid "Knowledge base entry saved"
+msgstr ""
+
 #: app/features/dashboard/components/recent-users-widget.tsx:111
 msgid "Last 10 new users who joined Datum"
 msgstr ""
@@ -1371,7 +1414,7 @@ msgstr ""
 msgid "Loading mail lists..."
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:78
+#: app/features/support/components/message-thread.tsx:113
 msgid "Loading messages..."
 msgstr ""
 
@@ -1392,9 +1435,13 @@ msgstr ""
 #: app/routes/auth/callback.tsx:71
 #: app/routes/auth/login.tsx:41
 #: app/routes/auth/logout.tsx:36
-#: app/routes/support/$ticketName/index.tsx:44
+#: app/routes/support/$ticketName/index.tsx:55
 #: app/routes/user/detail/index.tsx:289
 msgid "Loading..."
+msgstr ""
+
+#: app/features/support/components/kb-entry-list.tsx:112
+msgid "Loading…"
 msgstr ""
 
 #: app/features/user/components/user-identity-card.tsx:92
@@ -1485,7 +1532,7 @@ msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:22
 #: app/features/support/components/ticket-list.tsx:117
-#: app/routes/support/$ticketName/index.tsx:125
+#: app/routes/support/$ticketName/index.tsx:130
 msgid "Messages"
 msgstr ""
 
@@ -1581,6 +1628,10 @@ msgstr ""
 msgid "New Limit"
 msgstr ""
 
+#: app/features/support/components/ticket-nav-buttons.tsx:50
+msgid "Next ticket"
+msgstr ""
+
 #: app/routes/profile/session.tsx:143
 msgid "No active sessions."
 msgstr ""
@@ -1618,6 +1669,10 @@ msgstr ""
 msgid "No email activity found."
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:129
+msgid "No entries match your search."
+msgstr ""
+
 #: app/routes/project/detail/export-policy/index.tsx:84
 msgid "No export policies found."
 msgstr ""
@@ -1651,6 +1706,10 @@ msgstr ""
 msgid "No groups found."
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:129
+msgid "No knowledge base entries yet."
+msgstr ""
+
 #: app/routes/contact-group/detail/member.tsx:416
 #: app/routes/organization/detail/member.tsx:211
 msgid "No members found."
@@ -1660,7 +1719,7 @@ msgstr ""
 msgid "No members in this group."
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:79
+#: app/features/support/components/message-thread.tsx:114
 msgid "No messages yet."
 msgstr ""
 
@@ -1706,7 +1765,7 @@ msgstr ""
 msgid "No secrets found."
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:157
+#: app/features/support/components/ticket-list.tsx:164
 msgid "No support tickets found."
 msgstr ""
 
@@ -1777,11 +1836,11 @@ msgstr ""
 msgid "Open search"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:116
+#: app/routes/support/$ticketName/index.tsx:121
 msgid "Opened:"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:106
+#: app/routes/support/$ticketName/index.tsx:111
 msgid "Org:"
 msgstr ""
 
@@ -1928,6 +1987,10 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
+#: app/features/support/components/ticket-nav-buttons.tsx:35
+msgid "Previous ticket"
+msgstr ""
+
 #: app/features/email/components/email-detail.tsx:93
 #: app/features/email/components/email-list.tsx:133
 #: app/features/email/components/email-list.tsx:158
@@ -1972,6 +2035,14 @@ msgstr ""
 #: app/routes/project/index.tsx:16
 #: app/routes/project/layout.tsx:5
 msgid "Projects"
+msgstr ""
+
+#: app/features/support/components/message-thread.tsx:87
+msgid "Promote to knowledge base"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:63
+msgid "Promote to Knowledge Base"
 msgstr ""
 
 #: app/routes/fraud/providers/create.tsx:58
@@ -2158,7 +2229,7 @@ msgstr ""
 msgid "Response Code"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:70
+#: app/routes/support/$ticketName/index.tsx:75
 msgid "Responsible:"
 msgstr ""
 
@@ -2167,6 +2238,10 @@ msgstr ""
 #: app/features/dashboard/components/pending-approvals-widget.tsx:78
 #: app/features/dashboard/components/quota-utilization-widget.tsx:112
 msgid "Retry"
+msgstr ""
+
+#: app/routes/support/knowledge-base.tsx:17
+msgid "Reusable articles and FAQ entries promoted from support conversations."
 msgstr ""
 
 #: app/routes/fraud/index.tsx:320
@@ -2202,11 +2277,15 @@ msgid "Running"
 msgstr ""
 
 #: app/features/profile/components/profile-form.tsx:58
-#: app/features/support/components/message-thread.tsx:42
+#: app/features/support/components/message-thread.tsx:44
 msgid "Save"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:42
+#: app/features/support/components/promote-to-kb-dialog.tsx:120
+msgid "Save to Knowledge Base"
+msgstr ""
+
+#: app/features/support/components/message-thread.tsx:44
 msgid "Saving…"
 msgstr ""
 
@@ -2275,6 +2354,10 @@ msgstr ""
 msgid "Search email activity..."
 msgstr ""
 
+#: app/features/support/components/kb-entry-list.tsx:120
+msgid "Search entries…"
+msgstr ""
+
 #: app/routes/project/detail/export-policy/index.tsx:76
 msgid "Search export policies..."
 msgstr ""
@@ -2325,7 +2408,7 @@ msgstr ""
 msgid "Search sessions..."
 msgstr ""
 
-#: app/features/support/components/ticket-list.tsx:149
+#: app/features/support/components/ticket-list.tsx:156
 msgid "Search tickets..."
 msgstr ""
 
@@ -2452,11 +2535,11 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:129
+#: app/features/support/components/message-thread.tsx:164
 msgid "Staff"
 msgstr ""
 
-#: app/features/support/components/message-thread.tsx:124
+#: app/features/support/components/message-thread.tsx:159
 msgid "Staff note"
 msgstr ""
 
@@ -2533,7 +2616,7 @@ msgid "Summary"
 msgstr ""
 
 #: app/components/app-sidebar/index.tsx:150
-#: app/routes/support/layout.tsx:5
+#: app/routes/support/layout.tsx:15
 msgid "Support"
 msgstr ""
 
@@ -2545,6 +2628,7 @@ msgstr ""
 msgid "System"
 msgstr ""
 
+#: app/features/support/components/promote-to-kb-dialog.tsx:95
 #: app/features/support/components/ticket-detail.tsx:20
 msgid "Tags"
 msgstr ""
@@ -2581,12 +2665,12 @@ msgstr ""
 msgid "Ticket"
 msgstr ""
 
-#: app/routes/support/$ticketName/index.tsx:22
+#: app/routes/support/$ticketName/index.tsx:24
 msgid "Ticket Details"
 msgstr ""
 
 #: app/features/support/components/ticket-detail.tsx:12
-#: app/routes/support/$ticketName/index.tsx:45
+#: app/routes/support/$ticketName/index.tsx:56
 msgid "Ticket not found."
 msgstr ""
 
@@ -2595,11 +2679,20 @@ msgid "Ticket updated"
 msgstr ""
 
 #: app/components/app-sidebar/index.tsx:156
+#: app/routes/support/layout.tsx:27
 msgid "Tickets"
 msgstr ""
 
 #: app/features/preferences/components/preferences-form.tsx:64
 msgid "Timezone updated successfully"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:66
+msgid "Title"
+msgstr ""
+
+#: app/features/support/components/promote-to-kb-dialog.tsx:86
+msgid "Topic"
 msgstr ""
 
 #. placeholder {0}: idx + 1
@@ -2635,13 +2728,19 @@ msgstr ""
 #: app/features/support/components/ticket-actions.tsx:144
 #: app/features/support/components/ticket-detail.tsx:19
 #: app/features/support/components/ticket-list.tsx:109
-#: app/routes/support/$ticketName/index.tsx:49
-#: app/routes/support/$ticketName/index.tsx:78
+#: app/routes/support/$ticketName/index.tsx:48
+#: app/routes/support/$ticketName/index.tsx:83
 msgid "Unassigned"
 msgstr ""
 
 #: app/features/fraud/policy/policy-detail.tsx:164
 msgid "Unavailable"
+msgstr ""
+
+#: app/features/support/components/kb-entry-list.tsx:99
+#: app/features/support/components/kb-entry-list.tsx:106
+#: app/features/support/components/kb-entry-list.tsx:107
+msgid "Uncategorized"
 msgstr ""
 
 #: app/features/domain/components/note-card.tsx:38

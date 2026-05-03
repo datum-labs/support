@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ComMiloApisSupportV1Alpha1SupportTicket } from '@openapi/support.miloapis.com/v1alpha1';
+import type {
+  ComMiloApisSupportV1Alpha1SupportTicket,
+  ComMiloApisSupportV1Alpha1UserReference,
+} from '@openapi/support.miloapis.com/v1alpha1';
 import {
   messageCreateMutation,
   messagePatchMutation,
@@ -9,9 +12,13 @@ import {
   ticketMarkReadMutation,
   ticketPatchMutation,
   ticketUpdateLastActivityMutation,
+  kbEntryListQuery,
+  kbEntryCreateMutation,
+  kbEntryDeleteMutation,
   type TicketListParams,
+  type KnowledgeBaseListParams,
 } from '../apis/support.api';
-import type { ComMiloApisSupportV1Alpha1UserReference } from '@openapi/support.miloapis.com/v1alpha1';
+import type { ComMiloApisSupportV1Alpha1KnowledgeBaseEntrySpec } from '@openapi/support.miloapis.com/v1alpha1';
 
 export const supportQueryKeys = {
   all: ['support'] as const,
@@ -21,6 +28,9 @@ export const supportQueryKeys = {
   },
   messages: {
     list: (ticketName: string) => ['support', 'messages', ticketName] as const,
+  },
+  kb: {
+    list: (params?: KnowledgeBaseListParams) => ['support', 'kb', 'list', params] as const,
   },
 };
 
@@ -109,6 +119,37 @@ export function useUpdateMessageMutation(ticketName: string) {
       messagePatchMutation(name, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supportQueryKeys.messages.list(ticketName) });
+    },
+  });
+}
+
+export function useKbEntryListQuery(params?: KnowledgeBaseListParams) {
+  return useQuery({
+    queryKey: supportQueryKeys.kb.list(params),
+    queryFn: () => kbEntryListQuery(params),
+  });
+}
+
+export function useCreateKbEntryMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (spec: ComMiloApisSupportV1Alpha1KnowledgeBaseEntrySpec) =>
+      kbEntryCreateMutation({
+        metadata: { generateName: 'kb-' },
+        spec,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: supportQueryKeys.kb.list() });
+    },
+  });
+}
+
+export function useDeleteKbEntryMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => kbEntryDeleteMutation(name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: supportQueryKeys.kb.list() });
     },
   });
 }

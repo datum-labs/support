@@ -6,3 +6,5 @@ export * from './components/message-thread';
 export * from './components/reply-form';
 export * from './components/ticket-status-badge';
 export * from './components/priority-badge';
+export * from './components/kb-entry-list';
+export * from './components/promote-to-kb-dialog';

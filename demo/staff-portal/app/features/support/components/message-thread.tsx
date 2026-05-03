@@ -2,6 +2,8 @@ import { DateTime } from '@/components/date';
 import { MarkdownBody } from '@/components/markdown-body';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { useMessageListQuery, useUpdateMessageMutation } from '@/resources/request/client/queries/support.queries';
+import { PromoteToKbDialog } from './promote-to-kb-dialog';
+import { useApp } from '@/providers/app.provider';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { t } from '@lingui/core/macro';
 import { cn } from '@datum-cloud/datum-ui/utils';
@@ -67,7 +69,40 @@ function EditableMessage({
   );
 }
 
+function PromoteButton({
+  messageName,
+  messageBody,
+  authorRef,
+}: {
+  messageName: string;
+  messageBody: string;
+  authorRef: { name: string; displayName?: string; email?: string };
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+        title={t`Promote to knowledge base`}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+      </button>
+      <PromoteToKbDialog
+        open={open}
+        onOpenChange={setOpen}
+        sourceMessageRef={messageName}
+        initialBody={messageBody}
+        authorRef={authorRef}
+      />
+    </>
+  );
+}
+
 export function MessageThread({ ticketName }: { ticketName: string }) {
+  const { principalId, displayName } = useApp();
   const { data, isLoading } = useMessageListQuery(ticketName);
   const messages = [...(data?.items ?? [])].sort((a, b) => {
     const ta = a.status?.createdAt ?? a.metadata?.creationTimestamp ?? '';
@@ -130,10 +165,19 @@ export function MessageThread({ ticketName }: { ticketName: string }) {
                   </span>
                 )}
               </div>
-              <DateTime
-                date={msg.status?.createdAt ?? msg.metadata?.creationTimestamp}
-                className="text-xs text-muted-foreground"
-              />
+              <div className="flex items-center gap-2">
+                <DateTime
+                  date={msg.status?.createdAt ?? msg.metadata?.creationTimestamp}
+                  className="text-xs text-muted-foreground"
+                />
+                {isStaff && (
+                  <PromoteButton
+                    messageName={msgName}
+                    messageBody={msg.spec.body}
+                    authorRef={{ name: principalId ?? 'staff', displayName: displayName ?? undefined }}
+                  />
+                )}
+              </div>
             </div>
             <EditableMessage name={msgName} body={msg.spec.body} ticketName={ticketName} />
           </div>

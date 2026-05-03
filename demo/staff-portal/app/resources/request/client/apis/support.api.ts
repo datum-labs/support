@@ -2,6 +2,7 @@ import type {
   ComMiloApisSupportV1Alpha1SupportTicket,
   ComMiloApisSupportV1Alpha1SupportMessage,
   ComMiloApisSupportV1Alpha1UserReference,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntry,
 } from '@openapi/support.miloapis.com/v1alpha1';
 import {
   listSupportMiloapisComV1Alpha1SupportTicket,
@@ -12,6 +13,10 @@ import {
   listSupportMiloapisComV1Alpha1SupportMessage,
   createSupportMiloapisComV1Alpha1SupportMessage,
   patchSupportMiloapisComV1Alpha1SupportMessage,
+  listSupportMiloapisComV1Alpha1KnowledgeBaseEntry,
+  createSupportMiloapisComV1Alpha1KnowledgeBaseEntry,
+  patchSupportMiloapisComV1Alpha1KnowledgeBaseEntry,
+  deleteSupportMiloapisComV1Alpha1KnowledgeBaseEntry,
 } from '@openapi/support.miloapis.com/v1alpha1';
 
 export interface TicketListParams {
@@ -113,4 +118,43 @@ export const ticketUpdateLastActivityMutation = async (ticketName: string) => {
     status: { lastActivity: new Date().toISOString() },
   });
   return response.data;
+};
+
+export interface KnowledgeBaseListParams {
+  topic?: string;
+  fieldSelector?: string;
+}
+
+export const kbEntryListQuery = async (params?: KnowledgeBaseListParams) => {
+  const selectors: string[] = [];
+  if (params?.topic) selectors.push(`spec.topic=${params.topic}`);
+  if (params?.fieldSelector) selectors.push(params.fieldSelector);
+
+  const response = await listSupportMiloapisComV1Alpha1KnowledgeBaseEntry({
+    fieldSelector: selectors.length ? selectors.join(',') : undefined,
+  });
+  return response.data;
+};
+
+export const kbEntryCreateMutation = async (
+  entry: Omit<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry, 'apiVersion' | 'kind'>
+) => {
+  const response = await createSupportMiloapisComV1Alpha1KnowledgeBaseEntry({
+    apiVersion: 'support.miloapis.com/v1alpha1',
+    kind: 'KnowledgeBaseEntry',
+    ...entry,
+  });
+  return response.data;
+};
+
+export const kbEntryPatchMutation = async (
+  name: string,
+  patch: Partial<ComMiloApisSupportV1Alpha1KnowledgeBaseEntry['spec']>
+) => {
+  const response = await patchSupportMiloapisComV1Alpha1KnowledgeBaseEntry(name, { spec: patch });
+  return response.data;
+};
+
+export const kbEntryDeleteMutation = async (name: string) => {
+  return deleteSupportMiloapisComV1Alpha1KnowledgeBaseEntry(name);
 };

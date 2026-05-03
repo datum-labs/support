@@ -27,6 +27,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&SupportTicketList{},
 		&SupportMessage{},
 		&SupportMessageList{},
+		&KnowledgeBaseEntry{},
+		&KnowledgeBaseEntryList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
@@ -60,6 +62,19 @@ func addFieldLabelConversions(scheme *runtime.Scheme) error {
 				return label, value, nil
 			default:
 				return "", "", fmt.Errorf("field label %q not supported for SupportMessage", label)
+			}
+		}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddFieldLabelConversionFunc(SchemeGroupVersion.WithKind("KnowledgeBaseEntry"),
+		func(label, value string) (string, string, error) {
+			switch label {
+			case "metadata.name",
+				"spec.topic":
+				return label, value, nil
+			default:
+				return "", "", fmt.Errorf("field label %q not supported for KnowledgeBaseEntry", label)
 			}
 		}); err != nil {
 		return err

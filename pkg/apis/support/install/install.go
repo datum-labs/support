@@ -22,6 +22,8 @@ func Install(scheme *runtime.Scheme) {
 		&v1alpha1.SupportTicketList{},
 		&v1alpha1.SupportMessage{},
 		&v1alpha1.SupportMessageList{},
+		&v1alpha1.KnowledgeBaseEntry{},
+		&v1alpha1.KnowledgeBaseEntryList{},
 	)
 
 	utilruntime.Must(scheme.SetVersionPriority(v1alpha1.SchemeGroupVersion))

@@ -8,6 +8,10 @@ export type {
   ComMiloApisSupportV1Alpha1SupportMessageList,
   ComMiloApisSupportV1Alpha1SupportMessageSpec,
   ComMiloApisSupportV1Alpha1SupportMessageStatus,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntry,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntryList,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntrySpec,
+  ComMiloApisSupportV1Alpha1KnowledgeBaseEntryStatus,
   ComMiloApisSupportV1Alpha1UserReference,
   ComMiloApisSupportV1Alpha1ObjectReference,
 } from './types.gen';

@@ -108,3 +108,32 @@ export interface ComMiloApisSupportV1Alpha1SupportMessageList {
   metadata?: IoK8sApimachineryPkgApisMetaV1ListMeta;
   items: ComMiloApisSupportV1Alpha1SupportMessage[];
 }
+
+export interface ComMiloApisSupportV1Alpha1KnowledgeBaseEntrySpec {
+  title: string;
+  body: string;
+  topic?: string;
+  tags?: string[];
+  authorRef: ComMiloApisSupportV1Alpha1UserReference;
+  sourceMessageRef?: string;
+}
+
+export interface ComMiloApisSupportV1Alpha1KnowledgeBaseEntryStatus {
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ComMiloApisSupportV1Alpha1KnowledgeBaseEntry {
+  apiVersion?: string;
+  kind?: string;
+  metadata?: IoK8sApimachineryPkgApisMetaV1ObjectMeta;
+  spec: ComMiloApisSupportV1Alpha1KnowledgeBaseEntrySpec;
+  status?: ComMiloApisSupportV1Alpha1KnowledgeBaseEntryStatus;
+}
+
+export interface ComMiloApisSupportV1Alpha1KnowledgeBaseEntryList {
+  apiVersion?: string;
+  kind?: string;
+  metadata?: IoK8sApimachineryPkgApisMetaV1ListMeta;
+  items: ComMiloApisSupportV1Alpha1KnowledgeBaseEntry[];
+}

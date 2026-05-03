@@ -12,6 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	_ "go.miloapis.com/support/internal/metrics"
+	"go.miloapis.com/support/internal/registry/knowledgebase"
 	"go.miloapis.com/support/internal/registry/message"
 	"go.miloapis.com/support/internal/registry/ticket"
 	"go.miloapis.com/support/pkg/apis/support/install"
@@ -81,10 +82,16 @@ func (c completedConfig) New() (*SupportServer, error) {
 		return nil, err
 	}
 
+	kbREST, err := knowledgebase.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)
+	if err != nil {
+		return nil, err
+	}
+
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1alpha1.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = map[string]rest.Storage{
-		"supporttickets":  ticketREST,
-		"supportmessages": messageREST,
+		"supporttickets":      ticketREST,
+		"supportmessages":     messageREST,
+		"knowledgebaseentries": kbREST,
 	}
 
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
