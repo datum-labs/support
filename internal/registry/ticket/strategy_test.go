@@ -53,6 +53,20 @@ func TestPrepareForCreate_Defaults(t *testing.T) {
 	}
 }
 
+func TestPrepareForCreate_PreservesTicketUID(t *testing.T) {
+	s := newStrategy()
+	ticket := validTicket()
+	// Simulate the REST layer having pre-populated TicketUID before calling
+	// PrepareForCreate via the strategy chain.
+	ticket.Status.TicketUID = 42
+
+	s.PrepareForCreate(context.Background(), ticket)
+
+	if ticket.Status.TicketUID != 42 {
+		t.Errorf("TicketUID: got %d, want 42 — PrepareForCreate must not zero a pre-assigned TicketUID", ticket.Status.TicketUID)
+	}
+}
+
 func TestPrepareForCreate_PreservesExplicitValues(t *testing.T) {
 	s := newStrategy()
 	ticket := validTicket()
@@ -98,6 +112,23 @@ func TestPrepareForUpdate_PreservesImmutableFields(t *testing.T) {
 	}
 	if updated.Status.MessageCount != 5 {
 		t.Errorf("messageCount: got %d, want 5", updated.Status.MessageCount)
+	}
+}
+
+func TestPrepareForUpdate_PreservesTicketUID(t *testing.T) {
+	s := newStrategy()
+
+	old := validTicket()
+	old.Status.TicketUID = 99
+
+	updated := validTicket()
+	updated.Spec.Status = "closed"
+	updated.Status.TicketUID = 0 // attempt to clear by a client
+
+	s.PrepareForUpdate(context.Background(), updated, old)
+
+	if updated.Status.TicketUID != 99 {
+		t.Errorf("TicketUID: got %d, want 99 — PrepareForUpdate must restore TicketUID from old object", updated.Status.TicketUID)
 	}
 }
 

@@ -80,6 +80,13 @@ type SupportTicketStatus struct {
 	// +optional
 	Phase string `json:"phase,omitempty"`
 
+	// TicketUID is a monotonically increasing integer assigned by the server at
+	// creation time. It is unique across all SupportTickets in the entire Milo
+	// system and never reused. Consumers may use it as a compact, human-friendly
+	// reference number (e.g. "#42"). The value is immutable once set.
+	// +optional
+	TicketUID int64 `json:"ticketUid,omitempty"`
+
 	// MessageCount is the number of messages on this ticket.
 	// +optional
 	MessageCount int32 `json:"messageCount,omitempty"`

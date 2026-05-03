@@ -38,8 +38,12 @@ func (s strategy) PrepareForCreate(_ context.Context, obj runtime.Object) {
 	if ticket.Spec.Visibility == "" {
 		ticket.Spec.Visibility = "all-staff"
 	}
+	// Preserve TicketUID if it has already been assigned by the REST layer
+	// before reaching this point in the admission chain.
+	uid := ticket.Status.TicketUID
 	ticket.Status = v1alpha1.SupportTicketStatus{
-		Phase: ticket.Spec.Status,
+		Phase:     ticket.Spec.Status,
+		TicketUID: uid,
 	}
 }
 
@@ -49,6 +53,9 @@ func (s strategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
 
 	newTicket.Spec.ReporterRef = oldTicket.Spec.ReporterRef
 	newTicket.Spec.OrganizationRef = oldTicket.Spec.OrganizationRef
+
+	// TicketUID is immutable once assigned; always carry the old value forward.
+	newTicket.Status.TicketUID = oldTicket.Status.TicketUID
 
 	newTicket.Status.Phase = newTicket.Spec.Status
 	newTicket.Status.MessageCount = oldTicket.Status.MessageCount
