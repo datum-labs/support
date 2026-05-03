@@ -25,25 +25,33 @@ task demo:up
 
 This starts a kind cluster, deploys Milo, Dex (OIDC), the support API server, both portals, and seeds demo data. See [docs/demo.md](docs/demo.md) for the complete setup guide.
 
-**Demo credentials:** `demo@datum.net` / `password`
+**Demo credentials:**
+- Staff portal (`https://staff.localhost:30443`): `alice@datum.net` / `password` or `bob@datum.net` / `password`
+- Cloud portal (`https://cloud.localhost:30443`): `james.hartwell@acme-corp.example` / `password`
 
 ### Staff Portal — ticket list (`https://staff.localhost:30443/support`)
 
 ![Ticket list](docs/screenshots/readme-01-ticket-list.png)
 
-### Staff Portal — ticket detail
+### Staff Portal — ticket detail with reply
 
 ![Ticket detail](docs/screenshots/readme-02-ticket-detail.png)
 
-### Cloud Portal — ticket messages (`https://cloud.localhost:30443`)
+### Cloud Portal — ticket detail (`https://cloud.localhost:30443`)
 
 ![Ticket messages](docs/screenshots/readme-03-ticket-messages.png)
 
-### Editing a message
+### Cloud portal demo
 
-Messages support inline editing with a full markdown editor — hover any message to reveal the edit button.
+Log in as a customer, view open tickets, reply to one, then create a new ticket:
 
-![Edit message demo](docs/edit-message-demo.gif)
+![Cloud portal demo](docs/edit-message-demo.gif)
+
+### Staff portal demo
+
+Log in as support staff, find the incoming ticket, and reply:
+
+![Staff portal demo](docs/staff-portal-demo.gif)
 
 ---
 
