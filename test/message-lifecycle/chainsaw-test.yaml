@@ -1,0 +1,163 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: message-lifecycle
+spec:
+  description: |
+    Tests the full CRUD lifecycle of a SupportMessage.
+
+    Verifies:
+    - A message can be created with required fields
+    - A staff message is created correctly with internal=false
+    - An internal (staff-only) message can be created with internal=true
+    - A customer message can be created
+    - A message body can be updated
+    - A message can be deleted
+
+  steps:
+    - name: create-parent-ticket
+      description: Create the parent ticket that messages will reference
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: msg-lifecycle-ticket
+              spec:
+                title: "Parent ticket for message lifecycle tests"
+                description: "Holds messages during the lifecycle test."
+                reporterRef:
+                  name: user-ml-reporter
+
+    - name: create-staff-message
+      description: Create a public staff reply
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-staff-001
+              spec:
+                ticketRef: msg-lifecycle-ticket
+                body: "Thank you for reaching out! We are looking into this now."
+                authorRef:
+                  name: agent-alice
+                  displayName: "Alice (Support)"
+                  email: alice@datum.net
+                authorType: staff
+                internal: false
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-staff-001
+              spec:
+                ticketRef: msg-lifecycle-ticket
+                authorType: staff
+
+    - name: create-internal-note
+      description: Create a staff-only internal note (not visible to customers)
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-internal-001
+              spec:
+                ticketRef: msg-lifecycle-ticket
+                body: "Internal note: root cause identified, fix in INFRA-9001."
+                authorRef:
+                  name: agent-alice
+                  displayName: "Alice (Support)"
+                  email: alice@datum.net
+                authorType: staff
+                internal: true
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-internal-001
+              spec:
+                internal: true
+
+    - name: create-customer-reply
+      description: Create a customer reply
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-customer-001
+              spec:
+                ticketRef: msg-lifecycle-ticket
+                body: "Thank you! Looking forward to the fix."
+                authorRef:
+                  name: user-ml-reporter
+                  displayName: "Reporter"
+                  email: reporter@example.com
+                authorType: customer
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-customer-001
+              spec:
+                authorType: customer
+
+    - name: update-message-body
+      description: Update the body of the staff message
+      try:
+        - patch:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-staff-001
+              spec:
+                body: "UPDATE: we have identified the root cause and deployed a fix. Please try again."
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: msg-lifecycle-staff-001
+              spec:
+                body: "UPDATE: we have identified the root cause and deployed a fix. Please try again."
+
+    - name: delete-messages-and-ticket
+      description: Delete all messages and the parent ticket
+      try:
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: msg-lifecycle-staff-001
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: msg-lifecycle-internal-001
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: msg-lifecycle-customer-001
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: msg-lifecycle-ticket
+        - wait:
+            apiVersion: support.miloapis.com/v1alpha1
+            kind: SupportMessage
+            name: msg-lifecycle-staff-001
+            timeout: 30s
+            for:
+              deletion: {}

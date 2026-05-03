@@ -1,0 +1,160 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: message-validation
+spec:
+  description: |
+    Tests that the SupportMessage API server rejects invalid inputs.
+
+    Verifies:
+    - Creating a message without a ticketRef is rejected
+    - Creating a message without a body is rejected
+    - Creating a message without authorRef.name is rejected
+    - Creating a message without authorType is rejected
+    - Creating a message with an invalid authorType is rejected
+    - Both valid authorType values (staff, customer) are accepted
+
+  steps:
+    - name: reject-missing-ticketref
+      description: Message without ticketRef must be rejected
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: invalid-msg-no-ticketref
+              spec:
+                body: "A message body without a ticket reference."
+                authorRef:
+                  name: agent-abc
+                authorType: staff
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-missing-body
+      description: Message without body must be rejected
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: invalid-msg-no-body
+              spec:
+                ticketRef: some-ticket
+                authorRef:
+                  name: agent-abc
+                authorType: staff
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-missing-author-ref-name
+      description: Message without authorRef.name must be rejected
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: invalid-msg-no-author-name
+              spec:
+                ticketRef: some-ticket
+                body: "Valid body."
+                authorRef:
+                  displayName: "No name"
+                authorType: staff
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-missing-author-type
+      description: Message without authorType must be rejected
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: invalid-msg-no-author-type
+              spec:
+                ticketRef: some-ticket
+                body: "Valid body."
+                authorRef:
+                  name: agent-abc
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-invalid-author-type
+      description: Message with authorType=bot must be rejected
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: invalid-msg-bad-author-type
+              spec:
+                ticketRef: some-ticket
+                body: "Valid body."
+                authorRef:
+                  name: agent-abc
+                authorType: bot
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: accept-staff-author-type
+      description: A message with authorType=staff must be accepted
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: valid-msg-staff
+              spec:
+                ticketRef: some-ticket
+                body: "A valid staff message."
+                authorRef:
+                  name: agent-abc
+                authorType: staff
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: valid-msg-staff
+
+    - name: accept-customer-author-type
+      description: A message with authorType=customer must be accepted
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: valid-msg-customer
+              spec:
+                ticketRef: some-ticket
+                body: "A valid customer message."
+                authorRef:
+                  name: user-xyz
+                authorType: customer
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: valid-msg-customer

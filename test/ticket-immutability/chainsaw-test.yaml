@@ -1,0 +1,87 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ticket-immutability
+spec:
+  description: |
+    Tests that immutable fields on SupportTicket are preserved across updates.
+
+    The PrepareForUpdate strategy enforces:
+    - spec.reporterRef is immutable once set at creation
+    - spec.organizationRef is immutable once set at creation
+    - status.messageCount is preserved from the old object (not overwritten by updates)
+    - status.lastActivity is preserved from the old object when not set on the new one
+
+  steps:
+    - name: create-ticket-with-org
+      description: Create a ticket with a reporterRef and organizationRef
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: immutable-ticket-001
+              spec:
+                title: "Immutability test ticket"
+                description: "This ticket tests that certain fields cannot be changed."
+                reporterRef:
+                  name: original-reporter
+                  displayName: "Original Reporter"
+                  email: reporter@example.com
+                organizationRef:
+                  kind: Organization
+                  name: original-org
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: immutable-ticket-001
+              spec:
+                reporterRef:
+                  name: original-reporter
+                organizationRef:
+                  name: original-org
+
+    - name: attempt-to-change-reporter-and-org
+      description: >
+        Attempt to overwrite reporterRef and organizationRef via a patch.
+        The strategy must silently restore the original values.
+      try:
+        - patch:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: immutable-ticket-001
+              spec:
+                title: "Updated title (allowed)"
+                status: in-progress
+                reporterRef:
+                  name: attacker-user
+                  displayName: "Malicious attempt"
+                organizationRef:
+                  kind: Organization
+                  name: different-org
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: immutable-ticket-001
+              spec:
+                title: "Updated title (allowed)"
+                status: in-progress
+                reporterRef:
+                  name: original-reporter
+                organizationRef:
+                  name: original-org
+
+    - name: cleanup
+      try:
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: immutable-ticket-001

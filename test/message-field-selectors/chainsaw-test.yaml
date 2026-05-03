@@ -1,0 +1,213 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: message-field-selectors
+spec:
+  description: |
+    Tests field-selector filtering on SupportMessage resources.
+
+    Verifies that messages can be filtered by:
+    - spec.ticketRef  (retrieve all messages for a given ticket)
+    - spec.authorType (filter staff vs customer messages)
+    - spec.internal   (filter internal notes vs public replies)
+
+  steps:
+    - name: create-test-messages
+      description: Create a set of messages covering all filterable fields
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: mfs-msg-staff-public
+              spec:
+                ticketRef: ticket-alpha
+                body: "Public staff reply."
+                authorRef:
+                  name: agent-fs-alice
+                authorType: staff
+                internal: false
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: mfs-msg-staff-internal
+              spec:
+                ticketRef: ticket-alpha
+                body: "Internal staff note."
+                authorRef:
+                  name: agent-fs-alice
+                authorType: staff
+                internal: true
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: mfs-msg-customer
+              spec:
+                ticketRef: ticket-alpha
+                body: "Customer reply."
+                authorRef:
+                  name: user-fs-jane
+                authorType: customer
+                internal: false
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              metadata:
+                name: mfs-msg-other-ticket
+              spec:
+                ticketRef: ticket-beta
+                body: "Message on a different ticket."
+                authorRef:
+                  name: agent-fs-bob
+                authorType: staff
+                internal: false
+
+    - name: filter-by-ticket-ref
+      description: spec.ticketRef=ticket-alpha must return only the three alpha messages
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.ticketRef=ticket-alpha \
+                --no-headers 2>/dev/null | wc -l)
+              if [ "$count" -ne 3 ]; then
+                echo "FAIL: expected 3 messages for ticket-alpha, got $count"
+                kubectl get supportmessages --field-selector=spec.ticketRef=ticket-alpha --no-headers
+                exit 1
+              fi
+              # ticket-beta message must not appear
+              bad=$(kubectl get supportmessages \
+                --field-selector=spec.ticketRef=ticket-alpha \
+                --no-headers 2>/dev/null | grep "mfs-msg-other-ticket" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: ticket-beta message appeared in ticket-alpha filter: $bad"
+                exit 1
+              fi
+              echo "OK: ticketRef filter returned $count messages"
+
+    - name: filter-by-author-type-staff
+      description: spec.authorType=staff must return only the staff messages
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              # All four test messages are in scope; 3 are staff.
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.authorType=staff \
+                --no-headers 2>/dev/null | grep "^mfs-msg-" | wc -l)
+              if [ "$count" -ne 3 ]; then
+                echo "FAIL: expected 3 staff messages among fixtures, got $count"
+                exit 1
+              fi
+              bad=$(kubectl get supportmessages \
+                --field-selector=spec.authorType=staff \
+                --no-headers 2>/dev/null | grep "mfs-msg-customer" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: customer message appeared in staff filter: $bad"
+                exit 1
+              fi
+              echo "OK: authorType=staff filter returned $count messages"
+
+    - name: filter-by-author-type-customer
+      description: spec.authorType=customer must return only the customer message
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.authorType=customer \
+                --no-headers 2>/dev/null | grep "^mfs-msg-" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 customer message, got $count"
+                exit 1
+              fi
+              echo "OK: authorType=customer filter returned $count message(s)"
+
+    - name: filter-internal-true
+      description: spec.internal=true must return only the internal note
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.internal=true \
+                --no-headers 2>/dev/null | grep "^mfs-msg-" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 internal message, got $count"
+                exit 1
+              fi
+              # public messages must not appear
+              bad=$(kubectl get supportmessages \
+                --field-selector=spec.internal=true \
+                --no-headers 2>/dev/null | grep "mfs-msg-staff-public" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: public message appeared in internal=true filter: $bad"
+                exit 1
+              fi
+              echo "OK: spec.internal=true filter returned $count message(s)"
+
+    - name: filter-internal-false
+      description: spec.internal=false must return only public messages
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.internal=false \
+                --no-headers 2>/dev/null | grep "^mfs-msg-" | wc -l)
+              if [ "$count" -ne 3 ]; then
+                echo "FAIL: expected 3 public messages, got $count"
+                exit 1
+              fi
+              echo "OK: spec.internal=false filter returned $count message(s)"
+
+    - name: combined-filter-ticket-and-internal
+      description: Combining spec.ticketRef=ticket-alpha and spec.internal=false
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supportmessages \
+                --field-selector=spec.ticketRef=ticket-alpha,spec.internal=false \
+                --no-headers 2>/dev/null | grep "^mfs-msg-" | wc -l)
+              if [ "$count" -ne 2 ]; then
+                echo "FAIL: expected 2 public messages on ticket-alpha, got $count"
+                exit 1
+              fi
+              echo "OK: combined field selector returned $count message(s)"
+
+    - name: cleanup
+      try:
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: mfs-msg-staff-public
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: mfs-msg-staff-internal
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: mfs-msg-customer
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportMessage
+              name: mfs-msg-other-ticket

@@ -1,0 +1,192 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ticket-field-selectors
+spec:
+  description: |
+    Tests field-selector filtering on SupportTicket resources.
+
+    Verifies that tickets can be filtered by:
+    - spec.status
+    - spec.priority
+    - status.phase
+    - spec.organizationRef.name
+    - spec.ownerRef.name
+
+  steps:
+    - name: create-test-tickets
+      description: Create a set of tickets with different statuses, priorities, and owners
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: fs-ticket-open-high
+              spec:
+                title: "Open high-priority ticket"
+                description: "Field-selector test fixture."
+                reporterRef:
+                  name: user-fs-001
+                status: open
+                priority: high
+                ownerRef:
+                  name: agent-fs-alice
+                organizationRef:
+                  kind: Organization
+                  name: org-fs-acme
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: fs-ticket-inprogress-medium
+              spec:
+                title: "In-progress medium-priority ticket"
+                description: "Field-selector test fixture."
+                reporterRef:
+                  name: user-fs-002
+                status: in-progress
+                priority: medium
+                ownerRef:
+                  name: agent-fs-bob
+                organizationRef:
+                  kind: Organization
+                  name: org-fs-other
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: fs-ticket-resolved-low
+              spec:
+                title: "Resolved low-priority ticket"
+                description: "Field-selector test fixture."
+                reporterRef:
+                  name: user-fs-003
+                status: resolved
+                priority: low
+
+    - name: filter-by-status-open
+      description: Field-selector spec.status=open must return only open tickets
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supporttickets \
+                --field-selector=spec.status=open \
+                --no-headers 2>/dev/null | grep "^fs-ticket-open-high" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 open ticket, got $count"
+                exit 1
+              fi
+              echo "OK: found $count open ticket(s)"
+
+              # resolved ticket must NOT appear
+              bad=$(kubectl get supporttickets \
+                --field-selector=spec.status=open \
+                --no-headers 2>/dev/null | grep "fs-ticket-resolved-low" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: resolved ticket appeared in open filter: $bad"
+                exit 1
+              fi
+              echo "OK: resolved ticket correctly excluded from open filter"
+
+    - name: filter-by-priority-high
+      description: Field-selector spec.priority=high must return only high-priority tickets
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supporttickets \
+                --field-selector=spec.priority=high \
+                --no-headers 2>/dev/null | grep "^fs-ticket-open-high" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 high-priority ticket, got $count"
+                exit 1
+              fi
+              echo "OK: found $count high-priority ticket(s)"
+
+    - name: filter-by-status-phase
+      description: Field-selector status.phase mirrors spec.status
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supporttickets \
+                --field-selector=status.phase=resolved \
+                --no-headers 2>/dev/null | grep "^fs-ticket-resolved-low" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 resolved ticket by status.phase, got $count"
+                exit 1
+              fi
+              echo "OK: status.phase filter works"
+
+    - name: filter-by-organization-ref
+      description: Field-selector spec.organizationRef.name filters by org
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supporttickets \
+                --field-selector=spec.organizationRef.name=org-fs-acme \
+                --no-headers 2>/dev/null | grep "^fs-ticket-open-high" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 ticket for org-fs-acme, got $count"
+                exit 1
+              fi
+              # other-org ticket must not appear
+              bad=$(kubectl get supporttickets \
+                --field-selector=spec.organizationRef.name=org-fs-acme \
+                --no-headers 2>/dev/null | grep "fs-ticket-inprogress-medium" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: wrong org ticket appeared: $bad"
+                exit 1
+              fi
+              echo "OK: organizationRef.name filter works"
+
+    - name: filter-by-owner-ref
+      description: Field-selector spec.ownerRef.name filters by assigned agent
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              count=$(kubectl get supporttickets \
+                --field-selector=spec.ownerRef.name=agent-fs-alice \
+                --no-headers 2>/dev/null | grep "^fs-ticket-open-high" | wc -l)
+              if [ "$count" -ne 1 ]; then
+                echo "FAIL: expected 1 ticket owned by agent-fs-alice, got $count"
+                exit 1
+              fi
+              bad=$(kubectl get supporttickets \
+                --field-selector=spec.ownerRef.name=agent-fs-alice \
+                --no-headers 2>/dev/null | grep "fs-ticket-inprogress-medium" || true)
+              if [ -n "$bad" ]; then
+                echo "FAIL: agent-fs-bob ticket appeared for agent-fs-alice filter: $bad"
+                exit 1
+              fi
+              echo "OK: ownerRef.name filter works"
+
+    - name: cleanup
+      description: Remove field-selector test fixtures
+      try:
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: fs-ticket-open-high
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: fs-ticket-inprogress-medium
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: fs-ticket-resolved-low

@@ -1,0 +1,101 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: readstate-merge
+spec:
+  description: |
+    Tests that status.readState entries from different principals are merged
+    rather than overwritten during a PATCH update.
+
+    The PrepareForUpdate strategy merges the new readState on top of the old
+    one so that one user's cursor update does not clear another user's entry.
+
+  steps:
+    - name: create-ticket
+      description: Create a ticket to hold readState
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: readstate-ticket-001
+              spec:
+                title: "ReadState merge test"
+                description: "Testing that read cursors from multiple users are preserved."
+                reporterRef:
+                  name: user-readstate
+
+    - name: set-user-a-read-cursor
+      description: Simulate user-a marking the ticket as read via a status merge patch
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              kubectl patch supportticket readstate-ticket-001 \
+                --type=merge \
+                -p '{"status":{"readState":{"user-a":"2026-01-01T00:00:00Z"}}}'
+
+    - name: set-user-b-read-cursor-without-clearing-user-a
+      description: >
+        Simulate user-b marking the ticket as read.
+        After this patch, both user-a and user-b entries must exist.
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              kubectl patch supportticket readstate-ticket-001 \
+                --type=merge \
+                -p '{"status":{"readState":{"user-b":"2026-01-02T00:00:00Z"}}}'
+
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              userA=$(kubectl get supportticket readstate-ticket-001 \
+                -o jsonpath='{.status.readState.user-a}')
+              userB=$(kubectl get supportticket readstate-ticket-001 \
+                -o jsonpath='{.status.readState.user-b}')
+
+              if [ -z "$userA" ]; then
+                echo "FAIL: user-a read cursor was wiped after user-b patch"
+                exit 1
+              fi
+              if [ -z "$userB" ]; then
+                echo "FAIL: user-b read cursor was not saved"
+                exit 1
+              fi
+              echo "OK: both cursors present — user-a=$userA  user-b=$userB"
+
+    - name: update-user-a-cursor
+      description: Update user-a's cursor; user-b's must remain unchanged
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              kubectl patch supportticket readstate-ticket-001 \
+                --type=merge \
+                -p '{"status":{"readState":{"user-a":"2026-01-03T00:00:00Z"}}}'
+
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              userB=$(kubectl get supportticket readstate-ticket-001 \
+                -o jsonpath='{.status.readState.user-b}')
+              if [ -z "$userB" ]; then
+                echo "FAIL: user-b cursor was lost after user-a cursor update"
+                exit 1
+              fi
+              echo "OK: user-b cursor still present after user-a update: $userB"
+
+    - name: cleanup
+      try:
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: readstate-ticket-001

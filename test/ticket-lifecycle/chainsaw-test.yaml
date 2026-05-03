@@ -1,0 +1,136 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ticket-lifecycle
+spec:
+  description: |
+    Tests the full CRUD lifecycle of a SupportTicket.
+
+    Verifies:
+    - A ticket can be created with required fields
+    - Default values are applied on creation (status=open, priority=medium, visibility=all-staff)
+    - status.phase mirrors spec.status after creation
+    - A ticket can be updated (title, status, priority, ownerRef, tags)
+    - status.phase is updated to reflect the new spec.status after update
+    - A ticket can be deleted and is fully removed
+
+  steps:
+    - name: create-ticket
+      description: Create a minimal valid SupportTicket and verify defaults are applied
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                title: "Cannot log in to the portal"
+                description: "Clicking login redirects to a blank page."
+                reporterRef:
+                  name: user-jane
+                  displayName: "Jane Doe"
+                  email: jane@example.com
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                title: "Cannot log in to the portal"
+                status: open
+                priority: medium
+                visibility: all-staff
+              status:
+                phase: open
+
+    - name: update-ticket-status-and-owner
+      description: Update ticket to in-progress and assign an owner
+      try:
+        - patch:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                status: in-progress
+                priority: high
+                ownerRef:
+                  name: agent-alice
+                  displayName: "Alice (Support)"
+                  email: alice@datum.net
+                tags:
+                  - auth
+                  - portal
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                status: in-progress
+                priority: high
+                ownerRef:
+                  name: agent-alice
+                tags:
+                  - auth
+                  - portal
+              status:
+                phase: in-progress
+
+    - name: resolve-ticket
+      description: Transition the ticket to resolved
+      try:
+        - patch:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                status: resolved
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                status: resolved
+              status:
+                phase: resolved
+
+    - name: close-and-delete-ticket
+      description: Close the ticket and then delete it
+      try:
+        - patch:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              spec:
+                status: closed
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: lifecycle-ticket-001
+              status:
+                phase: closed
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: lifecycle-ticket-001
+        - wait:
+            apiVersion: support.miloapis.com/v1alpha1
+            kind: SupportTicket
+            name: lifecycle-ticket-001
+            timeout: 30s
+            for:
+              deletion: {}

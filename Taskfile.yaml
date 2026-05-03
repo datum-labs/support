@@ -149,6 +149,21 @@ tasks:
     cmds:
       - go test -buildvcs=false -v ./...
 
+  test:e2e:
+    desc: Run Chainsaw end-to-end tests against a running support API server
+    summary: |
+      Runs Chainsaw tests located in test/.
+      Requires the support API server to be reachable at https://localhost:30443
+      (i.e. the demo/dev cluster must already be running).
+      Set KUBECONFIG to point at the support API server before running, or
+      use the default .milo/kubeconfig which routes through Envoy Gateway.
+    cmds:
+      - |
+        chainsaw test \
+          --config test/.chainsaw.yaml \
+          --test-dir test/ \
+          "$@"
+
   generate:
     desc: Run code generation (deepcopy, openapi)
     cmds:

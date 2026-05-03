@@ -1,0 +1,164 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ticket-validation
+spec:
+  description: |
+    Tests that the SupportTicket API server rejects invalid inputs.
+
+    Verifies:
+    - Creating a ticket without a title is rejected
+    - Creating a ticket without a description is rejected
+    - Creating a ticket without a reporterRef.name is rejected
+    - Creating a ticket with an invalid status value is rejected
+    - Creating a ticket with an invalid priority value is rejected
+    - A valid ticket with all optional fields set is accepted
+
+  steps:
+    - name: reject-missing-title
+      description: Ticket creation without a title must fail
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: invalid-ticket-no-title
+              spec:
+                description: "A description without a title."
+                reporterRef:
+                  name: user-abc
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-missing-description
+      description: Ticket creation without a description must fail
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: invalid-ticket-no-desc
+              spec:
+                title: "A title without description"
+                reporterRef:
+                  name: user-abc
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-missing-reporter-ref
+      description: Ticket creation without reporterRef.name must fail
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: invalid-ticket-no-reporter
+              spec:
+                title: "Valid title"
+                description: "Valid description"
+                reporterRef:
+                  displayName: "No name field"
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-invalid-status
+      description: Ticket creation with an unrecognised status value must fail
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: invalid-ticket-bad-status
+              spec:
+                title: "Valid title"
+                description: "Valid description"
+                reporterRef:
+                  name: user-abc
+                status: "bogus-status"
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: reject-invalid-priority
+      description: Ticket creation with an unrecognised priority value must fail
+      try:
+        - script:
+            timeout: 15s
+            content: |
+              set -e
+              output=$(kubectl apply -f - 2>&1 <<'EOF'
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: invalid-ticket-bad-priority
+              spec:
+                title: "Valid title"
+                description: "Valid description"
+                reporterRef:
+                  name: user-abc
+                priority: "extreme"
+              EOF
+              ) && echo "UNEXPECTED_SUCCESS: $output" && exit 1 || echo "Correctly rejected: $output"
+
+    - name: accept-fully-populated-ticket
+      description: A fully populated ticket with all optional fields must be accepted
+      try:
+        - apply:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: valid-full-ticket
+              spec:
+                title: "Full ticket with every optional field"
+                description: "Testing all fields together."
+                status: waiting-on-customer
+                priority: urgent
+                visibility: all-staff
+                reporterRef:
+                  name: user-abc
+                  displayName: "User Abc"
+                  email: abc@example.com
+                ownerRef:
+                  name: agent-007
+                  displayName: "Agent 007"
+                contributors:
+                  - name: agent-002
+                participants:
+                  - userRef:
+                      name: user-xyz
+                tags:
+                  - urgent
+                  - billing
+                organizationRef:
+                  kind: Organization
+                  name: acme-corp
+        - assert:
+            resource:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              metadata:
+                name: valid-full-ticket
+              spec:
+                status: waiting-on-customer
+                priority: urgent
+        - delete:
+            ref:
+              apiVersion: support.miloapis.com/v1alpha1
+              kind: SupportTicket
+              name: valid-full-ticket
