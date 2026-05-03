@@ -371,6 +371,120 @@ tasks:
           apiservice/v1alpha1.support.miloapis.com --timeout=60s 2>/dev/null || true
         echo "✅ Support APIService registered in Milo cluster"
 
+        # Wire up auth delegation: support-apiserver validates tokens via Milo's TokenReview API.
+        # Create a kubeconfig pointing to the in-cluster Milo address with the demo static token.
+        echo "Wiring up auth delegation to Milo..."
+        cat > /tmp/support-milo-kubeconfig.yaml <<'KUBECONFIG'
+apiVersion: v1
+kind: Config
+clusters:
+- name: milo
+  cluster:
+    server: https://milo-apiserver.milo-system.svc.cluster.local:6443
+    insecure-skip-tls-verify: true
+users:
+- name: support-apiserver
+  user:
+    token: test-admin-token
+contexts:
+- name: default
+  context:
+    cluster: milo
+    user: support-apiserver
+current-context: default
+KUBECONFIG
+        kubectl create secret generic support-milo-kubeconfig \
+          -n support-system \
+          --from-file=kubeconfig=/tmp/support-milo-kubeconfig.yaml \
+          --dry-run=client -o yaml | kubectl apply -f -
+        rm -f /tmp/support-milo-kubeconfig.yaml
+
+        # Extract the support-apiserver CA cert for Envoy's BackendTLSPolicy.
+        SUPPORT_CA=$(kubectl get secret support-ca-secret -n support-system \
+          -o jsonpath='{.data.tls\.crt}' | base64 -d)
+        kubectl create configmap support-apiserver-ca \
+          -n support-system \
+          --from-literal=ca.crt="${SUPPORT_CA}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+        # Patch the support-apiserver deployment to use Milo for auth/authz.
+        # Uses strategic merge patch so it's idempotent (env vars merge by name, volumes by name).
+        kubectl patch deployment support-apiserver -n support-system --type=strategic -p='
+spec:
+  template:
+    spec:
+      containers:
+      - name: apiserver
+        env:
+        - name: AUTHENTICATION_KUBECONFIG
+          value: /etc/support/milo/kubeconfig
+        - name: AUTHORIZATION_KUBECONFIG
+          value: /etc/support/milo/kubeconfig
+        volumeMounts:
+        - name: milo-kubeconfig
+          mountPath: /etc/support/milo
+          readOnly: true
+      volumes:
+      - name: milo-kubeconfig
+        secret:
+          secretName: support-milo-kubeconfig
+'
+        kubectl rollout status deployment/support-apiserver -n support-system --timeout=60s 2>/dev/null || true
+
+        # Create a direct HTTPRoute for support API calls that bypasses Milo (which strips bearer tokens).
+        kubectl apply -f - <<'EOF'
+        apiVersion: gateway.networking.k8s.io/v1
+        kind: HTTPRoute
+        metadata:
+          name: support-apiserver
+          namespace: support-system
+        spec:
+          parentRefs:
+            - group: gateway.networking.k8s.io
+              kind: Gateway
+              name: default-gateway
+              namespace: envoy-gateway-system
+          rules:
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /apis/support.miloapis.com/
+                - path:
+                    type: Exact
+                    value: /apis/support.miloapis.com
+              backendRefs:
+                - group: ""
+                  kind: Service
+                  name: support-apiserver
+                  namespace: support-system
+                  port: 443
+                  weight: 1
+              timeouts:
+                request: 86400s
+                backendRequest: 86400s
+        EOF
+
+        # BackendTLSPolicy so Envoy uses TLS when proxying to the support-apiserver backend.
+        kubectl apply -f - <<'EOF'
+        apiVersion: gateway.networking.k8s.io/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: support-apiserver-tls
+          namespace: support-system
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: support-apiserver
+          validation:
+            caCertificateRefs:
+              - group: ""
+                kind: ConfigMap
+                name: support-apiserver-ca
+            hostname: support-apiserver.support-system.svc
+        EOF
+        echo "✅ Support API auth wired up"
+
   demo:deploy-staff-portal:
     desc: "Build, load, and deploy the staff portal (demo overlay) to the demo cluster"
     silent: true
@@ -532,6 +646,13 @@ tasks:
           givenName: Demo
           familyName: User
         EOF
+
+        # Approve the demo user so the cloud portal skips the /verifying screen
+        curl -sk -X PATCH \
+          -H "Authorization: Bearer test-admin-token" \
+          -H "Content-Type: application/merge-patch+json" \
+          https://localhost:30443/apis/iam.miloapis.com/v1alpha1/users/08a8684b-db88-4b73-90a9-3cd1661f5466/status \
+          -d '{"status":{"registrationApproval":"Approved"}}' > /dev/null
 
         kubectl --kubeconfig "${MILO_KUBECONFIG}" apply -f - <<'EOF'
         apiVersion: iam.miloapis.com/v1alpha1
