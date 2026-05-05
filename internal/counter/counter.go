@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/generic"
@@ -33,13 +34,15 @@ type counterValue struct {
 	Next int64 `json:"next"`
 }
 
-// counterObject wraps counterValue so it satisfies runtime.Object, which is
-// required by storage.Interface.GuaranteedUpdate.
+// counterObject wraps counterValue so it satisfies runtime.Object and
+// metav1.Object (via embedded ObjectMeta), both required by
+// storage.Interface.GuaranteedUpdate → PrepareObjectForStorage.
 type counterObject struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 	counterValue
 }
 
-func (*counterObject) GetObjectKind() schema.ObjectKind { return schema.EmptyObjectKind }
 func (c *counterObject) DeepCopyObject() runtime.Object {
 	cp := *c
 	return &cp
@@ -66,7 +69,7 @@ func (counterCodec) Decode(data []byte, _ *schema.GroupVersionKind, into runtime
 		co.counterValue = cv
 		return co, nil, nil
 	}
-	return &counterObject{cv}, nil, nil
+	return &counterObject{counterValue: cv}, nil, nil
 }
 
 func (counterCodec) Identifier() runtime.Identifier { return "counterCodec/json" }
@@ -143,7 +146,7 @@ func (c *TicketCounter) Next(ctx context.Context) (int64, error) {
 			}
 			next := cur.Next + 1
 			assigned = next
-			return &counterObject{counterValue{Next: next}}, nil, nil
+			return &counterObject{counterValue: counterValue{Next: next}}, nil, nil
 		},
 		nil, // no cached existing object
 	)
