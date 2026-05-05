@@ -45,8 +45,6 @@ tmp/
 temp/
 
 # Local environment files
-.env
-.env.local
 
 # ClickHouse data
 clickhouse-data/
@@ -65,3 +63,5 @@ observability/jsonnetfile.lock.json
 
 # Directory used by the taskfile for remote taskfile storage
 .task
+config.bat
+node_modules
