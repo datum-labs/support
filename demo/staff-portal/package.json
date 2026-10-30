@@ -55,7 +55,7 @@
     "@vvo/tzdb": "^6.184.0",
     "accept-language-parser": "^1.5.0",
     "ai": "^6.0.156",
-    "axios": "^1.13.2",
+    "axios": "^1.20.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
