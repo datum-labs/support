@@ -8,6 +8,7 @@ import { useProjectDnsListQuery } from '@/resources/request/client';
 import { projectRoutes } from '@/utils/config/routes.config';
 import { metaObject, transformControlPlaneStatus } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { ComMiloapisNetworkingDnsV1Alpha1DnsZone } from '@openapi/dns.networking.miloapis.com/v1alpha1';
@@ -20,14 +21,17 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`DNS - ${projectName}`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisNetworkingDnsV1Alpha1DnsZone>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisNetworkingDnsV1Alpha1DnsZone
+>();
 
 export default function Page() {
   const { project } = useProjectDetailData();
   const projectName = project.metadata?.name ?? '';
   const tableQuery = useProjectDnsListQuery(projectName);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.domainName', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Zone Name`} />,
       cell: ({ row }) => {
@@ -77,7 +81,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Description`} />,
       cell: ({ getValue }) => getValue() ?? '-',
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

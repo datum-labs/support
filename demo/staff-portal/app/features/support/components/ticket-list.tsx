@@ -1,19 +1,23 @@
+import { PriorityBadge } from './priority-badge';
+import { TicketStatusBadge } from './ticket-status-badge';
 import { DataTableToolbar } from '@/components/data-table-toolbar';
 import { DateTime } from '@/components/date';
 import { useApp } from '@/providers/app.provider';
+import type { TicketListParams } from '@/resources/request/client/apis/support.api';
 import { useTicketListQuery } from '@/resources/request/client/queries/support.queries';
 import { supportRoutes } from '@/utils/config/routes.config';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import type { ComMiloApisSupportV1Alpha1SupportTicket } from '@openapi/support.miloapis.com/v1alpha1';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link } from 'react-router';
-import { PriorityBadge } from './priority-badge';
-import { TicketStatusBadge } from './ticket-status-badge';
-import type { TicketListParams } from '@/resources/request/client/apis/support.api';
 
-const columnHelper = createColumnHelper<ComMiloApisSupportV1Alpha1SupportTicket>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloApisSupportV1Alpha1SupportTicket
+>();
 
 function isTicketUnread(
   ticket: ComMiloApisSupportV1Alpha1SupportTicket,
@@ -21,8 +25,7 @@ function isTicketUnread(
 ): { unread: boolean; isNew: boolean } {
   const readState = ticket.status?.readState ?? {};
   const anyoneRead = Object.keys(readState).length > 0;
-  const lastActivity =
-    ticket.status?.lastActivity ?? ticket.metadata?.creationTimestamp;
+  const lastActivity = ticket.status?.lastActivity ?? ticket.metadata?.creationTimestamp;
 
   if (!anyoneRead) {
     return { unread: true, isNew: true };
@@ -48,7 +51,7 @@ export function TicketList({ params }: { params?: TicketListParams }) {
   const tickets = query.data?.items ?? [];
   const { principalId } = useApp();
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.title', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Ticket`} />,
       cell: ({ getValue, row }) => {
@@ -65,7 +68,7 @@ export function TicketList({ params }: { params?: TicketListParams }) {
             <div className="min-w-0">
               <Link
                 to={supportRoutes.detail(ticket.metadata?.name ?? '')}
-                className={`block hover:underline ${unread ? 'font-semibold' : 'font-normal text-muted-foreground'}`}>
+                className={`block hover:underline ${unread ? 'font-semibold' : 'text-muted-foreground font-normal'}`}>
                 {getValue()}
               </Link>
               <div className="flex items-center gap-2">
@@ -96,9 +99,7 @@ export function TicketList({ params }: { params?: TicketListParams }) {
     columnHelper.accessor('spec.reporterRef.email', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Reporter`} />,
       cell: ({ getValue, row }) => (
-        <span title={getValue()}>
-          {row.original.spec.reporterRef.displayName || getValue()}
-        </span>
+        <span title={getValue()}>{row.original.spec.reporterRef.displayName || getValue()}</span>
       ),
     }),
     columnHelper.accessor('spec.ownerRef.displayName', {
@@ -122,13 +123,13 @@ export function TicketList({ params }: { params?: TicketListParams }) {
       cell: ({ getValue, row }) => (
         <DateTime date={getValue() ?? row.original.metadata?.creationTimestamp} />
       ),
-      sortingFn: (a, b) => {
+      sortFn: (a, b) => {
         const ta = a.original.status?.lastActivity ?? a.original.metadata?.creationTimestamp ?? '';
         const tb = b.original.status?.lastActivity ?? b.original.metadata?.creationTimestamp ?? '';
         return ta < tb ? -1 : ta > tb ? 1 : 0;
       },
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client
@@ -152,10 +153,7 @@ export function TicketList({ params }: { params?: TicketListParams }) {
         <CardContent className="flex flex-col gap-2 px-4">
           <DataTableToolbar
             search={
-              <DataTable.Search
-                placeholder={t`Search tickets...`}
-                className="w-full md:w-80"
-              />
+              <DataTable.Search placeholder={t`Search tickets...`} className="w-full md:w-80" />
             }
           />
           <DataTable.Content

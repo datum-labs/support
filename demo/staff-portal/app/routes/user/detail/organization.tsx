@@ -8,13 +8,17 @@ import { getUserDetailMetadata, useUserDetailData } from '@/routes/user/shared';
 import { orgRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { ComMiloapisResourcemanagerV1Alpha1OrganizationMembership } from '@openapi/resourcemanager.miloapis.com/v1alpha1';
 import { createColumnHelper } from '@tanstack/react-table';
 
-const columnHelper = createColumnHelper<ComMiloapisResourcemanagerV1Alpha1OrganizationMembership>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisResourcemanagerV1Alpha1OrganizationMembership
+>();
 
 export const handle = {
   breadcrumb: () => <Trans>Organizations</Trans>,
@@ -31,7 +35,7 @@ export default function Page() {
 
   const tableQuery = useUserOrganizationListQuery(userId);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.organizationRef.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -55,7 +59,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Joined`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   const rows = tableQuery.data?.items ?? [];
 

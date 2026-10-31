@@ -12,6 +12,7 @@ import { DNSRecordFlattened } from '@/resources/schemas';
 import { useProjectDetailData } from '@/routes/project/shared';
 import { extractDataFromMatches, formatTTL, metaObject } from '@/utils/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Text } from '@datum-cloud/datum-ui/typography';
 import { t } from '@lingui/core/macro';
@@ -68,8 +69,8 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   return { dns, domain };
 };
 
-const dnsRecordColumnHelper = createColumnHelper<DNSRecordFlattened>();
-const nameserverColumnHelper = createColumnHelper<NameserverRow>();
+const dnsRecordColumnHelper = createColumnHelper<DataTableFeatures, DNSRecordFlattened>();
+const nameserverColumnHelper = createColumnHelper<DataTableFeatures, NameserverRow>();
 
 export default function Page() {
   const { t: tMacro } = useLingui();
@@ -90,7 +91,7 @@ export default function Page() {
     [domain]
   );
 
-  const dnsRecordColumns = [
+  const dnsRecordColumns = dnsRecordColumnHelper.columns([
     dnsRecordColumnHelper.accessor('type', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Type`} />,
       cell: ({ getValue, row }) => (
@@ -151,9 +152,9 @@ export default function Page() {
       size: 50,
       cell: ({ getValue }) => formatTTL(getValue()),
     }),
-  ];
+  ]);
 
-  const nameserverColumns = [
+  const nameserverColumns = nameserverColumnHelper.columns([
     nameserverColumnHelper.display({
       id: 'type',
       header: () => <Trans>Type</Trans>,
@@ -179,7 +180,7 @@ export default function Page() {
       header: () => <Trans>Registrar</Trans>,
       cell: ({ getValue }) => <BadgeState state="pending" message={getValue() ?? ''} />,
     }),
-  ];
+  ]);
 
   return (
     <div className="m-4 flex flex-col gap-1">

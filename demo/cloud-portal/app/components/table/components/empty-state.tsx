@@ -1,3 +1,4 @@
+import { mapLegacyVariant } from '../../empty-content-action';
 import type { EmptyContentConfig } from '../types';
 import {
   useDataTableFilters,
@@ -6,6 +7,7 @@ import {
   useDataTableSearch,
 } from '@datum-cloud/datum-ui/data-table';
 import { EmptyContent } from '@datum-cloud/datum-ui/empty-content';
+import type { RowData } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
 /**
@@ -21,16 +23,13 @@ export function resolveEmpty(empty?: string | EmptyContentConfig): ReactNode {
   if (typeof empty === 'string') {
     return <EmptyContent title={empty} className="w-full" />;
   }
-  // Map wrapper's EmptyContentConfig.actions (uses `href`) to
-  // datum-ui's EmptyContentAction (uses `to`).
-  const actions = empty.actions?.map((a) => ({
-    label: a.label,
-    type: a.type,
-    onClick: a.onClick,
-    to: a.href,
-    icon: a.icon,
-    variant: a.variant,
-  }));
+  const actions = empty.actions?.map((a) => {
+    const base = { label: a.label, icon: a.icon, ...mapLegacyVariant(a.variant) };
+    if (a.type === 'link' || a.type === 'external-link') {
+      return { ...base, as: a.type, to: a.href ?? '' } as const;
+    }
+    return { ...base, as: 'button' as const, onClick: a.onClick };
+  });
   return (
     <EmptyContent
       title={empty.title}
@@ -60,7 +59,7 @@ export function resolveError(errorContent?: ReactNode | ErrorRenderer): ErrorRen
       <EmptyContent
         title="Failed to load"
         subtitle={err.message}
-        actions={[{ label: 'Retry', type: 'button', onClick: refetch }]}
+        actions={[{ label: 'Retry', as: 'button', onClick: refetch, ...mapLegacyVariant() }]}
         className="w-full"
       />
     );
@@ -102,7 +101,7 @@ export function useIsStandaloneEmpty(): boolean {
  *   message, NOT by this component — so users still see the toolbar with
  *   their filters in place and can adjust them.
  */
-export function TableBodyOrEmpty<TData>({
+export function TableBodyOrEmpty<TData extends RowData>({
   empty,
   children,
 }: {

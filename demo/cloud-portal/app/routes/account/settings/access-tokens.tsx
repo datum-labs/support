@@ -3,6 +3,7 @@ import { DateTime } from '@/components/date-time';
 import { createActionsColumn, Table } from '@/components/table';
 import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Col, Row } from '@datum-cloud/datum-ui/grid';
 import { CloseIcon, Icon } from '@datum-cloud/datum-ui/icons';
 import { ColumnDef } from '@tanstack/react-table';
@@ -27,7 +28,7 @@ const DUMMIES = [
 type TokenRow = (typeof DUMMIES)[0];
 
 export default function AccountActiveSessionsPage() {
-  const columns: ColumnDef<TokenRow>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, TokenRow>[] = useMemo(
     () => [
       {
         header: 'Name',

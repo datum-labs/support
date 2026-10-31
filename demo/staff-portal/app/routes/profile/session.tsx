@@ -6,6 +6,7 @@ import { useApp } from '@/providers/app.provider';
 import { useDeleteSessionMutation, useSessionListQuery } from '@/resources/request/client';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { Text } from '@datum-cloud/datum-ui/typography';
@@ -24,7 +25,10 @@ export const meta: Route.MetaFunction = () => {
   return metaObject('Active Sessions');
 };
 
-const columnHelper = createColumnHelper<ComMiloapisGoMiloPkgApisIdentityV1Alpha1Session>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisGoMiloPkgApisIdentityV1Alpha1Session
+>();
 
 export default function Page() {
   const { t: tMacro } = useLingui();
@@ -45,7 +49,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       id: 'metadata.name',
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Session ID`} />,
@@ -93,7 +97,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   return (
     <>

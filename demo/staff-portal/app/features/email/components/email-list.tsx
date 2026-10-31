@@ -5,6 +5,7 @@ import { getEmailCondition } from '@/features/email/email-utils';
 import { routes } from '@/utils/config/routes.config';
 import { startCase } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Text } from '@datum-cloud/datum-ui/typography';
 import { t } from '@lingui/core/macro';
@@ -36,6 +37,7 @@ function rowsForTable(items: ComMiloapisNotificationV1Alpha1Email[]) {
 }
 
 const columnHelper = createColumnHelper<
+  DataTableFeatures,
   ComMiloapisNotificationV1Alpha1Email & {
     priority?: string;
     deliveryStatus?: string;
@@ -51,7 +53,7 @@ export default function EmailList({ queryKeyPrefix, fetchFn, searchPlaceholder }
 
   const data = useMemo(() => rowsForTable(tableQuery.data?.items ?? []), [tableQuery.data?.items]);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('status.emailAddress', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Recipient`} />,
       cell: ({ row, getValue }) => (
@@ -94,7 +96,7 @@ export default function EmailList({ queryKeyPrefix, fetchFn, searchPlaceholder }
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Sent`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

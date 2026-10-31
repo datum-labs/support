@@ -17,6 +17,7 @@ import { BadRequestError } from '@/utils/errors';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { ColumnDef } from '@tanstack/react-table';
@@ -85,7 +86,7 @@ export default function SecretsPage() {
     });
   };
 
-  const columns: ColumnDef<Secret>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, Secret>[] = useMemo(
     () => [
       {
         header: 'Resource Name',

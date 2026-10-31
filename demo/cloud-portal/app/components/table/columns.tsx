@@ -1,7 +1,9 @@
 import { RowActions } from './components/row-actions';
 import type { RowAction } from './types';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
+import type { RowData } from '@tanstack/react-table';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Info } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -10,7 +12,7 @@ import type { ReactNode } from 'react';
  * Options forwarded to the cell-level `<RowActions />` renderer.
  * Mirrors the Table.Client / Table.Server props of the same name.
  */
-export type ActionsColumnOptions<TData> = {
+export type ActionsColumnOptions<TData extends RowData> = {
   hideRowActions?: (row: TData) => boolean;
   disableRowActions?: (row: TData) => boolean;
   maxInlineActions?: number;
@@ -52,10 +54,10 @@ export type ActionsColumnOptions<TData> = {
  * ]
  * ```
  */
-export function createActionsColumn<TData>(
+export function createActionsColumn<TData extends RowData>(
   actions: RowAction<TData>[] | ((row: TData) => RowAction<TData>[]),
   options?: ActionsColumnOptions<TData>
-): ColumnDef<TData> {
+): ColumnDef<DataTableFeatures, TData> {
   return {
     id: '_actions',
     header: () => null,

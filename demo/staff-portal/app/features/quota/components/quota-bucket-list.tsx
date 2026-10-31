@@ -2,6 +2,7 @@ import { DataTableToolbar } from '@/components/data-table-toolbar';
 import { DateTime } from '@/components/date';
 import { DialogForm } from '@/components/dialog';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -29,7 +30,10 @@ interface QuotaBucketListProps {
   ) => Promise<ComMiloapisQuotaV1Alpha1ResourceGrant>;
 }
 
-const columnHelper = createColumnHelper<ComMiloapisQuotaV1Alpha1AllowanceBucket>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisQuotaV1Alpha1AllowanceBucket
+>();
 
 export function QuotaBucketList({ queryKeyPrefix, fetchFn, createGrantFn }: QuotaBucketListProps) {
   const { t } = useLingui();
@@ -51,62 +55,65 @@ export function QuotaBucketList({ queryKeyPrefix, fetchFn, createGrantFn }: Quot
   ];
 
   const columns = useMemo(
-    () => [
-      columnHelper.accessor('spec.resourceType', {
-        header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Resource Type`} />,
-        cell: ({ getValue }) => getValue(),
-      }),
-      columnHelper.accessor('status', {
-        id: 'usage',
-        header: () => t`Usage`,
-        cell: ({ getValue }) => {
-          const status = getValue();
-          if (!status) return <Text className="text-muted-foreground">-</Text>;
-          const { allocated = 0, limit: lim = 0 } = status;
-          const used = allocated;
-          const total = lim;
-          const pct = total > 0 ? Math.round((used / total) * 100) : 0;
-          const bar =
-            total === 0
-              ? 'bg-gray-400'
-              : pct <= 70
-                ? 'bg-green-500'
-                : pct <= 90
-                  ? 'bg-yellow-500'
-                  : 'bg-red-500';
-          return (
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <Text className="text-sm font-medium">
-                  {used} / {total}
-                </Text>
-                <Text className="text-muted-foreground text-xs">({pct}%)</Text>
+    () =>
+      columnHelper.columns([
+        columnHelper.accessor('spec.resourceType', {
+          header: ({ column }) => (
+            <DataTable.ColumnHeader column={column} title={t`Resource Type`} />
+          ),
+          cell: ({ getValue }) => getValue(),
+        }),
+        columnHelper.accessor('status', {
+          id: 'usage',
+          header: () => t`Usage`,
+          cell: ({ getValue }) => {
+            const status = getValue();
+            if (!status) return <Text className="text-muted-foreground">-</Text>;
+            const { allocated = 0, limit: lim = 0 } = status;
+            const used = allocated;
+            const total = lim;
+            const pct = total > 0 ? Math.round((used / total) * 100) : 0;
+            const bar =
+              total === 0
+                ? 'bg-gray-400'
+                : pct <= 70
+                  ? 'bg-green-500'
+                  : pct <= 90
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500';
+            return (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <Text className="text-sm font-medium">
+                    {used} / {total}
+                  </Text>
+                  <Text className="text-muted-foreground text-xs">({pct}%)</Text>
+                </div>
+                <div className="bg-muted h-2 w-full rounded-full">
+                  <div
+                    className={`${bar} h-2 rounded-full transition-all`}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
               </div>
-              <div className="bg-muted h-2 w-full rounded-full">
-                <div
-                  className={`${bar} h-2 rounded-full transition-all`}
-                  style={{ width: `${Math.min(pct, 100)}%` }}
-                />
-              </div>
+            );
+          },
+        }),
+        columnHelper.accessor('metadata.creationTimestamp', {
+          id: 'metadata.creationTimestamp',
+          header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
+          cell: ({ getValue }) => <DateTime date={getValue()} />,
+        }),
+        columnHelper.display({
+          id: 'actions',
+          header: () => <div className="text-right" />,
+          cell: ({ row }) => (
+            <div className="flex w-full justify-end">
+              <DataTable.RowActions row={row} actions={actions} />
             </div>
-          );
-        },
-      }),
-      columnHelper.accessor('metadata.creationTimestamp', {
-        id: 'metadata.creationTimestamp',
-        header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
-        cell: ({ getValue }) => <DateTime date={getValue()} />,
-      }),
-      columnHelper.display({
-        id: 'actions',
-        header: () => <div className="text-right" />,
-        cell: ({ row }) => (
-          <div className="flex w-full justify-end">
-            <DataTable.RowActions row={row} actions={actions} />
-          </div>
-        ),
-      }),
-    ],
+          ),
+        }),
+      ]),
     [actions, t]
   );
 

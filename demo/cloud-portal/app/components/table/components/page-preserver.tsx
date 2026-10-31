@@ -1,4 +1,5 @@
 import { useDataTablePagination } from '@datum-cloud/datum-ui/data-table';
+import type { RowData } from '@tanstack/react-table';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 
 // useLayoutEffect commits before paint — the restore lands before the browser
@@ -32,7 +33,7 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
  * Must render INSIDE `DataTable.Client` so `useDataTablePagination` sees
  * the store context.
  */
-export function PagePreserver<TData>({ data }: { data: readonly TData[] }) {
+export function PagePreserver<TData extends RowData>({ data }: { data: readonly TData[] }) {
   const { pageIndex, pageCount, setPageIndex } = useDataTablePagination();
   const prevDataRef = useRef(data);
   const prevPageIndexRef = useRef(pageIndex);

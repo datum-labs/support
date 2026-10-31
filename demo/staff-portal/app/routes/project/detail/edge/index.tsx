@@ -7,6 +7,7 @@ import { useProjectEdgeListQuery } from '@/resources/request/client';
 import { projectRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { ComDatumapisNetworkingV1AlphaHttpProxy } from '@openapi/networking.datumapis.com/v1alpha';
@@ -18,14 +19,17 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`AI Edge - ${projectName}`);
 };
 
-const columnHelper = createColumnHelper<ComDatumapisNetworkingV1AlphaHttpProxy>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComDatumapisNetworkingV1AlphaHttpProxy
+>();
 
 export default function Page() {
   const { project } = useProjectDetailData();
   const projectName = project?.metadata?.name ?? '';
   const tableQuery = useProjectEdgeListQuery(projectName);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ getValue }) => (
@@ -53,7 +57,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

@@ -15,6 +15,7 @@ import { contactGroupRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { useTaskQueue } from '@datum-cloud/datum-ui/task-queue';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -31,7 +32,10 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Contact Groups`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisNotificationV1Alpha1ContactGroup>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisNotificationV1Alpha1ContactGroup
+>();
 
 export default function Page() {
   const navigate = useNavigate();
@@ -60,7 +64,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -98,7 +102,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const rows = tableQuery.data?.items ?? [];
 

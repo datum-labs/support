@@ -11,6 +11,7 @@ import { Button } from '@datum-cloud/datum-ui/button';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { CloseIcon } from '@datum-cloud/datum-ui/icons';
 import { cn } from '@datum-cloud/datum-ui/utils';
+import type { RowData } from '@tanstack/react-table';
 
 /**
  * Client-side data table entry point. Wraps datum-ui's DataTable.Client with
@@ -34,7 +35,7 @@ import { cn } from '@datum-cloud/datum-ui/utils';
  *   no per-cell className plumbing here.
  * - `urlSync` defaults to true; pass `false` to disable URL state sync.
  */
-export function TableClient<TData>(props: TableClientProps<TData>) {
+export function TableClient<TData extends RowData>(props: TableClientProps<TData>) {
   const stateAdapter = useTableUrlAdapter(props.urlSync ?? true);
   const columns = useResolvedColumns(props.columns, props.rowActions, {
     hideRowActions: props.hideRowActions,

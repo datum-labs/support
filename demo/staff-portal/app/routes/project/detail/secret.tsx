@@ -5,6 +5,7 @@ import { useProjectSecretMetricsQuery } from '@/resources/request/client';
 import { Secret } from '@/resources/schemas';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
@@ -19,9 +20,9 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Secret - ${projectName}`);
 };
 
-const columnHelper = createColumnHelper<Secret>();
+const columnHelper = createColumnHelper<DataTableFeatures, Secret>();
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('metric.resource_name', {
     header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
   }),
@@ -31,7 +32,7 @@ const columns = [
   columnHelper.accessor('metric.resource_version', {
     header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Version`} />,
   }),
-];
+]);
 
 export default function Page() {
   const { project } = useProjectDetailData();

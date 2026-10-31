@@ -16,6 +16,7 @@ import { fraudRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -39,7 +40,7 @@ const newEvalSchema = z.object({
   user: z.string().min(1, 'User is required'),
 });
 
-const columnHelper = createColumnHelper<FraudEvaluation>();
+const columnHelper = createColumnHelper<DataTableFeatures, FraudEvaluation>();
 
 export default function Page() {
   const tableQuery = useFraudEvaluationListQuery();
@@ -102,7 +103,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.userRef.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`User`} />,
       cell: ({ row }) => {
@@ -195,7 +196,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   return (
     <>

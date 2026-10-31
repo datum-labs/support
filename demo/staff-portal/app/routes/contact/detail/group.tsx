@@ -17,6 +17,7 @@ import { contactGroupRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -33,7 +34,7 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Groups - ${contactName}`);
 };
 
-const columnHelper = createColumnHelper<ContactMembershipWithContactGroup>();
+const columnHelper = createColumnHelper<DataTableFeatures, ContactMembershipWithContactGroup>();
 
 export default function Page() {
   const { t } = useLingui();
@@ -76,7 +77,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor(
       (row) => row.contactGroup?.spec?.displayName ?? row.contactGroup?.metadata?.name ?? '',
       {
@@ -123,7 +124,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const addGroupSchema = z.object({ name: z.string().nonempty(t`Group is required`) });
 

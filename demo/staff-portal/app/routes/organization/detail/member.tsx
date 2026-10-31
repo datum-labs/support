@@ -12,6 +12,7 @@ import { TeamMember } from '@/resources/schemas';
 import { userRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { t as tCore } from '@lingui/core/macro';
@@ -30,7 +31,7 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Members - ${organizationName}`);
 };
 
-const columnHelper = createColumnHelper<TeamMember>();
+const columnHelper = createColumnHelper<DataTableFeatures, TeamMember>();
 
 export default function Page() {
   const { t } = useLingui();
@@ -98,7 +99,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('givenName', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={tCore`Name`} />,
       cell: ({ row }) => {
@@ -136,7 +137,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const members = tableQuery.data ?? [];
 

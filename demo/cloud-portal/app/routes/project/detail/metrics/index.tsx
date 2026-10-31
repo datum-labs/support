@@ -13,6 +13,7 @@ import { AppError, BadRequestError } from '@/utils/errors';
 import { transformControlPlaneStatus } from '@/utils/helpers/control-plane.helper';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { ColumnDef } from '@tanstack/react-table';
@@ -85,7 +86,7 @@ export default function ExportPoliciesPage() {
     [confirm, deleteExportPolicyMutation]
   );
 
-  const columns: ColumnDef<ExportPolicy>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, ExportPolicy>[] = useMemo(
     () => [
       {
         header: 'Resource Name',

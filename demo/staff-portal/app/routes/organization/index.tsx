@@ -6,6 +6,7 @@ import { DisplayName } from '@/components/display';
 import { useOrgListQuery } from '@/resources/request/client';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import type { ComMiloapisResourcemanagerV1Alpha1Organization } from '@openapi/resourcemanager.miloapis.com/v1alpha1';
@@ -15,12 +16,15 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Organizations`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisResourcemanagerV1Alpha1Organization>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisResourcemanagerV1Alpha1Organization
+>();
 
 export default function Page() {
   const tableQuery = useOrgListQuery();
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -43,7 +47,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   const items = tableQuery.data?.items ?? [];
   const data = items.map((row) => ({ ...row, type: row.spec?.type }));

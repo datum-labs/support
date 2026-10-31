@@ -3,6 +3,7 @@ import { DataTableToolbar } from '@/components/data-table-toolbar';
 import { DateTime } from '@/components/date';
 import { DialogConfirm } from '@/components/dialog';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { t } from '@lingui/core/macro';
@@ -22,7 +23,7 @@ interface QuotaGrantListProps {
   deleteGrantFn: (name: string, namespace: string) => Promise<unknown>;
 }
 
-const columnHelper = createColumnHelper<ComMiloapisQuotaV1Alpha1ResourceGrant>();
+const columnHelper = createColumnHelper<DataTableFeatures, ComMiloapisQuotaV1Alpha1ResourceGrant>();
 
 function computeAllocationByResourceType(
   allowances: ComMiloapisQuotaV1Alpha1ResourceGrant['spec']['allowances'] | undefined
@@ -70,60 +71,61 @@ export function QuotaGrantList({ queryKeyPrefix, fetchFn, deleteGrantFn }: Quota
   );
 
   const columns = useMemo(
-    () => [
-      columnHelper.accessor('metadata.name', {
-        header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
-        cell: ({ getValue }) => getValue(),
-      }),
-      columnHelper.accessor((row) => row.spec.allowances, {
-        id: 'resourceTypes',
-        header: () => t`Resource Type`,
-        cell: ({ getValue }) => {
-          const entries = computeAllocationByResourceType(getValue());
-          return (
-            <div className="flex flex-col gap-1">
-              {entries.map(([type]) => (
-                <div key={type}>{type}</div>
-              ))}
+    () =>
+      columnHelper.columns([
+        columnHelper.accessor('metadata.name', {
+          header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
+          cell: ({ getValue }) => getValue(),
+        }),
+        columnHelper.accessor((row) => row.spec.allowances, {
+          id: 'resourceTypes',
+          header: () => t`Resource Type`,
+          cell: ({ getValue }) => {
+            const entries = computeAllocationByResourceType(getValue());
+            return (
+              <div className="flex flex-col gap-1">
+                {entries.map(([type]) => (
+                  <div key={type}>{type}</div>
+                ))}
+              </div>
+            );
+          },
+        }),
+        columnHelper.accessor((row) => row.spec.allowances, {
+          id: 'allocations',
+          header: () => t`Allocation`,
+          cell: ({ getValue }) => {
+            const entries = computeAllocationByResourceType(getValue());
+            return (
+              <div className="flex flex-col gap-1">
+                {entries.map(([type, total]) => (
+                  <div key={type}>{total}</div>
+                ))}
+              </div>
+            );
+          },
+        }),
+        columnHelper.accessor('status', {
+          header: () => t`Status`,
+          cell: ({ getValue }) => (
+            <BadgeCondition status={getValue()} multiple={false} showMessage className="text-xs" />
+          ),
+        }),
+        columnHelper.accessor('metadata.creationTimestamp', {
+          id: 'metadata.creationTimestamp',
+          header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
+          cell: ({ getValue }) => <DateTime date={getValue()} />,
+        }),
+        columnHelper.display({
+          id: 'actions',
+          header: () => <div className="text-right" />,
+          cell: ({ row }) => (
+            <div className="flex w-full justify-end">
+              <DataTable.RowActions row={row} actions={actions} />
             </div>
-          );
-        },
-      }),
-      columnHelper.accessor((row) => row.spec.allowances, {
-        id: 'allocations',
-        header: () => t`Allocation`,
-        cell: ({ getValue }) => {
-          const entries = computeAllocationByResourceType(getValue());
-          return (
-            <div className="flex flex-col gap-1">
-              {entries.map(([type, total]) => (
-                <div key={type}>{total}</div>
-              ))}
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor('status', {
-        header: () => t`Status`,
-        cell: ({ getValue }) => (
-          <BadgeCondition status={getValue()} multiple={false} showMessage className="text-xs" />
-        ),
-      }),
-      columnHelper.accessor('metadata.creationTimestamp', {
-        id: 'metadata.creationTimestamp',
-        header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
-        cell: ({ getValue }) => <DateTime date={getValue()} />,
-      }),
-      columnHelper.display({
-        id: 'actions',
-        header: () => <div className="text-right" />,
-        cell: ({ row }) => (
-          <div className="flex w-full justify-end">
-            <DataTable.RowActions row={row} actions={actions} />
-          </div>
-        ),
-      }),
-    ],
+          ),
+        }),
+      ]),
     [actions]
   );
 

@@ -11,6 +11,7 @@ import { fraudRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { Text } from '@datum-cloud/datum-ui/typography';
@@ -28,7 +29,7 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Fraud Providers`);
 };
 
-const columnHelper = createColumnHelper<FraudProvider>();
+const columnHelper = createColumnHelper<DataTableFeatures, FraudProvider>();
 
 export default function Page() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ getValue }) => (
@@ -111,7 +112,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   return (
     <>
