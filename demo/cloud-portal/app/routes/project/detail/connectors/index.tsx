@@ -16,6 +16,7 @@ import { transformControlPlaneStatus } from '@/utils/helpers/control-plane.helpe
 import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Popover, PopoverContent, PopoverTrigger } from '@datum-cloud/datum-ui/popover';
 import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
 import { ColumnDef } from '@tanstack/react-table';
@@ -96,7 +97,7 @@ export default function ConnectorsPage() {
     return connectorsData.map((c) => ({ ...c, proxies: byConnector.get(c.name) ?? [] }));
   }, [connectorsData, proxies]);
 
-  const columns: ColumnDef<ConnectorWithProxies>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, ConnectorWithProxies>[] = useMemo(
     () => [
       {
         header: 'Name',

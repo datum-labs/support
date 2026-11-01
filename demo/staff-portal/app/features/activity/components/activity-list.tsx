@@ -5,6 +5,7 @@ import { activityListQuery } from '@/resources/request/client';
 import { ActivityListResponse, ActivityLogEntry, ActivityQueryParams } from '@/resources/schemas';
 import { Badge } from '@datum-cloud/datum-ui/badge';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import {
   DataTable as DatumDataTable,
   useDataTableFilters,
@@ -41,7 +42,7 @@ interface ActivityListProps {
   timeRangePlaceholder?: string;
 }
 
-const columnHelper = createColumnHelper<ActivityLogEntry>();
+const columnHelper = createColumnHelper<DataTableFeatures, ActivityLogEntry>();
 
 // Resource labels mapping (simplified from reference)
 const RESOURCE_LABELS: Record<string, string> = {

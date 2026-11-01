@@ -1,6 +1,7 @@
 import { Table } from '@/components/table';
 import { formatTTL, type ImportDetail } from '@/utils/helpers/dns-record.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
 import { cn } from '@datum-cloud/datum-ui/utils';
@@ -57,7 +58,7 @@ interface ImportResultTableProps {
  * Uses same DataTable component as DnsRecordTable for consistent styling
  */
 export const ImportResultTable = ({ details }: ImportResultTableProps) => {
-  const columns: ColumnDef<ImportDetail>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, ImportDetail>[] = useMemo(
     () => [
       {
         header: 'Type',

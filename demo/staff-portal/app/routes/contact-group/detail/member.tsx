@@ -21,6 +21,7 @@ import { contactRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -39,7 +40,7 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Members - ${contactGroupName}`);
 };
 
-const columnHelper = createColumnHelper<ContactGroupMembershipWithContact>();
+const columnHelper = createColumnHelper<DataTableFeatures, ContactGroupMembershipWithContact>();
 
 type AddMemberFieldsProps = {
   contactOptions: { value: string; label: string; description?: string }[];
@@ -167,7 +168,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor(
       (row) => {
         const contact = row.contact;
@@ -233,7 +234,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const deleteMemberDisplayName = useMemo(() => {
     if (!selectedMembership) return '';

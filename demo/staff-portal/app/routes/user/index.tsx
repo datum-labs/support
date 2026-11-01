@@ -15,6 +15,7 @@ import { userRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -31,7 +32,7 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Users`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisIamV1Alpha1User>();
+const columnHelper = createColumnHelper<DataTableFeatures, ComMiloapisIamV1Alpha1User>();
 
 export default function Page() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.givenName', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -134,7 +135,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const inviteSchema = z
     .object({

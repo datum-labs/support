@@ -1,4 +1,6 @@
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import type { ActionItem, UseDataTableServerOptions } from '@datum-cloud/datum-ui/data-table';
+import type { RowData } from '@tanstack/react-table';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
@@ -18,7 +20,7 @@ import type { ReactNode } from 'react';
  * - `data-e2e`: applied to the rendered button for e2e-test targeting.
  * - `tooltip`: widened to accept a ReactNode and/or a function of the row.
  */
-export type RowAction<TData> = Omit<ActionItem<TData>, 'tooltip'> & {
+export type RowAction<TData extends RowData> = Omit<ActionItem<TData>, 'tooltip'> & {
   display?: 'inline' | 'dropdown';
   showLabel?: boolean;
   triggerInlineEdit?: boolean;
@@ -42,7 +44,7 @@ export type EmptyContentConfig = {
 };
 
 /** Controlled inline-content config. Mutually exclusive with onRowClick. */
-export type InlineContentConfig<TData> = {
+export type InlineContentConfig<TData extends RowData> = {
   open: boolean;
   position: 'top' | 'row';
   rowId?: string;
@@ -52,10 +54,10 @@ export type InlineContentConfig<TData> = {
 };
 
 /** Arguments passed to Table.Server fetchFn. Derived from datum-ui. */
-export type ServerFetchArgs = Parameters<UseDataTableServerOptions<unknown, unknown>['fetchFn']>[0];
+export type ServerFetchArgs = Parameters<UseDataTableServerOptions<unknown, RowData>['fetchFn']>[0];
 
 /** Return shape from Table.Server transform. Derived from datum-ui. */
-export type ServerTransformResult<TData> = ReturnType<
+export type ServerTransformResult<TData extends RowData> = ReturnType<
   UseDataTableServerOptions<unknown, TData>['transform']
 >;
 
@@ -68,7 +70,7 @@ export type TableServerRef = {
  * Bulk action descriptor. Extends datum-ui's MultiAction with a helpers arg
  * (clearSelection) injected by the wrapper.
  */
-export type MultiAction<TData> = {
+export type MultiAction<TData extends RowData> = {
   label: string;
   onClick: (rows: TData[], helpers: { clearSelection: () => void }) => void | Promise<void>;
   icon?: ReactNode;
@@ -77,8 +79,8 @@ export type MultiAction<TData> = {
 };
 
 /** Props shared by Table.Client and Table.Server. */
-export type TableSharedProps<TData> = {
-  columns: ColumnDef<TData>[];
+export type TableSharedProps<TData extends RowData> = {
+  columns: ColumnDef<DataTableFeatures, TData>[];
   empty?: string | EmptyContentConfig;
 
   // Toolbar
@@ -126,7 +128,7 @@ export type TableSharedProps<TData> = {
 };
 
 /** Props for Table.Client. */
-export type TableClientProps<TData> = TableSharedProps<TData> & {
+export type TableClientProps<TData extends RowData> = TableSharedProps<TData> & {
   data: TData[];
   inline?: InlineContentConfig<TData>;
   /**
@@ -143,7 +145,10 @@ export type TableClientProps<TData> = TableSharedProps<TData> & {
 };
 
 /** Props for Table.Server. */
-export type TableServerProps<TData, TResponse = unknown> = TableSharedProps<TData> & {
+export type TableServerProps<
+  TData extends RowData,
+  TResponse = unknown,
+> = TableSharedProps<TData> & {
   fetchFn: (args: ServerFetchArgs) => Promise<TResponse>;
   transform: (response: TResponse) => ServerTransformResult<TData>;
   limit?: number;

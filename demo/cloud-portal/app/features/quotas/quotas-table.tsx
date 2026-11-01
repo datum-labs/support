@@ -4,6 +4,7 @@ import type { Organization } from '@/resources/organizations';
 import type { Project } from '@/resources/projects';
 import { openSupportMessage } from '@/utils/open-support-message';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpIcon } from 'lucide-react';
@@ -57,7 +58,7 @@ export const QuotasTable = ({
         `Thank you!`,
     });
   };
-  const columns: ColumnDef<AllowanceBucket>[] = useMemo(() => {
+  const columns: ColumnDef<DataTableFeatures, AllowanceBucket>[] = useMemo(() => {
     const e2ePrefix = resourceType === 'organization' ? 'org-quota' : 'project-quota';
 
     return [

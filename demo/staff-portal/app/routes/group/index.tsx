@@ -5,6 +5,7 @@ import { DisplayName } from '@/components/display';
 import { useGroupListQuery } from '@/resources/request/client';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { ComMiloapisIamV1Alpha1Group } from '@openapi/iam.miloapis.com/v1alpha1';
@@ -14,12 +15,12 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Groups`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisIamV1Alpha1Group>();
+const columnHelper = createColumnHelper<DataTableFeatures, ComMiloapisIamV1Alpha1Group>();
 
 export default function Page() {
   const tableQuery = useGroupListQuery();
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -35,7 +36,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

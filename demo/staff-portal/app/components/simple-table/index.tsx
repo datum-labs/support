@@ -1,3 +1,5 @@
+import { appTableFeatures } from '@/components/table-features';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import {
   Table,
   TableBody,
@@ -7,19 +9,12 @@ import {
   TableRow,
 } from '@datum-cloud/datum-ui/table';
 import { cn } from '@datum-cloud/datum-ui/utils';
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table';
+import { ColumnDef, flexRender, RowData, SortingState, useTable } from '@tanstack/react-table';
 import type * as React from 'react';
 import { useState } from 'react';
 
-export interface SimpleTableProps<TData> extends React.ComponentProps<'div'> {
-  columns: ColumnDef<TData, any>[];
+export interface SimpleTableProps<TData extends RowData> extends React.ComponentProps<'div'> {
+  columns: ColumnDef<DataTableFeatures, TData, any>[];
   data: TData[];
   enableSorting?: boolean;
   getRowId?: (row: TData, index: number) => string;
@@ -30,7 +25,7 @@ export interface SimpleTableProps<TData> extends React.ComponentProps<'div'> {
  * Static TanStack table (no DataTable store). Used for small in-card lists
  * where full DataTable.Client is unnecessary (e.g. DNS nameservers).
  */
-export function SimpleTable<TData>({
+export function SimpleTable<TData extends RowData>({
   columns,
   data,
   enableSorting = false,
@@ -41,15 +36,15 @@ export function SimpleTable<TData>({
 }: SimpleTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const table = useReactTable<TData>({
+  const table = useTable({
+    features: appTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
     enableSorting,
     onSortingChange: enableSorting ? setSorting : undefined,
     state: {
-      sorting: enableSorting ? sorting : undefined,
+      sorting: enableSorting ? sorting : [],
+      pagination: { pageIndex: 0, pageSize: Math.max(data.length, 1) },
     },
     getRowId,
   });

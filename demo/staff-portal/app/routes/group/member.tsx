@@ -18,6 +18,7 @@ import { userRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { Form } from '@datum-cloud/datum-ui/form';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -49,7 +50,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   return data;
 };
 
-const columnHelper = createColumnHelper<ComMiloapisIamV1Alpha1GroupMembership>();
+const columnHelper = createColumnHelper<DataTableFeatures, ComMiloapisIamV1Alpha1GroupMembership>();
 
 export default function Page() {
   const { t } = useLingui();
@@ -99,7 +100,7 @@ export default function Page() {
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -131,7 +132,7 @@ export default function Page() {
         </div>
       ),
     }),
-  ];
+  ]);
 
   const addMemberSchema = z.object({
     name: z.string().nonempty('User is required'),
@@ -211,7 +212,9 @@ export default function Page() {
           const user = userMapRef.current.get(userRefName);
           const displayName = (user?.displayName ?? '').toLowerCase();
           const email = (user?.email ?? '').toLowerCase();
-          return displayName.includes(q) || email.includes(q) || userRefName.toLowerCase().includes(q);
+          return (
+            displayName.includes(q) || email.includes(q) || userRefName.toLowerCase().includes(q)
+          );
         }}>
         <Card className="m-4 py-4 shadow-none">
           <CardContent className="flex flex-col gap-2 px-4">

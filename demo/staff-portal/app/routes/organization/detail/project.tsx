@@ -7,6 +7,7 @@ import { useOrgProjectListQuery } from '@/resources/request/client';
 import { projectRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
@@ -22,7 +23,10 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Projects - ${organizationName}`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisResourcemanagerV1Alpha1Project>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisResourcemanagerV1Alpha1Project
+>();
 
 export default function Page() {
   const orgData = useOrganizationDetailData();
@@ -30,7 +34,7 @@ export default function Page() {
 
   const tableQuery = useOrgProjectListQuery(orgName);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -50,7 +54,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

@@ -1,5 +1,4 @@
-'use client';
-
+import { appTableFeatures } from '@/components/table-features';
 import { Button } from '@datum-cloud/datum-ui/button';
 import {
   Card,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from '@datum-cloud/datum-ui/card';
 import { Checkbox } from '@datum-cloud/datum-ui/checkbox';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,16 +29,14 @@ import {
   ColumnDef,
   ColumnFiltersState,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  ColumnVisibilityState,
   SortingState,
-  useReactTable,
-  VisibilityState,
+  useTable,
 } from '@tanstack/react-table';
 import { MoreHorizontalIcon } from 'lucide-react';
 import * as React from 'react';
+
+('use client');
 
 const data: Payment[] = [
   {
@@ -86,7 +84,7 @@ export type Payment = {
   email: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<DataTableFeatures, Payment>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -165,18 +163,15 @@ export const columns: ColumnDef<Payment>[] = [
 export function CardsPayments() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<ColumnVisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const table = useReactTable({
+  const table = useTable({
+    features: appTableFeatures,
     data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {

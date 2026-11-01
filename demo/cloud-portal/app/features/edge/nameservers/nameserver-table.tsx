@@ -3,6 +3,7 @@ import { createActionsColumn, Table } from '@/components/table';
 import type { ActionItem } from '@/components/table';
 import { IDnsNameserver, IDnsRegistration } from '@/resources/domains';
 import { Badge } from '@datum-cloud/datum-ui/badge';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
@@ -26,7 +27,7 @@ export const NameserverTable = ({
   className,
   rowActions,
 }: NameserverTableProps) => {
-  const columns: ColumnDef<IDnsNameserver>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, IDnsNameserver>[] = useMemo(
     () => [
       {
         header: 'Type',

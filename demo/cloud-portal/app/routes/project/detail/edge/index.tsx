@@ -25,6 +25,7 @@ import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
@@ -69,7 +70,7 @@ export default function HttpProxyPage() {
     },
   });
 
-  const columns: ColumnDef<HttpProxy>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, HttpProxy>[] = useMemo(
     () => [
       {
         header: 'Name',

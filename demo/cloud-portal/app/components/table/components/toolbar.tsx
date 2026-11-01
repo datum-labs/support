@@ -12,10 +12,11 @@ import { InputWithAddons } from '@datum-cloud/datum-ui/input-with-addons';
 import { PageTitle } from '@datum-cloud/datum-ui/page-title';
 import { Skeleton } from '@datum-cloud/datum-ui/skeleton';
 import { cn } from '@datum-cloud/datum-ui/utils';
+import type { RowData } from '@tanstack/react-table';
 import { Search as SearchIconLucide, X as XIconLucide } from 'lucide-react';
 import { Children, type ReactNode } from 'react';
 
-interface TableToolbarProps<TData> {
+interface TableToolbarProps<TData extends RowData> {
   title?: string;
   description?: ReactNode;
   search?: string | true;
@@ -39,7 +40,7 @@ interface TableToolbarProps<TData> {
  *
  * Internal — consumers never render this directly.
  */
-export function TableToolbar<TData>({
+export function TableToolbar<TData extends RowData>({
   title,
   description,
   search,
@@ -78,7 +79,7 @@ export function TableToolbar<TData>({
  * because datum-ui's useDataTableSelection does not expose a
  * clearSelection helper directly. Injected into every multiAction.onClick.
  */
-function TableToolbarTools<TData>({
+function TableToolbarTools<TData extends RowData>({
   search,
   filters,
   actions,

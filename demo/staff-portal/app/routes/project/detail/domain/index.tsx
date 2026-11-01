@@ -7,6 +7,7 @@ import { useProjectDomainListQuery } from '@/resources/request/client';
 import { projectRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { ComDatumapisNetworkingV1AlphaDomain } from '@openapi/networking.datumapis.com/v1alpha';
@@ -18,14 +19,14 @@ export const meta: Route.MetaFunction = ({ matches }) => {
   return metaObject(`Domain - ${projectName}`);
 };
 
-const columnHelper = createColumnHelper<ComDatumapisNetworkingV1AlphaDomain>();
+const columnHelper = createColumnHelper<DataTableFeatures, ComDatumapisNetworkingV1AlphaDomain>();
 
 export default function Page() {
   const { project } = useProjectDetailData();
   const projectName = project.metadata?.name ?? '';
   const tableQuery = useProjectDomainListQuery(projectName);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('spec.domainName', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Domain`} />,
       cell: ({ getValue, row }) => (
@@ -66,7 +67,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

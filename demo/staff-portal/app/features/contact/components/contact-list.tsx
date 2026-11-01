@@ -6,6 +6,7 @@ import { DisplayName } from '@/components/display';
 import { contactDeleteMutation } from '@/resources/request/client';
 import { contactRoutes } from '@/utils/config/routes.config';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ActionItem, DataTable } from '@datum-cloud/datum-ui/data-table';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { t } from '@lingui/core/macro';
@@ -19,7 +20,10 @@ import { EditIcon, Trash2Icon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-const columnHelper = createColumnHelper<ComMiloapisNotificationV1Alpha1Contact>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisNotificationV1Alpha1Contact
+>();
 
 export interface ContactListProps {
   queryKeyPrefix: string | string[];
@@ -62,7 +66,7 @@ export function ContactList({
     },
   ];
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -104,7 +108,7 @@ export function ContactList({
         </div>
       ),
     }),
-  ];
+  ]);
 
   return (
     <>

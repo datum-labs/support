@@ -5,10 +5,12 @@ import { Table, createActionsColumn } from '@/components/table';
 import { IFlattenedDnsRecord } from '@/resources/dns-records';
 import { formatTTL } from '@/utils/helpers/dns-record.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable, useDataTableSelection } from '@datum-cloud/datum-ui/data-table';
 import type { ActionItem } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { Tooltip } from '@datum-cloud/datum-ui/tooltip';
+import type { RowData } from '@tanstack/react-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { InfoIcon, LockIcon } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
@@ -104,14 +106,13 @@ function useDnsRecordColumns(
   projectId: string,
   showStatus: boolean,
   renderAiEdgeCell?: (record: IFlattenedDnsRecord) => ReactNode
-): ColumnDef<IFlattenedDnsRecord>[] {
+): ColumnDef<DataTableFeatures, IFlattenedDnsRecord>[] {
   return useMemo(
     () => [
       {
         header: 'Type',
         accessorKey: 'type',
         size: 120,
-        filterFn: 'arrayOr',
         cell: ({ row }) => {
           const { type, _meta, lockReason } = row.original;
           const wasTransformed = _meta?.transformedFrom;
@@ -254,7 +255,7 @@ function useDnsRecordColumns(
               },
               enableSorting: false,
               size: 180,
-            } as ColumnDef<IFlattenedDnsRecord>,
+            } as ColumnDef<DataTableFeatures, IFlattenedDnsRecord>,
           ]
         : []),
       {
@@ -402,7 +403,7 @@ DnsRecordTable.displayName = 'DnsRecordTable';
  * acceptable today — callers relying on object identity after a background
  * refetch would need to derive rows from `selectedIds` themselves.
  */
-function SelectionObserver<TData>({
+function SelectionObserver<TData extends RowData>({
   onChange,
 }: {
   onChange: (selectedIds: string[], selectedRows: TData[]) => void;

@@ -6,6 +6,7 @@ import { useProjectListQuery } from '@/resources/request/client';
 import { orgRoutes } from '@/utils/config/routes.config';
 import { metaObject } from '@/utils/helpers';
 import { Card, CardContent } from '@datum-cloud/datum-ui/card';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable } from '@datum-cloud/datum-ui/data-table';
 import { t } from '@lingui/core/macro';
 import { ComMiloapisResourcemanagerV1Alpha1Project } from '@openapi/resourcemanager.miloapis.com/v1alpha1';
@@ -16,12 +17,15 @@ export const meta: Route.MetaFunction = () => {
   return metaObject(t`Projects`);
 };
 
-const columnHelper = createColumnHelper<ComMiloapisResourcemanagerV1Alpha1Project>();
+const columnHelper = createColumnHelper<
+  DataTableFeatures,
+  ComMiloapisResourcemanagerV1Alpha1Project
+>();
 
 export default function Page() {
   const tableQuery = useProjectListQuery();
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('metadata.name', {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Name`} />,
       cell: ({ row }) => {
@@ -49,7 +53,7 @@ export default function Page() {
       header: ({ column }) => <DataTable.ColumnHeader column={column} title={t`Created`} />,
       cell: ({ getValue }) => <DateTime date={getValue()} />,
     }),
-  ];
+  ]);
 
   return (
     <DataTable.Client

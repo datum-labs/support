@@ -1,3 +1,4 @@
+import { mapLegacyIconPosition, mapLegacyVariant } from '../empty-content-action';
 import { Button } from '@datum-cloud/datum-ui/button';
 import { EmptyContent } from '@datum-cloud/datum-ui/empty-content';
 import { Icon } from '@datum-cloud/datum-ui/icons';
@@ -386,13 +387,12 @@ function CardListItems<TData>({
               emptyConfig.action
                 ? [
                     {
-                      // EmptyContentAction does not have buttonProps — omit it
-                      type: 'button' as const,
+                      as: 'button' as const,
                       label: emptyConfig.action.label,
                       onClick: emptyConfig.action.onClick,
-                      variant: emptyConfig.action.variant ?? 'default',
+                      ...mapLegacyVariant(emptyConfig.action.variant),
                       icon: emptyConfig.action.icon,
-                      iconPosition: emptyConfig.action.iconPosition,
+                      iconPosition: mapLegacyIconPosition(emptyConfig.action.iconPosition),
                     },
                   ]
                 : undefined

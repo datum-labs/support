@@ -2,6 +2,7 @@ import { DateTime } from '@/components/date-time';
 import type { ActivityLog } from '@/resources/activity-logs';
 import { User } from '@/resources/users';
 import { Badge } from '@datum-cloud/datum-ui/badge';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 
 export interface ActivityLogColumnsOptions {
@@ -22,10 +23,10 @@ export interface ActivityLogColumnsOptions {
  */
 export function getActivityLogColumns(
   options: ActivityLogColumnsOptions = {}
-): ColumnDef<ActivityLog>[] {
+): ColumnDef<DataTableFeatures, ActivityLog>[] {
   const { user, hideUserColumn = false } = options;
 
-  const columns: ColumnDef<ActivityLog>[] = [];
+  const columns: ColumnDef<DataTableFeatures, ActivityLog>[] = [];
 
   // User column (optional)
   if (!hideUserColumn) {

@@ -11,6 +11,7 @@ import { QUERY_STALE_TIME } from '@/utils/config/query.config';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { ColumnDef } from '@tanstack/react-table';
@@ -256,7 +257,7 @@ export default function OrgTeamPage() {
     [confirm, leaveOrganizationMutation, orgId]
   );
 
-  const columns: ColumnDef<ITeamMember>[] = useMemo(() => {
+  const columns: ColumnDef<DataTableFeatures, ITeamMember>[] = useMemo(() => {
     return [
       {
         header: 'User',

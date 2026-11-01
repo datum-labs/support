@@ -1,10 +1,12 @@
 import type { ErrorRenderer } from './empty-state';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable, useDataTableLoading, useDataTableRows } from '@datum-cloud/datum-ui/data-table';
 import { EmptyContent } from '@datum-cloud/datum-ui/empty-content';
+import type { RowData } from '@tanstack/react-table';
 import type { Cell } from '@tanstack/react-table';
 import { useCallback } from 'react';
 
-interface TableContentProps<TData> {
+interface TableContentProps<TData extends RowData> {
   onRowClick?: (row: TData) => void;
   /** Only relevant in server mode. Resolved by resolveError(). */
   errorContent?: ErrorRenderer;
@@ -43,7 +45,7 @@ const STICKY_HEADER_CELL =
  * TableBodyOrEmpty, which replaces the table entirely with a full
  * EmptyContent card.
  */
-export function TableContent<TData>({
+export function TableContent<TData extends RowData>({
   onRowClick,
   errorContent,
   onRefetch,
@@ -53,7 +55,8 @@ export function TableContent<TData>({
   const { error } = useDataTableLoading();
 
   const cellClassName = stickyActionsColumn
-    ? (cell: Cell<unknown, unknown>) => (cell.column.id === '_actions' ? STICKY_BODY_CELL : '')
+    ? (cell: Cell<DataTableFeatures, RowData, unknown>) =>
+        cell.column.id === '_actions' ? STICKY_BODY_CELL : ''
     : undefined;
   const headerCellClassName = stickyActionsColumn ? STICKY_HEADER_CELL : undefined;
 

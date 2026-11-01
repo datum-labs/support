@@ -1,6 +1,7 @@
 import ButtonEnhancedDemo from '@/components/demo/button-enhanced-demo';
 import { FormDemo } from '@/components/demo/form-demo';
 import { logger } from '@/utils/logger';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { DataTable as DatumDataTable } from '@datum-cloud/datum-ui/data-table';
 import { useQuery } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -15,9 +16,9 @@ interface DemoData {
   status: string;
 }
 
-const columnHelper = createColumnHelper<DemoData>();
+const columnHelper = createColumnHelper<DataTableFeatures, DemoData>();
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: 'Name',
     cell: ({ getValue }) => <strong>{getValue()}</strong>,
@@ -34,7 +35,7 @@ const columns = [
       </span>
     ),
   }),
-];
+]);
 
 const demoData: DemoData[] = [
   { id: '1', name: 'John Doe', email: 'john@example.com', status: 'active' },
@@ -150,7 +151,7 @@ const clientDemoData: ClientDemoData[] = [
   },
 ];
 
-const clientColumnHelper = createColumnHelper<ClientDemoData>();
+const clientColumnHelper = createColumnHelper<DataTableFeatures, ClientDemoData>();
 
 function buildClientDemoColumns(
   loadingStates: Record<string, boolean>,
@@ -185,7 +186,7 @@ function buildClientDemoColumns(
       },
     },
   ];
-  return [
+  return clientColumnHelper.columns([
     clientColumnHelper.accessor('name', {
       header: ({ column }) => <DatumDataTable.ColumnHeader column={column} title="Name" />,
       cell: ({ getValue }) => <strong>{getValue()}</strong>,
@@ -224,7 +225,7 @@ function buildClientDemoColumns(
         </div>
       ),
     }),
-  ];
+  ]);
 }
 
 const fetchClientDemoData = async (): Promise<ClientDemoDataList> => {
@@ -246,7 +247,7 @@ const actions = [
   },
 ];
 
-const columnsWithActions = [
+const columnsWithActions = columnHelper.columns([
   ...columns,
   columnHelper.display({
     id: 'actions',
@@ -257,7 +258,7 @@ const columnsWithActions = [
       </div>
     ),
   }),
-];
+]);
 
 export default function DemoPage() {
   return (
@@ -469,29 +470,30 @@ function ClientDataTableSearchOnlyDemo() {
     queryFn: fetchClientDemoData,
   });
   const columns = useMemo(
-    () => [
-      clientColumnHelper.accessor('name', {
-        header: ({ column }) => <DatumDataTable.ColumnHeader column={column} title="Name" />,
-        cell: ({ getValue }) => <strong>{getValue()}</strong>,
-      }),
-      clientColumnHelper.accessor('email', { header: 'Email' }),
-      clientColumnHelper.accessor('status', {
-        header: 'Status',
-        cell: ({ getValue }) => {
-          const status = getValue();
-          const colors = {
-            active: 'bg-green-100 text-green-800',
-            inactive: 'bg-red-100 text-red-800',
-            pending: 'bg-yellow-100 text-yellow-800',
-          };
-          return <span className={`rounded px-2 py-1 text-xs ${colors[status]}`}>{status}</span>;
-        },
-      }),
-      clientColumnHelper.accessor('category', {
-        header: 'Category',
-        cell: ({ getValue }) => <span className="text-sm capitalize">{getValue()}</span>,
-      }),
-    ],
+    () =>
+      clientColumnHelper.columns([
+        clientColumnHelper.accessor('name', {
+          header: ({ column }) => <DatumDataTable.ColumnHeader column={column} title="Name" />,
+          cell: ({ getValue }) => <strong>{getValue()}</strong>,
+        }),
+        clientColumnHelper.accessor('email', { header: 'Email' }),
+        clientColumnHelper.accessor('status', {
+          header: 'Status',
+          cell: ({ getValue }) => {
+            const status = getValue();
+            const colors = {
+              active: 'bg-green-100 text-green-800',
+              inactive: 'bg-red-100 text-red-800',
+              pending: 'bg-yellow-100 text-yellow-800',
+            };
+            return <span className={`rounded px-2 py-1 text-xs ${colors[status]}`}>{status}</span>;
+          },
+        }),
+        clientColumnHelper.accessor('category', {
+          header: 'Category',
+          cell: ({ getValue }) => <span className="text-sm capitalize">{getValue()}</span>,
+        }),
+      ]),
     []
   );
 

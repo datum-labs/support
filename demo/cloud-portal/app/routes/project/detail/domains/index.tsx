@@ -33,6 +33,7 @@ import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { getPathWithParams } from '@/utils/helpers/path.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
 import { Button } from '@datum-cloud/datum-ui/button';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { useTaskQueue, createProjectMetadata } from '@datum-cloud/datum-ui/task-queue';
 import { toast } from '@datum-cloud/datum-ui/toast';
@@ -251,7 +252,7 @@ export default function DomainsPage() {
     [navigate, projectId]
   );
 
-  const columns: ColumnDef<FormattedDomain>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, FormattedDomain>[] = useMemo(
     () => [
       {
         header: 'Domain',

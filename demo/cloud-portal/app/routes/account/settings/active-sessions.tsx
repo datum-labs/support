@@ -11,6 +11,7 @@ import { QUERY_STALE_TIME } from '@/utils/config/query.config';
 import { getIdTokenSession } from '@/utils/cookies';
 import { mergeMeta, metaObject } from '@/utils/helpers/meta.helper';
 import { Badge } from '@datum-cloud/datum-ui/badge';
+import type { DataTableFeatures } from '@datum-cloud/datum-ui/data-table';
 import { Icon } from '@datum-cloud/datum-ui/icons';
 import { toast } from '@datum-cloud/datum-ui/toast';
 import { ColumnDef } from '@tanstack/react-table';
@@ -85,7 +86,7 @@ export default function AccountActiveSessionsPage() {
     [revokeMutation]
   );
 
-  const columns: ColumnDef<UserActiveSession>[] = useMemo(
+  const columns: ColumnDef<DataTableFeatures, UserActiveSession>[] = useMemo(
     () => [
       {
         header: 'Device',
