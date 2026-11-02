@@ -91,7 +91,7 @@ This is why many route files have light loaders and richer client queries in req
 ## How to add a new OpenAPI-backed request
 
 1. Regenerate OpenAPI SDK if endpoint is new:
-   - `bun run openapi:generate`
+   - `npm run openapi:generate`
 2. Add API wrapper in `app/resources/request/client/apis/<feature>.api.ts`:
    - export async query/mutation functions
    - unwrap response payload consistently
