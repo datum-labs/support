@@ -18,7 +18,7 @@ env:
   CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
   BUN_CACHE: ~/.bun/install/cache
   BUN_VERSION: 1.2.13 # Pin to a specific version for stability
-  NODE_VERSION: '22' # Required by Lingui v6 (uses node:fs globSync)
+  NODE_VERSION: '26' # Required by Lingui v6 (uses node:fs globSync)
 
 jobs:
   setup:
