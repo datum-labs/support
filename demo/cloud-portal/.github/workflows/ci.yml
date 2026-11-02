@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
-  BUN_CACHE: ~/.bun/install/cache
+  NPM_CACHE: ~/.npm
 
 jobs:
   # ─── Quality ────────────────────────────────────────────────
@@ -25,17 +25,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         id: cache-deps
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
       - if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: bun install --frozen-lockfile
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
   lint:
     name: Lint & Format
@@ -43,14 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
-      - run: bun run lint && bun run format
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
+      - run: npm run lint && npm run format
 
   typecheck:
     name: Type Check
@@ -58,15 +61,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
-      - run: bun typecheck
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
+      - run: npm run typecheck
 
   build:
     name: Build
@@ -75,15 +79,16 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
-      - run: bun run build
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
+      - run: npm run build
       - uses: actions/cache@v5
         with:
           path: build
@@ -97,16 +102,17 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
-      - run: bunx cypress install && bunx cypress verify
-      - run: bun run test:unit:prod
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
+      - run: npx cypress install && npx cypress verify
+      - run: npm run test:unit:prod
         env:
           NODE_ENV: test
           CYPRESS: 'true'
@@ -119,14 +125,15 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
       - uses: actions/cache@v5
         with:
           path: build
@@ -153,7 +160,7 @@ jobs:
           LOG_LEVEL=warn
           CYPRESS_BASE_URL=http://localhost:3000
           EOF
-      - run: bunx cypress install && bunx cypress verify
+      - run: npx cypress install && npx cypress verify
       - name: Run Smoke Tests
         env:
           NODE_ENV: test
@@ -163,9 +170,9 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           SUB: ${{ secrets.SUB }}
         run: >-
-          bunx start-server-and-test
-          'bun run start' http://localhost:3000/_healthz
-          'bunx cypress run --spec "cypress/e2e/smoke/**" --config-file cypress.config.ts'
+          npx start-server-and-test
+          'npm run start' http://localhost:3000/_healthz
+          'npx cypress run --spec "cypress/e2e/smoke/**" --config-file cypress.config.ts'
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -189,14 +196,15 @@ jobs:
         shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ env.BUN_CACHE }}
+            ${{ env.NPM_CACHE }}
             **/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/package.json', '.npmrc') }}
       - uses: actions/cache@v5
         with:
           path: build
@@ -223,7 +231,7 @@ jobs:
           LOG_LEVEL=warn
           CYPRESS_BASE_URL=http://localhost:3000
           EOF
-      - run: bunx cypress install && bunx cypress verify
+      - run: npx cypress install && npx cypress verify
       - name: Run Regression Tests
         env:
           NODE_ENV: test
@@ -236,9 +244,9 @@ jobs:
           SPLIT_INDEX: ${{ strategy.job-index }}
           CYPRESS_specPattern: 'cypress/e2e/regression/**/*.{cy,spec}.{js,jsx,ts,tsx}'
         run: >-
-          bunx start-server-and-test
-          'bun run start' http://localhost:3000/_healthz
-          'bunx cypress run --config-file cypress.config.ts'
+          npx start-server-and-test
+          'npm run start' http://localhost:3000/_healthz
+          'npx cypress run --config-file cypress.config.ts'
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

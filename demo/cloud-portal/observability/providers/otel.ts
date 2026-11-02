@@ -259,9 +259,6 @@ export class OtelProvider extends BaseProvider {
     return new NodeSDK({
       instrumentations: [
         getNodeAutoInstrumentations({
-          // Disable instrumentations not supported by Bun runtime
-          // - runtime-node uses perf_hooks.monitorEventLoopDelay (not implemented in Bun)
-          // - fs uses Node.js fs internals not available in Bun
           '@opentelemetry/instrumentation-runtime-node': { enabled: false },
           '@opentelemetry/instrumentation-fs': { enabled: false },
         }),

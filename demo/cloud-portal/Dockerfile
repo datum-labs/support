@@ -1,27 +1,25 @@
+# syntax=docker/dockerfile:1
+
 # ==========================================
 # BASE STAGE - Common dependencies and setup
 # ==========================================
 
-# syntax=docker/dockerfile:1
+FROM node:26.13.0-alpine3.24@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS base
 
-# Use the latest Bun version
-FROM oven/bun:1.3.13 AS base
-
-# Install system dependencies and clean up in the same layer
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends unzip ca-certificates && \
-    update-ca-certificates && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+# Fail the build if the compromised emSign ECC Root CA - G3 comes back. Node
+# checks TLS against roots built into its binary, so test those; the system
+# bundle only counts if --use-system-ca is ever turned on, so test it too.
+RUN apk add --no-cache --upgrade 'ca-certificates>=20261020-r0'
+RUN ! grep -q MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG /etc/ssl/certs/ca-certificates.crt
+RUN node -e 'const tls = require("node:tls"); const { X509Certificate } = require("node:crypto"); if (tls.rootCertificates.some((pem) => new X509Certificate(pem).subject.split("\n").includes("CN=emSign ECC Root CA - G3"))) { console.error("Node trusts emSign ECC Root CA - G3"); process.exit(1); }'
 
 # Remix app lives here
 WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV=production \
-    PORT=3000 \
-    BUN_RUNTIME_TRANSPILER_CACHE_PATH=/tmp/bun-transpiler-cache
-    
+    PORT=3000
+
 # ==========================================
 # BUILD STAGE - Compile and prepare the app
 # ==========================================
@@ -35,17 +33,16 @@ ENV VERSION=${VERSION}
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 # Install dependencies
-COPY --link package.json bun.lock ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+COPY --link package.json package-lock.json .npmrc ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --include=dev --ignore-scripts --no-audit --no-fund
 
 # Copy application code
 COPY --link . .
 
 # Build application
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun run build && \
-    bun install --production --frozen-lockfile && \
+RUN npm run build && \
+    npm prune --omit=dev --ignore-scripts --no-audit --no-fund && \
     touch .env
 
 # ==========================================
@@ -57,18 +54,17 @@ FROM base
 ARG VERSION=dev
 ENV VERSION=${VERSION}
 
-# Copy only necessary files from build stage
-COPY --from=build /app /app
+# Create the non-root user first so ownership can be applied during COPY,
+# which avoids a second full-size layer from a separate `chown -R /app`.
+RUN addgroup -g 1001 datum && \
+    adduser -u 1001 -G datum -D -H datum
+
+# Copy the built app from the build stage, owned by the runtime user.
+COPY --from=build --chown=datum:datum /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE ${PORT}
 
-# Use non-root user for better security
-RUN groupadd --gid 1001 datum && \
-    useradd --uid 1001 --gid 1001 --no-create-home datum && \
-    chown -R datum:datum /app
-
 USER datum
 
-# Use the start script from package.json
-CMD [ "bun", "run", "start" ]
+CMD [ "node", "--env-file-if-exists=.env", "./observability/start.js" ]
