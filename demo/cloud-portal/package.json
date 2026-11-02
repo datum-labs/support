@@ -153,7 +153,7 @@
     "vite-tsconfig-paths": "^6.1.1"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "overrides": {
     "axios": "^1.15.0",
