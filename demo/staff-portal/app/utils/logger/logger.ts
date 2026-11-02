@@ -2,7 +2,6 @@ import { toBoolean } from '@/utils/helpers';
 
 /**
  * Shared logger utility for consistent JSON logging across the application
- * Optimized for Bun runtime
  */
 export interface LogContext {
   reqId?: string;
@@ -48,7 +47,6 @@ export class Logger {
 
   /**
    * Log a message with the specified level
-   * Optimized for Bun's performance
    */
   private log(level: LogLevel['level'], message: string, data?: any): void {
     // Capture caller information
@@ -64,7 +62,6 @@ export class Logger {
       ...(callerInfo && { caller: callerInfo }),
     };
 
-    // Use Bun's optimized console.log for better performance
     // Pretty print in development mode for better readability
     const isDebug = typeof window === 'undefined' ? process.env.DEBUG : window?.ENV?.DEBUG;
 
