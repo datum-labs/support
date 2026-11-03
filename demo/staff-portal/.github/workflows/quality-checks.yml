@@ -40,7 +40,7 @@ jobs:
 
       - name: Cache Dependencies
         id: cache-deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.BUN_CACHE }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: Cache Build
         id: cache-build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: build
           key: build-v1-${{ github.sha }}
@@ -81,7 +81,7 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Restore Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.BUN_CACHE }}
@@ -121,7 +121,7 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Restore Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.BUN_CACHE }}
@@ -136,7 +136,7 @@ jobs:
         run: bun run build
 
       - name: Cache Build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: build
           key: build-v1-${{ github.sha }}
@@ -162,7 +162,7 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Restore Dependencies Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.BUN_CACHE }}
@@ -170,7 +170,7 @@ jobs:
           key: ${{ runner.os }}-deps-v1-${{ hashFiles('**/bun.lockb', '**/package.json') }}
 
       - name: Restore Build Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: build
           key: build-v1-${{ github.sha }}
