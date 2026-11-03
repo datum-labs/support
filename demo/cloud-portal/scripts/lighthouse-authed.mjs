@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 // Run Lighthouse against an authenticated cloud-portal route by injecting
 // a signed _session cookie via Chrome DevTools Protocol (CDP) before navigation.
 //
@@ -8,7 +8,7 @@
 // fails once the React app hydrates and fires client-side fetch calls.
 //
 // Usage:
-//   bun scripts/lighthouse-authed.mjs <url> <output-json-path> [chrome-user-data-dir]
+//   node scripts/lighthouse-authed.mjs <url> <output-json-path> [chrome-user-data-dir]
 //
 // Env requirements: ACCESS_TOKEN, SUB, SESSION_SECRET (loaded from .env).
 
@@ -22,7 +22,7 @@ import { createCookie, createCookieSessionStorage } from 'react-router';
 const [, , url, outputPath, userDataDir = `/tmp/lh-authed-${Date.now()}`] = process.argv;
 
 if (!url || !outputPath) {
-  console.error('Usage: bun scripts/lighthouse-authed.mjs <url> <output-json-path> [chrome-user-data-dir]');
+  console.error('Usage: node scripts/lighthouse-authed.mjs <url> <output-json-path> [chrome-user-data-dir]');
   process.exit(1);
 }
 
@@ -191,7 +191,7 @@ const args = [
   '--disable-storage-reset', // Don't clear cookies between navigations
 ];
 
-const lhChild = spawn('bunx', args, { stdio: 'inherit' });
+const lhChild = spawn('npx', args, { stdio: 'inherit' });
 
 lhChild.on('exit', (code) => {
   chromeProc.kill();

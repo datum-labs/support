@@ -2,14 +2,14 @@
 # ==========================================
 # BASE STAGE - Common dependencies and setup
 # ==========================================
-FROM oven/bun:1.3.13 AS base
+FROM node:26.13.0-alpine3.24@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS base
 
-# Install system dependencies and clean up in the same layer
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends unzip ca-certificates && \
-    update-ca-certificates && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+# Fail the build if the compromised emSign ECC Root CA - G3 comes back. Node
+# checks TLS against roots built into its binary, so test those; the system
+# bundle only counts if --use-system-ca is ever turned on, so test it too.
+RUN apk add --no-cache --upgrade 'ca-certificates>=20261020-r0'
+RUN ! grep -q MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG /etc/ssl/certs/ca-certificates.crt
+RUN node -e 'const tls = require("node:tls"); const { X509Certificate } = require("node:crypto"); if (tls.rootCertificates.some((pem) => new X509Certificate(pem).subject.split("\n").includes("CN=emSign ECC Root CA - G3"))) { console.error("Node trusts emSign ECC Root CA - G3"); process.exit(1); }'
 
 # Set working directory and environment variables
 WORKDIR /app
@@ -29,17 +29,16 @@ ENV VERSION=${VERSION}
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 # Install dependencies first (better layer caching)
-COPY --link package.json bun.lock ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+COPY --link package.json package-lock.json .npmrc ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --include=dev --ignore-scripts --no-audit --no-fund
 
 # Copy application code
 COPY --link . .
 
 # Build application and clean up
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun run build && \
-    bun install --production --frozen-lockfile && \
+RUN npm run build && \
+    npm prune --omit=dev --ignore-scripts --no-audit --no-fund && \
     touch .env
 
 # ==========================================
@@ -51,24 +50,23 @@ FROM base
 ARG VERSION=dev
 ENV VERSION=${VERSION}
 
+# Use non-root user for better security
+RUN addgroup -g 1001 datum && \
+    adduser -u 1001 -G datum -D -H datum && \
+    chown datum:datum /app
+
 # Copy only necessary files from build stage
-COPY --from=build /app/build /app/build
-COPY --from=build /app/public /app/public
-COPY --from=build /app/package.json /app/package.json
-COPY --from=build /app/bun.lock /app/bun.lock
-COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/.env /app/.env
-COPY --from=build /app/observability /app/observability
+COPY --from=build --chown=datum:datum /app/build /app/build
+COPY --from=build --chown=datum:datum /app/public /app/public
+COPY --from=build --chown=datum:datum /app/package.json /app/package.json
+COPY --from=build --chown=datum:datum /app/node_modules /app/node_modules
+COPY --from=build --chown=datum:datum /app/.env /app/.env
+COPY --from=build --chown=datum:datum /app/observability /app/observability
 
 # Expose port
 EXPOSE ${PORT}
 
-# Use non-root user for better security
-RUN groupadd --gid 1001 datum && \
-    useradd --uid 1001 --gid 1001 --no-create-home datum && \
-    chown -R datum:datum /app
-
 USER datum
 
 # Start the application
-CMD ["bun", "run", "start"]
+CMD ["node", "--env-file-if-exists=.env", "./observability/start.js"]
