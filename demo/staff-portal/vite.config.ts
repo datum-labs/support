@@ -34,7 +34,7 @@ export default defineConfig((config) => {
     plugins: [
       tailwindcss(),
       reactRouter(),
-      reactRouterHonoServer({ runtime: 'bun' }),
+      reactRouterHonoServer(),
       macrosPlugin(),
       lingui(),
       sentryReactRouter(

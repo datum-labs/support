@@ -14,4 +14,7 @@ spec:
   timeout:
     http:
       requestTimeout: '0s'
-      connectionIdleTimeout: 300s
+      # Must stay below the portal's keep-alive timeout (75s, in
+      # app/server/adapter/node.ts) so Envoy closes idle upstream connections
+      # before the portal does.
+      connectionIdleTimeout: 60s
