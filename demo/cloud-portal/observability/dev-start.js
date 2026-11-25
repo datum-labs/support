@@ -4,8 +4,10 @@
  * This script initializes observability services before starting the development server.
  * It uses the factory pattern for clean, extensible observability management.
  */
-
 /* global process */
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 
 /**
  * Start the React Router development server
@@ -13,10 +15,16 @@
 async function startDevServer() {
   console.log('🌐 Starting React Router development server...');
 
-  // Use bunx --bun vite for development (matches staff-portal)
-  const devProcess = Bun.spawn(['bunx', '--bun', 'vite'], {
+  const viteBin = join(
+    dirname(createRequire(import.meta.url).resolve('vite/package.json')),
+    'bin/vite.js'
+  );
+  const devProcess = spawn(process.execPath, [viteBin], {
     stdio: ['inherit', 'inherit', 'inherit'],
     env: { ...process.env },
+  });
+  const exited = new Promise((resolve) => {
+    devProcess.once('exit', (code, signal) => resolve(code ?? (signal ? 1 : 0)));
   });
 
   const forwardSignal = (signal) => {
@@ -30,7 +38,7 @@ async function startDevServer() {
   process.on('SIGTERM', () => forwardSignal('SIGTERM'));
   process.on('SIGINT', () => forwardSignal('SIGINT'));
 
-  const exitCode = await devProcess.exited;
+  const exitCode = await exited;
   if (exitCode !== 0) {
     console.error(`❌ Development server exited with code ${exitCode}`);
     process.exit(exitCode);

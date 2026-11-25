@@ -92,7 +92,7 @@ How-to guides for common tasks:
 
 | Layer         | Technology                                              |
 | ------------- | ------------------------------------------------------- |
-| **Runtime**   | [Bun](https://bun.sh/)                                  |
+| **Runtime**   | [Node.js](https://nodejs.org/)                          |
 | **Framework** | [React Router v7](https://reactrouter.com/)             |
 | **Server**    | [Hono](https://hono.dev/)                               |
 | **State**     | [TanStack Query](https://tanstack.com/query)            |

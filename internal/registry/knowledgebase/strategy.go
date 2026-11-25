@@ -53,8 +53,8 @@ func (s strategy) ValidateUpdate(ctx context.Context, obj, _ runtime.Object) fie
 
 func (s strategy) Canonicalize(_ runtime.Object) {}
 
-func (s strategy) AllowCreateOnUpdate() bool                                           { return false }
-func (s strategy) AllowUnconditionalUpdate() bool                                      { return true }
+func (s strategy) AllowCreateOnUpdate(_ context.Context) bool                                           { return false }
+func (s strategy) AllowUnconditionalUpdate(_ context.Context) bool                                      { return true }
 func (s strategy) WarningsOnCreate(_ context.Context, _ runtime.Object) []string       { return nil }
 func (s strategy) WarningsOnUpdate(_ context.Context, _, _ runtime.Object) []string    { return nil }
 

@@ -21,17 +21,17 @@ This document covers the tools and practices for maintaining code quality.
 
 ```bash
 # Linting
-bun run lint              # Lint and auto-fix
+npm run lint              # Lint and auto-fix
 
 # Formatting
-bun run format            # Format all files
-bun run format:check      # Check formatting (CI)
+npm run format            # Format all files
+npm run format:check      # Check formatting (CI)
 
 # Type Checking
-bun run typecheck         # Run TypeScript compiler
+npm run typecheck         # Run TypeScript compiler
 
 # All checks
-bun run lint && bun run format:check && bun run typecheck
+npm run lint && npm run format:check && npm run typecheck
 ```
 
 ---
@@ -51,10 +51,10 @@ ESLint is configured in `eslint.config.js` with:
 
 ```bash
 # Lint with auto-fix
-bun run lint
+npm run lint
 
 # Lint specific files
-bunx eslint "app/routes/**/*.tsx" --fix
+npx eslint "app/routes/**/*.tsx" --fix
 ```
 
 ### Key Rules
@@ -107,13 +107,13 @@ Prettier config in `.prettierrc`:
 
 ```bash
 # Format all files
-bun run format
+npm run format
 
 # Format specific files
-bunx prettier --write "app/routes/**/*.tsx"
+npx prettier --write "app/routes/**/*.tsx"
 
 # Check without writing
-bun run format:check
+npm run format:check
 ```
 
 ### Editor Integration
@@ -140,7 +140,7 @@ TypeScript is configured in `tsconfig.json` with strict mode enabled.
 ### Running Type Check
 
 ```bash
-bun run typecheck
+npm run typecheck
 ```
 
 This runs:
@@ -206,12 +206,12 @@ pre-commit:
   commands:
     lint:
       glob: '*.{ts,tsx}'
-      run: bunx eslint {staged_files} --fix
+      run: npx eslint {staged_files} --fix
     format:
       glob: '*.{ts,tsx,json,css,md}'
-      run: bunx prettier --write {staged_files}
+      run: npx prettier --write {staged_files}
     types:
-      run: bun run typecheck
+      run: npm run typecheck
 ```
 
 ### How It Works
@@ -339,13 +339,13 @@ jobs:
   quality:
     steps:
       - name: Lint
-        run: bun run lint
+        run: npm run lint
 
       - name: Format Check
-        run: bun run format:check
+        run: npm run format:check
 
       - name: Type Check
-        run: bun run typecheck
+        run: npm run typecheck
 ```
 
 PRs are blocked if any check fails.
@@ -361,7 +361,7 @@ PRs are blocked if any check fails.
 ls eslint.config.js
 
 # Run with debug
-DEBUG=eslint:* bunx eslint app/
+DEBUG=eslint:* npx eslint app/
 ```
 
 ### Prettier/ESLint Conflicts
@@ -370,14 +370,14 @@ Ensure Prettier runs after ESLint:
 
 ```bash
 # In lefthook or CI
-bun run lint && bun run format
+npm run lint && npm run format
 ```
 
 ### TypeScript Errors After Refactor
 
 ```bash
 # Regenerate route types
-bun run typecheck
+npm run typecheck
 
 # If still failing, restart TS server
 # VS Code: Cmd+Shift+P → "TypeScript: Restart TS Server"

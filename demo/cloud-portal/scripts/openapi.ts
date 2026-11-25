@@ -1,10 +1,10 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * OpenAPI Generation Script
  *
  * Interactive script to generate control-plane SDK modules from OpenAPI specs.
  *
- * Usage: bun run openapi
+ * Usage: npm run openapi
  */
 import { createClient, defaultPlugins } from '@hey-api/openapi-ts';
 import { input, checkbox, confirm } from '@inquirer/prompts';

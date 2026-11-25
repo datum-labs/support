@@ -9,7 +9,7 @@ A practical guide for developers to verify the architecture is working correctly
 ### Prerequisites
 
 - Node.js 20+
-- Bun 1.0+
+- Node.js 26+ (see `.nvmrc`)
 - Access to control plane API
 - Environment variables configured
 
@@ -17,14 +17,14 @@ A practical guide for developers to verify the architecture is working correctly
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Configure environment
 cp .env.example .env
 # Edit .env with your values
 
 # Start development server
-bun dev
+npm run dev
 ```
 
 ### Verify App Loads
@@ -44,7 +44,7 @@ Use this checklist to verify all systems are working correctly.
 
 | Feature       | Test                                  | Expected Result              | ✓   |
 | ------------- | ------------------------------------- | ---------------------------- | --- |
-| Hono server   | Start `bun dev`                       | Server starts without errors | ☐   |
+| Hono server   | Start `npm run dev`                   | Server starts without errors | ☐   |
 | Health check  | `curl http://localhost:3000/_healthz` | 200 OK                       | ☐   |
 | Rate limiting | Send 100+ requests quickly            | 429 after limit              | ☐   |
 

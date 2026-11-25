@@ -18,7 +18,6 @@ This guide walks you through running the full support system locally using a [ki
 | [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) | Local Kubernetes clusters |
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | Cluster interaction |
 | [task](https://taskfile.dev/installation/) | Task runner |
-| [nix](https://nixos.org/download/) | Provides `bun` for portal builds |
 | [go](https://go.dev/dl/) 1.23+ | Building the support binary |
 
 The demo also expects the following repositories checked out as siblings of this one:

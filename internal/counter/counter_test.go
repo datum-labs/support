@@ -206,5 +206,5 @@ func (*atomicFakeStore) RequestWatchProgress(_ context.Context) error    { panic
 func (*atomicFakeStore) GetCurrentResourceVersion(_ context.Context) (uint64, error) {
 	panic("not implemented")
 }
-func (*atomicFakeStore) SetKeysFunc(_ storage.KeysFunc)  { panic("not implemented") }
+func (*atomicFakeStore) EnableResourceSizeEstimation(_ storage.KeysFunc) error { panic("not implemented") }
 func (*atomicFakeStore) CompactRevision() int64          { panic("not implemented") }

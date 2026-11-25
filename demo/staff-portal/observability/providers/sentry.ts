@@ -109,7 +109,7 @@ export class SentryProvider extends BaseProvider {
       enableLogs: true,
       skipOpenTelemetrySetup: true,
       tracesSampleRate: this.getTracesSampleRate(),
-      profilesSampleRate: 0, // Not supported in Bun
+      profilesSampleRate: 0,
       release: process.env.VERSION || 'dev',
 
       // Circuit breaker implementation

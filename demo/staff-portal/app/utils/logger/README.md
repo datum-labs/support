@@ -19,7 +19,6 @@ The `Logger` class provides structured JSON logging with:
 
 - **Context Management**: Add request, user, or session context
 - **Caller Information**: Automatic file, line, and column detection
-- **Performance Optimized**: Optimized for Bun runtime
 - **Debug Mode**: Pretty printing with clickable file links in browser
 
 ### Basic Usage
@@ -137,7 +136,6 @@ interface CallerInfo {
 
 ## Performance Features
 
-- **Bun Optimized**: Uses Bun's optimized console.log
 - **Stack Trace Parsing**: Efficient caller information extraction
 - **Context Merging**: Minimal overhead for context updates
 - **Conditional Formatting**: Debug mode only when needed

@@ -10,29 +10,14 @@
 console.log('🚀 Starting application in production environment...');
 
 /**
- * Start the Bun server with the given module
- */
-function startServer(module) {
-  // Check if we have a Bun server with fetch method
-  if (typeof module.default.fetch === 'function') {
-    console.log(`🌐 Starting Bun server on port ${module.default.port}`);
-    Bun.serve({
-      port: module.default.port,
-      fetch: module.default.fetch,
-      development: module.default.development,
-    });
-    console.log(`✅ Server started successfully on port ${module.default.port}`);
-  } else {
-    console.log(`⚠️ Server object does not have fetch method, assuming it's already running`);
-    console.log(`✅ Server started successfully on port ${module.default.port}`);
-  }
-}
-
-/**
- * Load and start the server
+ * Load the server module. Importing it starts the server: in production,
+ * react-router-hono-server's Node adapter starts the HTTP server itself, and
+ * app/server/adapter/node.ts owns graceful shutdown. Do not start a server
+ * here as well; a second server on the same port gets its own settings and
+ * takes a share of the connections.
  */
 function loadAndStartServer() {
-  return import('../build/server/index.js').then(startServer).catch((error) => {
+  return import('../build/server/index.js').catch((error) => {
     console.error('❌ Error loading server:', error);
     process.exit(1);
   });
@@ -42,7 +27,7 @@ try {
   // Load observability services first
   console.log('📊 Loading observability services...');
 
-  import('./index.ts')
+  import('../build/observability/index.js')
     .then(async (observabilityModule) => {
       try {
         // Initialize observability with all providers
